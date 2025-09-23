@@ -22,14 +22,12 @@ dependencyResolutionManagement {
 
 rootProject.name = "ChildMomentSnap"
 include(":app")
-include(":core")
 include(":core:data")
 include(":core:database")
 include(":core:datastore")
 include(":core:model")
-include(":feature")
-include(":feature:calendar")
 include(":core:network")
+include(":feature:calendar")
 include(":feature:diary")
 include(":feature:dairy-detail")
 include(":feature:photo")
