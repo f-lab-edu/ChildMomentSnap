@@ -1,0 +1,14 @@
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/PrintTestApks.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/Badging.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/GradleManagedDevices.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/ProjectExtension.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/KotlinAndroid.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/AndroidInstrumentedTests.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidFeatureConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidApplicationComposeConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/com/jg/childmomentsnap/AndroidCompose.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/HiltConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidLibraryComposeConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidRoomConventionPlugin.kt
+/Users/ijung-geun/ChildMomentSnap/build-logic/convention/src/main/kotlin/AndroidLibraryConventionPlugin.kt
