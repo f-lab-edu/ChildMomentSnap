@@ -27,10 +27,8 @@ internal fun Project.configureKotlinAndroid(
         }
 
         compileOptions {
-            // Up to Java 11 APIs are available through desugaring
-            // https://developer.android.com/studio/write/java11-minimal-support-table
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
             isCoreLibraryDesugaringEnabled = true
         }
     }
@@ -70,7 +68,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() =
         is KotlinJvmProjectExtension -> compilerOptions
         else -> TODO("Unsupported project extension $this ${T::class}")
     }.apply {
-        jvmTarget = JvmTarget.JVM_11
+        jvmTarget = JvmTarget.JVM_17
         allWarningsAsErrors = warningsAsErrors
         freeCompilerArgs.add(
             // Enable experimental coroutines APIs, including Flow

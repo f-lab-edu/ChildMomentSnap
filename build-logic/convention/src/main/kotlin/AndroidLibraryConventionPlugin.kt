@@ -16,12 +16,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
-            apply(plugin = "nowinandroid.android.lint")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 testOptions.targetSdk = 35
-                lint.targetSdk = 35
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
                 configureGradleManagedDevices(this)
@@ -39,7 +37,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
                 "testImplementation"(libs.findLibrary("kotlin.test").get())
 
-                "implementation"(libs.findLibrary("androidx.tracing.ktx").get())
+                "implementation"(libs.findLibrary("androidx-tracing-ktx").get())
             }
         }
     }

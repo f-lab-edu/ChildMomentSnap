@@ -1,11 +1,14 @@
+
+
+
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.cms.android.application)
+    alias(libs.plugins.cms.android.application.compose)
+    alias(libs.plugins.cms.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "com.jg.childmomentsnap"
     compileSdk = 36
 
     defaultConfig {
@@ -27,28 +30,50 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    packaging {
+        resources {
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+        }
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
-    }
+    
+    namespace = "com.jg.childmomentsnap.apps"
 }
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.datastore)
+    implementation(projects.core.model)
+    implementation(projects.core.network)
+    implementation(projects.core.ui)
+
+    implementation(projects.feature.calendar)
+    implementation(projects.feature.diary)
+    implementation(projects.feature.dairyDetail)
+    implementation(projects.feature.photo)
+    implementation(projects.feature.voice)
+
+
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.layout)
+    implementation(libs.androidx.compose.material3.adaptive.navigation)
+    implementation(libs.androidx.compose.material3.windowSizeClass)
+    implementation(libs.androidx.compose.runtime.tracing)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.serialization.json)
+
+    ksp(libs.hilt.compiler)
+
+    kspTest(libs.hilt.compiler)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

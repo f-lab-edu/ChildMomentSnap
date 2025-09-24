@@ -1,38 +1,25 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.cms.android.library)
+    alias(libs.plugins.cms.hilt)
+    id("kotlinx-serialization")
 }
 
 android {
-    namespace = "com.jg.network"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 27
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    buildFeatures {
+        buildConfig = true
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    namespace = "com.jg.childmomentsnap.core.network"
 }
 
 dependencies {
+    api(libs.kotlinx.datetime)
+    api(projects.core.model)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.coil.kt)
+    implementation(libs.coil.kt.svg)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlin.serialization)
+
 }

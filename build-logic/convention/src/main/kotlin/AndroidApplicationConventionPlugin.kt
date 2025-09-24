@@ -2,6 +2,7 @@
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.jg.childmomentsnap.configureBadgingTasks
 import com.jg.childmomentsnap.configureGradleManagedDevices
 import com.jg.childmomentsnap.configureKotlinAndroid
 import com.jg.childmomentsnap.configurePrintApksTask
@@ -16,8 +17,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
-            apply(plugin = "nowinandroid.android.lint")
-            apply(plugin = "com.dropbox.dependency-guard")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
