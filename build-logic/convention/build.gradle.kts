@@ -45,6 +45,10 @@ gradlePlugin {
             id = libs.plugins.cms.android.library.asProvider().get().pluginId
             implementationClass = "AndroidLibraryConventionPlugin"
         }
+        register("androidFeature") {
+            id = libs.plugins.cms.android.feature.get().pluginId
+            implementationClass = "AndroidFeatureConventionPlugin"
+        }
         register("hilt") {
             id = libs.plugins.cms.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"

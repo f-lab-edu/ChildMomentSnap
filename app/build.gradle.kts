@@ -65,7 +65,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.runtime.tracing)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
 
@@ -73,12 +76,15 @@ dependencies {
 
     kspTest(libs.hilt.compiler)
 
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.kotlin.test)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //testImplementation(libs.androidx.navigation.testing)
 }
