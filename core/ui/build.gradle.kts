@@ -10,6 +10,6 @@ android {
 dependencies {
     api(projects.core.model)
 
-    implementation(libs.coil.kt)
-    implementation(libs.coil.compose)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
 }

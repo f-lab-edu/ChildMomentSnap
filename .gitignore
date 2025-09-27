@@ -14,3 +14,8 @@
 .cxx
 local.properties
 .idea/*
+/build/
+/bin/
+/*.log
+**/build-history.bin
+build-logic/convention/build/kotlin/compileKotlin/cacheable/
