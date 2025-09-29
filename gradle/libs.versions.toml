@@ -4,7 +4,8 @@ activityCompose = "1.11.0"
 androidTools = "31.13.0"
 coreKtx = "1.17.0"
 composeBom = "2025.09.01"
-cameraX = "1.5.0"
+androidxComposeFoundation = "1.9.2"
+androidxCameraX = "1.5.0"
 espressoCore = "3.7.0"
 kotlin = "2.2.20"
 kotlinx-serialization = "1.9.0"
@@ -56,6 +57,9 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "androidxComposeFoundation" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
+androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-navigationSuite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "androidxComposeMaterial3Adaptive" }
@@ -64,6 +68,7 @@ androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.mat
 androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-runtime-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeRuntimeTracing" }
+androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 androidx-dataStore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "androidxDataStore" }
@@ -131,11 +136,11 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "androidx-compose-ui-tooling" }
 
 # CameraX
-androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "cameraX"}
-androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version = "cameraX"}
-androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "cameraX"}
-androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "cameraX"}
-androidx-camera-video = { group = "androidx.camera", name = "camera-video", version = "cameraX"}
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "androidxCameraX"}
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "androidxCameraX"}
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "androidxCameraX"}
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidxCameraX"}
+androidx-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "androidxCameraX"}
 
 # Dependencies of the included build-logic
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
