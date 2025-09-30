@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.cms.android.library)
     alias(libs.plugins.cms.hilt)
-    id("kotlinx-serialization")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -9,9 +9,11 @@ android {
 }
 
 dependencies {
+    implementation(libs.kotlinx.serialization.json)
+
+    api(projects.core.common)
+    api(projects.core.model)
     api(projects.core.database)
     api(projects.core.datastore)
     api(projects.core.network)
-
-    
 }

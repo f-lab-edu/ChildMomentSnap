@@ -1,14 +1,17 @@
-package com.jg.childmomentsnap.feature.photo
-
+import android.app.Application
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.data.repository.PhotoRepository
+import com.jg.childmomentsnap.feature.photo.CameraState
+import com.jg.childmomentsnap.feature.photo.CameraUiState
+import com.jg.childmomentsnap.feature.photo.PermissionState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,8 +24,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    // TODO: Inject PhotoRepository when available
-    // private val photoRepository: PhotoRepository
+    private val app: Application,
+    private val photoRepository: PhotoRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CameraUiState())
@@ -53,8 +56,6 @@ class CameraViewModel @Inject constructor(
         hasAnyPermanentlyDenied: Boolean = false
     ) {
         val allGranted = permissions.values.all { it }
-        val hasAnyGranted = permissions.values.any { it }
-        
         
         _uiState.update { currentState ->
             currentState.copy(
@@ -98,37 +99,45 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 사진 촬영 프로세스를 시작합니다
+     * 사진 촬영 트리거를 설정합니다 (CameraPreview에서 실제 촬영 수행)
      */
     fun capturePhoto() {
-        _uiState.update { it.copy(isCapturing = true) }
-        
-        viewModelScope.launch {
-            try {
-                // TODO: PhotoRepository를 사용한 실제 사진 촬영 로직 구현
-                // 현재는 촬영 프로세스를 시뮬레이션
-                delay(1000)
-                
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isCapturing = false,
-                        cameraState = CameraState.Previewing
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isCapturing = false,
-                        errorMessage = "사진 촬영 중 오류가 발생했습니다: ${e.message}",
-                        cameraState = CameraState.Error
-                    )
-                }
-            }
+        _uiState.update { currentState ->
+            currentState.copy(
+                isCapturing = true,
+                shouldCapture = true
+            )
         }
     }
     
     /**
-     * 현재 에러 메시지를 지웁니다
+     * CameraPreview에서 사진 촬영이 완료되었을 때 호출
+     */
+    fun onPhotoCaptured(uri: Uri) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isCapturing = false,
+                capturedImageUri = uri,
+                showCapturedImageDialog = true,
+                cameraState = CameraState.Previewing
+            )
+        }
+    }
+    
+    /**
+     * 사진 촬영 프로세스가 완료되었을 때 트리거를 리셋
+     */
+    fun onCaptureComplete() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                shouldCapture = false,
+                isCapturing = false
+            )
+        }
+    }
+    
+    /**
+     * 현재 에러 메시지를 클리어
      */
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
@@ -174,26 +183,35 @@ class CameraViewModel @Inject constructor(
         val currentUri = _uiState.value.selectedImageUri ?: return
         
         viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingImage = true) }
             try {
-                _uiState.update { currentState ->
-                    currentState.copy(isProcessingImage = true)
-                }
-                
-                // TODO: 선택된 이미지를 처리하고 AI API 호출하여 글쓰기 화면으로 이동
-                // 이미지 처리 시뮬레이션
-                delay(2000)
-                
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isProcessingImage = false
-                        // TODO: 글쓰기 화면으로 네비게이션 트리거
-                    )
-                }
+                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
+                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
+
+                photoRepository.analyzeImage(imageBytes)
+                    .catch { e ->
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                isProcessingImage = false,
+                                errorMessage = "이미지 분석 중 오류가 발생했습니다: ${e.message}"
+                            )
+                        }
+                    }
+                    .collect { 
+                        // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                isProcessingImage = false,
+                                selectedImageUri = null // 성공 후 선택된 이미지 초기화
+                            )
+                        }
+                    }
+
             } catch (e: Exception) {
                 _uiState.update { currentState ->
                     currentState.copy(
                         isProcessingImage = false,
-                        errorMessage = "이미지 처리 중 오류가 발생했습니다: ${e.message}"
+                        errorMessage = "이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"
                     )
                 }
             }
@@ -222,15 +240,84 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 카메라 상태를 대기 상태로 초기화합니다 (네비게이션에 유용)
+     * 촬영된 사진 사용을 확인하고 AI 처리를 시작합니다
+     */
+    fun confirmCapturedImage() {
+        val currentUri = _uiState.value.capturedImageUri ?: return
+        
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingImage = true, showCapturedImageDialog = false) }
+            try {
+                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
+                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
+
+                photoRepository.analyzeImage(imageBytes)
+                    .catch { e ->
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                isProcessingImage = false,
+                                errorMessage = "이미지 분석 중 오류가 발생했습니다: ${e.message}"
+                            )
+                        }
+                    }
+                    .collect { 
+                        // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                isProcessingImage = false,
+                                capturedImageUri = null // 성공 후 캡쳐된 이미지 초기화
+                            )
+                        }
+                    }
+
+            } catch (e: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false,
+                        errorMessage = "이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * 촬영된 사진을 취소하고 다시 촬영합니다
+     */
+    fun retakeCapturedPhoto() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                capturedImageUri = null,
+                showCapturedImageDialog = false
+            )
+        }
+    }
+    
+    /**
+     * TODO 촬영된 사진 확인 다이얼로그를 닫습니다
+     */
+    fun dismissCapturedImageDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showCapturedImageDialog = false,
+                capturedImageUri = null
+            )
+        }
+    }
+    
+    /**
+     * 카메라 상태를 대기 상태로 초기화
      */
     fun resetCameraState() {
         _uiState.update { currentState ->
             currentState.copy(
                 cameraState = CameraState.Idle,
                 isCapturing = false,
+                shouldCapture = false,
+                capturedImageUri = null,
                 selectedImageUri = null,
                 showGalleryPicker = false,
+                showCapturedImageDialog = false,
                 isProcessingImage = false,
                 errorMessage = null
             )

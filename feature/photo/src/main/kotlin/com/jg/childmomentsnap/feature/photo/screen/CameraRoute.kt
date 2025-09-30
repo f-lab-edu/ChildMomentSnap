@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.photo.screen
 
+import CameraViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -14,7 +15,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
-import com.jg.childmomentsnap.feature.photo.CameraViewModel
 
 /**
  * ViewModel과 통합된 카메라 라우트 진입점
@@ -82,6 +82,10 @@ fun CameraRoute(
         onCancelImage = viewModel::cancelSelectedImage,
         onClearError = viewModel::clearError,
         onCameraError = viewModel::onCameraError,
+        onPhotoCaptured = viewModel::onPhotoCaptured,
+        onCaptureComplete = viewModel::onCaptureComplete,
+        onConfirmCapturedImage = viewModel::confirmCapturedImage,
+        onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
         onNavigateUp = onNavigateUp,
         modifier = modifier
     )
