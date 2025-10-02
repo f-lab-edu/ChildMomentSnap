@@ -18,4 +18,5 @@ local.properties
 /bin/
 /*.log
 **/build-history.bin
-build-logic/convention/build/kotlin/compileKotlin/cacheable/
+# Build logic
+/build-logic/convention/build/

@@ -14,9 +14,11 @@ data class CameraUiState(
     val cameraState: CameraState = CameraState.Idle,
     val lensFacing: Int = CameraSelector.LENS_FACING_BACK,
     val isCapturing: Boolean = false,
+    val shouldCapture: Boolean = false,
     val capturedImageUri: Uri? = null,
     val selectedImageUri: Uri? = null,
     val showGalleryPicker: Boolean = false,
+    val showCapturedImageDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val errorMessage: String? = null
 )

@@ -252,6 +252,8 @@ internal fun CameraPreviewContainer(
     onCapturePhoto: () -> Unit,
     onGalleryClick: () -> Unit,
     onCameraError: (String) -> Unit,
+    onPhotoCaptured: (Uri) -> Unit,
+    onCaptureComplete: () -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -259,8 +261,11 @@ internal fun CameraPreviewContainer(
         // 카메라 프리뷰
         CameraPreview(
             lensFacing = uiState.lensFacing,
+            shouldCapture = uiState.shouldCapture,
             onCameraReady = onCameraReady,
             onCameraError = onCameraError,
+            onPhotoCaptured = onPhotoCaptured,
+            onCaptureComplete = onCaptureComplete,
             modifier = Modifier.fillMaxSize()
         )
         

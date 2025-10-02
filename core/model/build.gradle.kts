@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.cms.android.library)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -7,5 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.kotlinx.serialization.json)
+
     api(libs.kotlinx.datetime)
 }

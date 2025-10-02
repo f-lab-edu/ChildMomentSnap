@@ -11,6 +11,7 @@ import com.jg.childmomentsnap.feature.photo.components.CameraLoadingScreen
 import com.jg.childmomentsnap.feature.photo.components.CameraPermissionPermanentlyDeniedScreen
 import com.jg.childmomentsnap.feature.photo.components.CameraPermissionScreen
 import com.jg.childmomentsnap.feature.photo.components.CameraPreviewContainer
+import com.jg.childmomentsnap.feature.photo.components.CapturedImagePreview
 import com.jg.childmomentsnap.feature.photo.components.PhotoPicker
 import com.jg.childmomentsnap.feature.photo.components.SelectedImagePreview
 
@@ -62,6 +63,10 @@ internal fun CameraScreen(
     onDismissGalleryPicker: () -> Unit,
     onConfirmImage: () -> Unit,
     onCancelImage: () -> Unit,
+    onPhotoCaptured: (android.net.Uri) -> Unit,
+    onCaptureComplete: () -> Unit,
+    onConfirmCapturedImage: () -> Unit,
+    onRetakeCapturedPhoto: () -> Unit,
     onClearError: () -> Unit,
     onCameraError: (String) -> Unit,
     onNavigateUp: () -> Unit,
@@ -102,6 +107,8 @@ internal fun CameraScreen(
                 onCapturePhoto = onCapturePhoto,
                 onGalleryClick = onGalleryClick,
                 onCameraError = onCameraError,
+                onPhotoCaptured = onPhotoCaptured,
+                onCaptureComplete = onCaptureComplete,
                 onNavigateUp = onNavigateUp,
                 modifier = modifier
             )
@@ -125,6 +132,20 @@ internal fun CameraScreen(
             onNavigateUp = onNavigateUp,
             modifier = modifier
         )
+    }
+    
+    // 촬영된 사진 확인 다이얼로그
+    uiState.capturedImageUri?.let { imageUri ->
+        if (uiState.showCapturedImageDialog) {
+            CapturedImagePreview(
+                imageUri = imageUri,
+                isProcessing = uiState.isProcessingImage,
+                onConfirm = onConfirmCapturedImage,
+                onRetake = onRetakeCapturedPhoto,
+                onCancel = onRetakeCapturedPhoto,
+                modifier = modifier
+            )
+        }
     }
     
     // 갤러리 선택기
