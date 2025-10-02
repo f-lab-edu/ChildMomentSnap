@@ -1,30 +1,30 @@
-import android.app.Application
+
+package com.jg.childmomentsnap.feature.photo
+
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.data.repository.PhotoRepository
 import com.jg.childmomentsnap.feature.photo.CameraState
 import com.jg.childmomentsnap.feature.photo.CameraUiState
 import com.jg.childmomentsnap.feature.photo.PermissionState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
- * State Hoisting 패턴을 따르는 카메라 화면용 ViewModel
+ * 카메라 화면용 ViewModel
  * 
- * Android 의존성 없이 카메라 관련 모든 상태를 관리하여
- * 테스트하기 쉽고 클린 아키텍처 원칙을 따릅니다.
+ * Android 의존성 없이 카메라 관련 모든 상태를 관리
  */
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val app: Application,
     private val photoRepository: PhotoRepository
 ) : ViewModel() {
     
@@ -32,8 +32,7 @@ class CameraViewModel @Inject constructor(
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
     
     /**
-     * 현재 권한 상태를 기반으로 권한 상태를 업데이트합니다
-     * 권한 확인 후 UI 레이어에서 호출됩니다
+     * 현재 권한 상태를 기반으로 권한 상태를 업데이트
      */
     fun updatePermissionState(hasAllPermissions: Boolean) {
         _uiState.update { currentState ->
@@ -48,8 +47,8 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * ActivityResult에서 권한 요청 결과를 처리합니다
-     * 권한이 영구적으로 거부되었는지 판단합니다
+     * ActivityResult에서 권한 요청 결과를 처리
+     * 권한이 영구적으로 거부되었는지 판단
      */
     fun onPermissionResult(
         permissions: Map<String, Boolean>,
@@ -75,7 +74,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 카메라 프리뷰가 성공적으로 초기화되었을 때 호출됩니다
+     * 카메라 프리뷰가 성공적으로 초기화되었을 때 호출
      */
     fun onCameraReady() {
         _uiState.update { currentState ->
@@ -84,7 +83,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 전면과 후면 카메라를 전환합니다
+     * 전면과 후면 카메라를 전환
      */
     fun switchCamera() {
         _uiState.update { currentState ->
@@ -99,7 +98,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 사진 촬영 트리거를 설정합니다 (CameraPreview에서 실제 촬영 수행)
+     * 사진 촬영 트리거를 설정 (CameraPreview에서 실제 촬영 수행)
      */
     fun capturePhoto() {
         _uiState.update { currentState ->
@@ -144,7 +143,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 카메라 초기화 또는 사용 중 오류를 처리합니다
+     * 카메라 초기화 또는 사용 중 오류를 처리
      */
     fun onCameraError(error: String) {
         _uiState.update { currentState ->
@@ -156,7 +155,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 갤러리를 열어 이미지를 선택합니다
+     * 갤러리를 열어 이미지를 선택
      */
     fun openGallery() {
         _uiState.update { currentState ->
@@ -165,7 +164,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 갤러리에서 이미지를 선택한 후 처리합니다
+     * 갤러리에서 이미지를 선택한 후 처리
      */
     fun onImageSelected(uri: Uri?) {
         _uiState.update { currentState ->
@@ -177,7 +176,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 선택된 이미지 사용을 확인하고 AI 처리를 시작합니다
+     * 선택된 이미지 사용을 확인하고 AI 처리를 시작
      */
     fun confirmSelectedImage() {
         val currentUri = _uiState.value.selectedImageUri ?: return
@@ -185,10 +184,7 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingImage = true) }
             try {
-                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
-                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
-
-                photoRepository.analyzeImage(imageBytes)
+                photoRepository.analyzeImageFromUri(currentUri)
                     .catch { e ->
                         _uiState.update { currentState ->
                             currentState.copy(
@@ -197,7 +193,7 @@ class CameraViewModel @Inject constructor(
                             )
                         }
                     }
-                    .collect { 
+                    .collect {
                         // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
                         _uiState.update { currentState ->
                             currentState.copy(
@@ -219,7 +215,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 선택된 이미지를 취소하고 카메라로 돌아갑니다
+     * 선택된 이미지를 취소하고 카메라로 돌아감
      */
     fun cancelSelectedImage() {
         _uiState.update { currentState ->
@@ -231,7 +227,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 갤러리 선택기를 닫습니다
+     * 갤러리 선택기를 닫기
      */
     fun dismissGalleryPicker() {
         _uiState.update { currentState ->
@@ -240,7 +236,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 촬영된 사진 사용을 확인하고 AI 처리를 시작합니다
+     * 촬영된 사진 사용을 확인하고 AI 처리를 시작
      */
     fun confirmCapturedImage() {
         val currentUri = _uiState.value.capturedImageUri ?: return
@@ -248,10 +244,7 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingImage = true, showCapturedImageDialog = false) }
             try {
-                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
-                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
-
-                photoRepository.analyzeImage(imageBytes)
+                photoRepository.analyzeImageFromUri(currentUri)
                     .catch { e ->
                         _uiState.update { currentState ->
                             currentState.copy(
@@ -260,7 +253,7 @@ class CameraViewModel @Inject constructor(
                             )
                         }
                     }
-                    .collect { 
+                    .collect {
                         // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
                         _uiState.update { currentState ->
                             currentState.copy(
@@ -282,7 +275,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * 촬영된 사진을 취소하고 다시 촬영합니다
+     * 촬영된 사진을 취소하고 다시 촬영
      */
     fun retakeCapturedPhoto() {
         _uiState.update { currentState ->
@@ -294,7 +287,7 @@ class CameraViewModel @Inject constructor(
     }
     
     /**
-     * TODO 촬영된 사진 확인 다이얼로그를 닫습니다
+     * TODO 촬영된 사진 확인 다이얼로그를 닫기
      */
     fun dismissCapturedImageDialog() {
         _uiState.update { currentState ->
