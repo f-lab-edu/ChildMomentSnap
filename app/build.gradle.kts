@@ -1,6 +1,10 @@
 import java.util.Properties
 
 val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
 
 plugins {
     alias(libs.plugins.cms.android.application)
