@@ -1,5 +1,6 @@
+import java.util.Properties
 
-
+val keystoreProperties = Properties()
 
 plugins {
     alias(libs.plugins.cms.android.application)
@@ -21,13 +22,26 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
+            storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
+            keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
+            keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("release")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     packaging {
