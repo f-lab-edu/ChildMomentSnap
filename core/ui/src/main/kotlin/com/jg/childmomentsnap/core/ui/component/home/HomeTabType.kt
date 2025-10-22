@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.ui.component
+package com.jg.childmomentsnap.core.ui.component.home
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -13,16 +13,16 @@ enum class HomeTabType(
     val prefix: String,
     val graph: String,
     val route: String,
-    @DrawableRes val selectedIcon: Int,
-    @DrawableRes val unselectedIcon: Int,
+    @DrawableRes val selectedIconId: Int,
+    @DrawableRes val unselectedIconId: Int,
     @StringRes val iconTextId: Int
 ) {
     CALENDAR(
         prefix = CALENDAR_PREFIX,
         graph = buildGraph(CALENDAR_PREFIX),
         route = buildHomeRoute(CALENDAR_PREFIX),
-        selectedIcon = R.drawable.ic_calendar_filled,
-        unselectedIcon = R.drawable.ic_calendar,
+        selectedIconId = R.drawable.ic_calendar_filled,
+        unselectedIconId = R.drawable.ic_calendar,
         iconTextId = R.string.bottom_calendar
     ),
 
@@ -30,8 +30,8 @@ enum class HomeTabType(
         prefix = CAMERA_PREFIX,
         graph = buildGraph(CAMERA_PREFIX),
         route = buildHomeRoute(CAMERA_PREFIX),
-        selectedIcon = R.drawable.ic_camera_filled,
-        unselectedIcon = R.drawable .ic_camera,
+        selectedIconId = R.drawable.ic_camera_filled,
+        unselectedIconId = R.drawable .ic_camera,
         iconTextId = R.string.bottom_camera
     ),
 
@@ -39,8 +39,8 @@ enum class HomeTabType(
         prefix = DAILY_PREFIX,
         graph = buildGraph(DAILY_PREFIX),
         route = buildHomeRoute(DAILY_PREFIX),
-        selectedIcon = R.drawable.ic_write_filled,
-        unselectedIcon = R.drawable.ic_write,
+        selectedIconId = R.drawable.ic_write_filled,
+        unselectedIconId = R.drawable.ic_write,
         iconTextId = R.string.bottom_daily
     ),
 
@@ -48,8 +48,8 @@ enum class HomeTabType(
         prefix = MY_PREFIX,
         graph = buildGraph(MY_PREFIX),
         route = buildHomeRoute(MY_PREFIX),
-        selectedIcon = R.drawable.ic_my_filled,
-        unselectedIcon = R.drawable.ic_my,
+        selectedIconId = R.drawable.ic_my_filled,
+        unselectedIconId = R.drawable.ic_my,
         iconTextId = R.string.bottom_my
     );
 
