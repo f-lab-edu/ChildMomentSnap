@@ -67,6 +67,7 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.common)
 
+    implementation(projects.feature.home)
     implementation(projects.feature.calendar)
     implementation(projects.feature.diary)
     implementation(projects.feature.dairyDetail)
