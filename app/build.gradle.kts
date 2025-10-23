@@ -1,5 +1,4 @@
-
-
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.cms.android.application)
@@ -8,7 +7,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+
 android {
+    // Load local.properties
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+
     compileSdk = 36
 
     defaultConfig {
@@ -19,6 +26,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "GOOGLE_VISION_API_KEY", "\"${localProperties.getProperty("GOOGLE_VISION_API_KEY")}\"")
     }
 
     buildTypes {
