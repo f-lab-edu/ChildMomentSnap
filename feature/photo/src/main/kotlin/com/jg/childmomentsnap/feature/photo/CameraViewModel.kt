@@ -1,4 +1,3 @@
-
 package com.jg.childmomentsnap.feature.photo
 
 import android.net.Uri
@@ -8,13 +7,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.data.repository.PhotoRepository
-import com.jg.childmomentsnap.feature.photo.CameraState
-import com.jg.childmomentsnap.feature.photo.CameraUiState
-import com.jg.childmomentsnap.feature.photo.PermissionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -182,26 +177,21 @@ class CameraViewModel @Inject constructor(
         val currentUri = _uiState.value.selectedImageUri ?: return
         
         viewModelScope.launch {
-            _uiState.update { it.copy(isProcessingImage = true) }
+            _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
             try {
-                photoRepository.analyzeImageFromUri(currentUri)
-                    .catch { e ->
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isProcessingImage = false,
-                                errorMessage = "이미지 분석 중 오류가 발생했습니다: ${e.message}"
-                            )
-                        }
-                    }
-                    .collect {
-                        // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isProcessingImage = false,
-                                selectedImageUri = null // 성공 후 선택된 이미지 초기화
-                            )
-                        }
-                    }
+                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
+                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
+
+                val analysis = photoRepository.analyzeImage(imageBytes)
+
+                // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false,
+                        selectedImageUri = null, // 성공 후 선택된 이미지 초기화
+                        visionAnalysis = analysis
+                    )
+                }
 
             } catch (e: Exception) {
                 _uiState.update { currentState ->
@@ -242,26 +232,27 @@ class CameraViewModel @Inject constructor(
         val currentUri = _uiState.value.capturedImageUri ?: return
         
         viewModelScope.launch {
-            _uiState.update { it.copy(isProcessingImage = true, showCapturedImageDialog = false) }
+            _uiState.update {
+                it.copy(
+                    isProcessingImage = true,
+                    showCapturedImageDialog = false,
+                    visionAnalysis = null
+                )
+            }
             try {
-                photoRepository.analyzeImageFromUri(currentUri)
-                    .catch { e ->
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isProcessingImage = false,
-                                errorMessage = "이미지 분석 중 오류가 발생했습니다: ${e.message}"
-                            )
-                        }
-                    }
-                    .collect {
-                        // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isProcessingImage = false,
-                                capturedImageUri = null // 성공 후 캡쳐된 이미지 초기화
-                            )
-                        }
-                    }
+                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
+                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
+
+                val analysis = photoRepository.analyzeImage(imageBytes)
+
+                // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false,
+                        capturedImageUri = null, // 성공 후 캡쳐된 이미지 초기화
+                        visionAnalysis = analysis
+                    )
+                }
 
             } catch (e: Exception) {
                 _uiState.update { currentState ->
@@ -312,6 +303,7 @@ class CameraViewModel @Inject constructor(
                 showGalleryPicker = false,
                 showCapturedImageDialog = false,
                 isProcessingImage = false,
+                visionAnalysis = null,
                 errorMessage = null
             )
         }

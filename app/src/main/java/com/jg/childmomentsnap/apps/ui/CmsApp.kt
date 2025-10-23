@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.jg.childmomentsnap.apps.navigation.CmsNavHost
-import com.jg.childmomentsnap.core.common.state.CmsAppState
-import com.jg.childmomentsnap.core.common.state.rememberCmsAppState
+import com.jg.childmomentsnap.core.ui.state.CmsAppState
+import com.jg.childmomentsnap.core.ui.state.rememberCmsAppState
 
 @Composable
 fun CmsApp(

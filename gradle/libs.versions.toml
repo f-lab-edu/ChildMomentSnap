@@ -3,9 +3,9 @@ agp = "8.11.2"
 activityCompose = "1.11.0"
 androidTools = "31.13.0"
 coreKtx = "1.17.0"
-composeBom = "2025.09.01"
-androidxComposeFoundation = "1.9.2"
-androidxCameraX = "1.5.0"
+composeBom = "2025.10.01"
+androidxComposeFoundation = "1.9.4"
+androidxCameraX = "1.5.1"
 espressoCore = "3.7.0"
 kotlin = "2.2.20"
 kotlinx-serialization = "1.9.0"
@@ -18,9 +18,9 @@ jetbrainsKotlinJvm = "2.0.21"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 lifecycleRuntimeKtx = "2.9.4"
-room = "2.8.1"
+room = "2.8.3"
 retrofit = "3.0.0"
-okhttp = "5.1.0"
+okhttp = "5.2.1"
 appcompat = "1.7.1"
 fragment = "1.8.9"
 navigation = "2.9.5"
@@ -37,11 +37,15 @@ androidx-lifecycle-viewModelCompose = "2.9.4"
 androidx-navigation-compose = "2.9.5"
 androidx-navigation-testing = "2.9.5"
 androidx-lifecycle-runtimeTesting = "2.9.4"
-androidx-compose-ui-tooling-preview = "1.9.2"
-androidx-compose-ui-tooling = "1.9.2"
-androidxComposeMaterial3Adaptive = "1.1.0"
-androidxComposeRuntimeTracing = "1.9.2"
+androidx-compose-ui-tooling-preview = "1.9.4"
+androidx-compose-ui-tooling = "1.9.4"
+androidxComposeMaterial3Adaptive = "1.2.0"
+androidxComposeRuntimeTracing = "1.9.4"
 androidxDataStore = "1.1.7"
+google-cloud-sppech = "4.73.0"
+google-cloud-vision = "3.76.0"
+google-auth-library-library-auth2-http = "3.19.0"
+media = "1.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -72,6 +76,7 @@ androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 androidx-dataStore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "androidxDataStore" }
+androidx-media = { group = "androidx.media", name = "media", version.ref = "media"}
 
 # Gradle plugins
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -141,6 +146,11 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "androidxCameraX"}
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidxCameraX"}
 androidx-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "androidxCameraX"}
+
+# Google
+google-cloud-sppech = { group = "com.google.cloud", name = "google-cloud-speech", version.ref = "google-cloud-sppech"}
+google-cloud-vision = { group = "com.google.cloud", name = "google-cloud-vision", version.ref = "google-cloud-vision"}
+google-auth-library-auth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "google-auth-library-library-auth2-http"}
 
 # Dependencies of the included build-logic
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }

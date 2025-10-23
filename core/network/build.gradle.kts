@@ -9,17 +9,23 @@ android {
         buildConfig = true
     }
     namespace = "com.jg.childmomentsnap.core.network"
+
+    defaultConfig {
+        buildConfigField(
+            "String",
+            "GOOGLE_VISION_BASE_URL",
+            "\"https://vision.googleapis.com/\""
+        )
+    }
 }
 
 dependencies {
     api(libs.kotlinx.datetime)
     api(projects.core.model)
+    api(projects.core.common)
 
-    implementation(libs.coil.kt)
-    implementation(libs.coil.kt.svg)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlin.serialization)
-
 }

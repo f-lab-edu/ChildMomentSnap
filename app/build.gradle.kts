@@ -13,7 +13,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+
 android {
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileSdk = 36
 
     defaultConfig {
@@ -37,8 +42,24 @@ android {
 
     buildTypes {
         debug {
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_API_KEY",
+                getLocalProperty("GOOGLE_CLOUD_API_KEY")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_PROJECT_ID",
+                getLocalProperty("GOOGLE_CLOUD_PROJECT_ID")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_APPLICATION_CREDENTIALS",
+                "\"google_credentials\""
+            )
             signingConfig = signingConfigs.getByName("release")
         }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -46,11 +67,27 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_API_KEY",
+                getLocalProperty("GOOGLE_CLOUD_API_KEY")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_PROJECT_ID",
+                getLocalProperty("GOOGLE_CLOUD_PROJECT_ID")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_APPLICATION_CREDENTIALS",
+                "\"google_credentials\""
+            )
         }
     }
     packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
         }
     }
     
@@ -107,4 +144,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //testImplementation(libs.androidx.navigation.testing)
+}
+
+fun getLocalProperty(key: String): String {
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { properties.load(it) }
+    }
+    return properties.getProperty(key) ?: ""
 }

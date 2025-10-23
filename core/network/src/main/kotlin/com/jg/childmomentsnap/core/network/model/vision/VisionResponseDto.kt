@@ -1,96 +1,93 @@
-package com.jg.childmomentsnap.core.data.model.network.response
+package com.jg.childmomentsnap.core.network.model.vision
 
 import kotlinx.serialization.Serializable
 
-// ===== 응답 모델들 =====
-
 @Serializable
-data class VisionAnalysisResponse(
-    val responses: List<AnnotateImageResponse>
+data class VisionResponseDto(
+    val responses: List<VisionAnnotateImageResponseDto>
 )
 
 @Serializable
-data class AnnotateImageResponse(
-    val faceAnnotations: List<FaceAnnotation>? = null,
-    val labelAnnotations: List<EntityAnnotation>? = null,
-    val textAnnotations: List<EntityAnnotation>? = null,
-    val localizedObjectAnnotations: List<LocalizedObjectAnnotation>? = null,
-    val error: Status? = null
+data class VisionAnnotateImageResponseDto(
+    val faceAnnotations: List<VisionFaceAnnotationDto>? = null,
+    val labelAnnotations: List<VisionEntityAnnotationDto>? = null,
+    val textAnnotations: List<VisionEntityAnnotationDto>? = null,
+    val localizedObjectAnnotations: List<VisionLocalizedObjectAnnotationDto>? = null,
+    val error: VisionStatusDto? = null
 )
 
 @Serializable
-data class FaceAnnotation(
-    val boundingPoly: BoundingPoly,
-    val fdBoundingPoly: BoundingPoly,
-    val landmarks: List<Landmark>,
+data class VisionFaceAnnotationDto(
+    val boundingPoly: VisionBoundingPolyDto,
+    val fdBoundingPoly: VisionBoundingPolyDto,
+    val landmarks: List<VisionLandmarkDto>,
     val rollAngle: Float,
     val panAngle: Float,
     val tiltAngle: Float,
     val detectionConfidence: Float,
     val landmarkingConfidence: Float,
-    // 표정 분석 (핵심 부분)
-    val joyLikelihood: Likelihood,
-    val sorrowLikelihood: Likelihood,
-    val angerLikelihood: Likelihood,
-    val surpriseLikelihood: Likelihood,
-    val underExposedLikelihood: Likelihood,
-    val blurredLikelihood: Likelihood,
-    val headwearLikelihood: Likelihood
+    val joyLikelihood: VisionLikelihoodDto,
+    val sorrowLikelihood: VisionLikelihoodDto,
+    val angerLikelihood: VisionLikelihoodDto,
+    val surpriseLikelihood: VisionLikelihoodDto,
+    val underExposedLikelihood: VisionLikelihoodDto,
+    val blurredLikelihood: VisionLikelihoodDto,
+    val headwearLikelihood: VisionLikelihoodDto
 )
 
 @Serializable
-data class EntityAnnotation(
+data class VisionEntityAnnotationDto(
     val mid: String? = null,
     val locale: String? = null,
     val description: String,
     val score: Float,
     val confidence: Float? = null,
     val topicality: Float? = null,
-    val boundingPoly: BoundingPoly? = null
+    val boundingPoly: VisionBoundingPolyDto? = null
 )
 
 @Serializable
-data class LocalizedObjectAnnotation(
+data class VisionLocalizedObjectAnnotationDto(
     val mid: String,
     val languageCode: String? = null,
     val name: String,
     val score: Float,
-    val boundingPoly: BoundingPoly
+    val boundingPoly: VisionBoundingPolyDto
 )
 
 @Serializable
-data class BoundingPoly(
-    val vertices: List<Vertex>,
-    val normalizedVertices: List<NormalizedVertex>? = null
+data class VisionBoundingPolyDto(
+    val vertices: List<VisionVertexDto>,
+    val normalizedVertices: List<VisionNormalizedVertexDto>? = null
 )
 
 @Serializable
-data class Vertex(
+data class VisionVertexDto(
     val x: Int,
     val y: Int
 )
 
 @Serializable
-data class NormalizedVertex(
+data class VisionNormalizedVertexDto(
     val x: Float,
     val y: Float
 )
 
 @Serializable
-data class Landmark(
-    val type: LandmarkType,
-    val position: Position
+data class VisionLandmarkDto(
+    val type: VisionLandmarkTypeDto,
+    val position: VisionPositionDto
 )
 
 @Serializable
-data class Position(
+data class VisionPositionDto(
     val x: Float,
     val y: Float,
     val z: Float
 )
 
 @Serializable
-enum class LandmarkType {
+enum class VisionLandmarkTypeDto {
     UNKNOWN_LANDMARK,
     LEFT_EYE,
     RIGHT_EYE,
@@ -129,7 +126,7 @@ enum class LandmarkType {
 }
 
 @Serializable
-enum class Likelihood {
+enum class VisionLikelihoodDto {
     UNKNOWN,
     VERY_UNLIKELY,
     UNLIKELY,
@@ -139,7 +136,7 @@ enum class Likelihood {
 }
 
 @Serializable
-data class Status(
+data class VisionStatusDto(
     val code: Int,
     val message: String,
     val details: List<Map<String, String>>? = null
