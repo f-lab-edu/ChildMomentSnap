@@ -21,3 +21,11 @@ local.properties
 # Build logic
 /build-logic/convention/build/
 \n# Google Cloud credentials\n/app/src/main/res/raw/google_credentials.json
+
+# Keystore files
+*.jks
+*.keystore
+app/keystore/
+
+# Gradle properties with sensitive data
+gradle.properties

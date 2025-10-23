@@ -1,5 +1,11 @@
 import java.util.Properties
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.cms.android.application)
     alias(libs.plugins.cms.android.application.compose)
@@ -12,7 +18,7 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    
+
     compileSdk = 36
 
     defaultConfig {
@@ -23,6 +29,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
+            storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
+            keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
+            keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+        }
     }
 
     buildTypes {
@@ -42,13 +57,16 @@ android {
                 "GOOGLE_APPLICATION_CREDENTIALS",
                 "\"google_credentials\""
             )
+            signingConfig = signingConfigs.getByName("release")
         }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField(
                 "String",
                 "GOOGLE_CLOUD_API_KEY",
@@ -86,6 +104,7 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.common)
 
+    implementation(projects.feature.home)
     implementation(projects.feature.calendar)
     implementation(projects.feature.diary)
     implementation(projects.feature.dairyDetail)

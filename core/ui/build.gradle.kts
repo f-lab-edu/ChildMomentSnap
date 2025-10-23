@@ -5,6 +5,7 @@ plugins {
 
 android {
     namespace = "com.jg.childmomentsnap.core.ui"
+    resourcePrefix = "core_ui_"
 }
 
 dependencies {

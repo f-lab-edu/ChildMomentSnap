@@ -41,3 +41,4 @@ class PhotoRepositoryImpl @Inject constructor(
         return analysis
     }
 }
+

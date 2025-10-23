@@ -9,8 +9,13 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.jg.childmomentsnap.core.ui.component.home.HomeTabType
 import androidx.navigation.compose.rememberNavController
 
+/**
+ *  App 상태를 전달해야 하는 경우 대비
+ *  추후 추가
+ */
 
 @Composable
 fun rememberCmsAppState(
@@ -23,12 +28,16 @@ fun rememberCmsAppState(
 
 @Stable
 class CmsAppState(
-    val nvaController: NavHostController
+    val navController: NavHostController
 ) {
     val currentDestination: NavDestination?
-        @Composable get() = nvaController
-            .currentBackStackEntryAsState()
-            .value?.destination
+        @Composable get() = navController
+            .currentBackStackEntryAsState().value?.destination
+
+    val isHomeLevelDestination: Boolean
+        @Composable get() = HomeTabType.entries
+            .map { it.route }
+            .contains(currentDestination?.route ?: "")
 
     var isLoading by mutableStateOf(false)
 

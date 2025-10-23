@@ -25,6 +25,8 @@ fun CmsNavHost(
             startDestination = CAMERA_GRAPH,
             modifier = modifier
         ) {
+            //   TODO calendar 모듈 완성되면 연결.
+           // homeGraph(appState)
             cameraGraph(appState)
         }
     }
