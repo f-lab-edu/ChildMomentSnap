@@ -1,7 +1,7 @@
 package com.jg.childmomentsnap.core.data.repository
 
-import kotlinx.coroutines.flow.Flow
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 interface PhotoRepository {
-    suspend fun analyzeImage(imageBytes: ByteArray): Flow<Unit>
+    suspend fun analyzeImage(imageBytes: ByteArray): VisionAnalysis
 }

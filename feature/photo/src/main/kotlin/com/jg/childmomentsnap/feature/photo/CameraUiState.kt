@@ -2,6 +2,7 @@ package com.jg.childmomentsnap.feature.photo
 
 import android.net.Uri
 import androidx.camera.core.CameraSelector
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 /**
  * 카메라 화면의 UI 상태
@@ -20,6 +21,7 @@ data class CameraUiState(
     val showGalleryPicker: Boolean = false,
     val showCapturedImageDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
+    val visionAnalysis: VisionAnalysis? = null,
     val errorMessage: String? = null
 )
 

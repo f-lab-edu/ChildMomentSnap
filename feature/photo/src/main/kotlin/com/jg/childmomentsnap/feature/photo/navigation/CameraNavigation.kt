@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.jg.childmomentsnap.core.common.state.CmsAppState
+import com.jg.childmomentsnap.core.ui.state.CmsAppState
 import com.jg.childmomentsnap.feature.photo.screen.CameraRoute
 
 

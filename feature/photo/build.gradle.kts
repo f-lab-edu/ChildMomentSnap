@@ -9,7 +9,6 @@ android {
 
 dependencies {
     implementation(projects.core.model)
-    implementation(projects.core.common)
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

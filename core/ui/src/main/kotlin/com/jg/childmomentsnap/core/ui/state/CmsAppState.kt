@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.common.state
+package com.jg.childmomentsnap.core.ui.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable

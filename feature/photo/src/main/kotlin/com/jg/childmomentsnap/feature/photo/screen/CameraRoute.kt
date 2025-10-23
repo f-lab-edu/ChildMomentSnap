@@ -1,6 +1,6 @@
 package com.jg.childmomentsnap.feature.photo.screen
 
-import CameraViewModel
+import com.jg.childmomentsnap.feature.photo.CameraViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

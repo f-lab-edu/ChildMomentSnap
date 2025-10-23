@@ -9,13 +9,10 @@ plugins {
 
 
 android {
-    // Load local.properties
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localProperties.load(localPropertiesFile.inputStream())
+    buildFeatures {
+        buildConfig = true
     }
-
+    
     compileSdk = 36
 
     defaultConfig {
@@ -26,21 +23,53 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GOOGLE_VISION_API_KEY", "\"${localProperties.getProperty("GOOGLE_VISION_API_KEY")}\"")
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_API_KEY",
+                getLocalProperty("GOOGLE_CLOUD_API_KEY")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_PROJECT_ID",
+                getLocalProperty("GOOGLE_CLOUD_PROJECT_ID")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_APPLICATION_CREDENTIALS",
+                "\"google_credentials\""
+            )
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_API_KEY",
+                getLocalProperty("GOOGLE_CLOUD_API_KEY")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_CLOUD_PROJECT_ID",
+                getLocalProperty("GOOGLE_CLOUD_PROJECT_ID")
+            )
+            buildConfigField(
+                "String",
+                "GOOGLE_APPLICATION_CREDENTIALS",
+                "\"google_credentials\""
+            )
         }
     }
     packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
         }
     }
     
@@ -96,4 +125,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //testImplementation(libs.androidx.navigation.testing)
+}
+
+fun getLocalProperty(key: String): String {
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { properties.load(it) }
+    }
+    return properties.getProperty(key) ?: ""
 }

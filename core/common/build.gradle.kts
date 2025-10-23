@@ -1,17 +1,11 @@
 plugins {
     alias(libs.plugins.cms.android.library)
     alias(libs.plugins.cms.android.library.compose)
+    alias(libs.plugins.cms.hilt)
 }
 
 android {
     namespace = "com.jg.childmomentsnap.core.common"
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-
-        }
-    }
 }
 
 dependencies {
