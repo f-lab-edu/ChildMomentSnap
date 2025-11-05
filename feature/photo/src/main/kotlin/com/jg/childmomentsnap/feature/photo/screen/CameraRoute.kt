@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.photo.screen
 
+import android.widget.Toast
 import com.jg.childmomentsnap.feature.photo.CameraViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -9,12 +10,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
+import com.jg.childmomentsnap.feature.photo.model.CameraUiEffect
 
 /**
  * ViewModel과 통합된 카메라 라우트 진입점
@@ -68,6 +71,18 @@ fun CameraRoute(
             viewModel.resetCameraState()
         }
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEffect
+            .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .collect { effect ->
+                when (effect) {
+                    is CameraUiEffect.ShowError -> {
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+    }
     
     CameraScreen(
         uiState = uiState,
@@ -78,13 +93,17 @@ fun CameraRoute(
         onGalleryClick = viewModel::openGallery,
         onImageSelected = viewModel::onImageSelected,
         onDismissGalleryPicker = viewModel::dismissGalleryPicker,
-        onConfirmImage = viewModel::confirmSelectedImage,
+        onConfirmImage = {
+            viewModel.confirmSelectedImage(context)
+        },
         onCancelImage = viewModel::cancelSelectedImage,
         onClearError = viewModel::clearError,
         onCameraError = viewModel::onCameraError,
         onPhotoCaptured = viewModel::onPhotoCaptured,
         onCaptureComplete = viewModel::onCaptureComplete,
-        onConfirmCapturedImage = viewModel::confirmCapturedImage,
+        onConfirmCapturedImage = {
+            viewModel.confirmCapturedImage(context)
+        },
         onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
         onNavigateUp = onNavigateUp,
         modifier = modifier

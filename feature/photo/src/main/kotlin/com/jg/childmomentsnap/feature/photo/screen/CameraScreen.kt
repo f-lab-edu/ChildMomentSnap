@@ -72,16 +72,7 @@ internal fun CameraScreen(
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
 
-    // 에러 메시지 처리
-    uiState.errorMessage?.let { error ->
-        LaunchedEffect(error) {
-            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-            onClearError()
-        }
-    }
-    
     // 권한 상태에 따른 조건부 렌더링
     when (uiState.permissionState) {
         PermissionState.Checking -> {
