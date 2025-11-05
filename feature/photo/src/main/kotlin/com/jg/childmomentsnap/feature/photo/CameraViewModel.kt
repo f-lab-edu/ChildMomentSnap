@@ -193,6 +193,7 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
             try {
+                //  TODO 해당 코드 수정 예정
                 val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
                     ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
 
@@ -255,6 +256,7 @@ class CameraViewModel @Inject constructor(
                 )
             }
             try {
+                //  TODO 해당 코드 수정 예정
                 val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
                     ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
 
