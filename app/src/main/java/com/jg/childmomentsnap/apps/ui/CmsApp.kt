@@ -15,8 +15,7 @@ fun CmsApp(
     appState: CmsAppState = rememberCmsAppState()
 ) {
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize()
     ) {
         CmsNavHost(appState = appState)
     }
