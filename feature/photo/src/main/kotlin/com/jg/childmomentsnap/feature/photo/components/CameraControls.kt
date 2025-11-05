@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,8 +45,7 @@ internal fun CameraTopBar(
                     )
                 )
             )
-            .padding(16.dp)
-            .systemBarsPadding(),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 뒤로가기 버튼
@@ -63,9 +61,9 @@ internal fun CameraTopBar(
                 tint = Color.White
             )
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         // 제목
         Text(
             text = "사진 촬영",
@@ -115,9 +113,9 @@ internal fun CameraBottomControls(
                 modifier = Modifier.size(32.dp)
             )
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         // 촬영 버튼
         IconButton(
             onClick = onCaptureClick,
@@ -144,9 +142,9 @@ internal fun CameraBottomControls(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         // 카메라 전환 버튼
         IconButton(
             onClick = onSwitchCamera,

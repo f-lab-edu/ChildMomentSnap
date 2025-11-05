@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.photo.screen
 
+import android.app.Activity
 import android.widget.Toast
 import com.jg.childmomentsnap.feature.photo.CameraViewModel
 import androidx.activity.compose.BackHandler
@@ -53,17 +54,27 @@ fun CameraRoute(
     
     // 앱이 포그라운드로 돌아올 때 권한 재확인
     val lifecycleOwner = LocalLifecycleOwner.current
+    val activity = context as? Activity
     var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, activity) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                val hasAllPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-                //  상태 변경 시에만 UI 업데이트
-                if (lastPermissionState != hasAllPermissions) {
-                    lastPermissionState = hasAllPermissions
-                    viewModel.updatePermissionState(hasAllPermissions)
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    val hasAllPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+                    //  상태 변경 시에만 UI 업데이트
+                    if (lastPermissionState != hasAllPermissions) {
+                        lastPermissionState = hasAllPermissions
+                        viewModel.updatePermissionState(hasAllPermissions)
+                    }
                 }
+                Lifecycle.Event.ON_STOP -> {
+                    //  설정 변경 (화면 회전 등)이 아닐 때만 초기화
+                    if (activity?.isChangingConfigurations == false) {
+                        viewModel.resetCameraState()
+                    }
+                }
+                else -> Unit
             }
         }
         
@@ -71,13 +82,6 @@ fun CameraRoute(
         
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-    
-    // 화면을 떠날 때 카메라 상태 초기화
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.resetCameraState()
         }
     }
 

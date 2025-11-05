@@ -38,7 +38,7 @@ fun NavHostController.navigateToCameraGraph(navOptions: NavOptions? = null) {
 fun NavGraphBuilder.cameraGraph(
     appState: CmsAppState
 ) {
-    val navController = appState.nvaController
+    val navController = appState.navController
 
     navigation(
         route = CAMERA_GRAPH,
