@@ -4,4 +4,27 @@
     <string name="bottom_camera" tools:ignore="ResourceName">카메라</string>
     <string name="bottom_daily" tools:ignore="ResourceName">일기</string>
     <string name="bottom_my" tools:ignore="ResourceName">My</string>
+    
+    <!-- Permission Names -->
+    <string name="permission_camera">카메라</string>
+    <string name="permission_read_external_storage">저장소 읽기</string>
+    <string name="permission_write_external_storage">저장소 쓰기</string>
+    <string name="permission_read_media_images">사진 접근</string>
+    <string name="permission_read_media_video">동영상 접근</string>
+    <string name="permission_record_audio">마이크</string>
+    <string name="permission_access_fine_location">정확한 위치</string>
+    <string name="permission_access_coarse_location">대략적인 위치</string>
+    <string name="permission_post_notifications">알림</string>
+    
+    <!-- Permission Descriptions -->
+    <string name="permission_camera_description">사진을 촬영하기 위해 카메라 권한이 필요합니다.</string>
+    <string name="permission_read_external_storage_description">갤러리에서 사진을 선택하기 위해 저장소 접근 권한이 필요합니다.</string>
+    <string name="permission_write_external_storage_description">사진을 저장하기 위해 저장소 쓰기 권한이 필요합니다.</string>
+    <string name="permission_read_media_images_description">갤러리에서 사진을 선택하기 위해 사진 접근 권한이 필요합니다.</string>
+    <string name="permission_read_media_video_description">갤러리에서 동영상을 선택하기 위해 동영상 접근 권한이 필요합니다.</string>
+    <string name="permission_record_audio_description">음성을 녹음하기 위해 마이크 권한이 필요합니다.</string>
+    <string name="permission_access_fine_location_description">정확한 위치 정보를 사용하기 위해 위치 권한이 필요합니다.</string>
+    <string name="permission_access_coarse_location_description">대략적인 위치 정보를 사용하기 위해 위치 권한이 필요합니다.</string>
+    <string name="permission_post_notifications_description">알림을 보내기 위해 알림 권한이 필요합니다.</string>
+    <string name="permission_default_description">앱을 정상적으로 사용하기 위해 권한이 필요합니다.</string>
 </resources>
