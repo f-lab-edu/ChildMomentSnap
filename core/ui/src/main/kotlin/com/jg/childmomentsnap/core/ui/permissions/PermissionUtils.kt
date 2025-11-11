@@ -1,6 +1,8 @@
 package com.jg.childmomentsnap.core.ui.permissions
 
 import android.Manifest
+import android.content.Context
+import com.jg.childmomentsnap.core.ui.R
 
 object AppPermissions {
 
@@ -79,33 +81,33 @@ object AppPermissions {
 
 object PermissionUtils {
 
-    fun getPermissionName(permission: String): String {
+    fun getPermissionName(context: Context, permission: String): String {
         return when (permission) {
-            AppPermissions.CAMERA -> "카메라"
-            AppPermissions.READ_EXTERNAL_STORAGE -> "저장소 읽기"
-            AppPermissions.WRITE_EXTERNAL_STORAGE -> "저장소 쓰기"
-            AppPermissions.READ_MEDIA_IMAGES -> "사진 접근"
-            AppPermissions.READ_MEDIA_VIDEO -> "동영상 접근"
-            AppPermissions.RECORD_AUDIO -> "마이크"
-            AppPermissions.ACCESS_FINE_LOCATION -> "정확한 위치"
-            AppPermissions.ACCESS_COARSE_LOCATION -> "대략적인 위치"
-            AppPermissions.POST_NOTIFICATIONS -> "알림"
+            AppPermissions.CAMERA -> context.getString(R.string.permission_camera)
+            AppPermissions.READ_EXTERNAL_STORAGE -> context.getString(R.string.permission_read_external_storage)
+            AppPermissions.WRITE_EXTERNAL_STORAGE -> context.getString(R.string.permission_write_external_storage)
+            AppPermissions.READ_MEDIA_IMAGES -> context.getString(R.string.permission_read_media_images)
+            AppPermissions.READ_MEDIA_VIDEO -> context.getString(R.string.permission_read_media_video)
+            AppPermissions.RECORD_AUDIO -> context.getString(R.string.permission_record_audio)
+            AppPermissions.ACCESS_FINE_LOCATION -> context.getString(R.string.permission_access_fine_location)
+            AppPermissions.ACCESS_COARSE_LOCATION -> context.getString(R.string.permission_access_coarse_location)
+            AppPermissions.POST_NOTIFICATIONS -> context.getString(R.string.permission_post_notifications)
             else -> permission.substringAfterLast(".")
         }
     }
 
-    fun getPermissionDescription(permission: String): String {
+    fun getPermissionDescription(context: Context, permission: String): String {
         return when (permission) {
-            AppPermissions.CAMERA -> "사진을 촬영하기 위해 카메라 권한이 필요합니다."
-            AppPermissions.READ_EXTERNAL_STORAGE -> "갤러리에서 사진을 선택하기 위해 저장소 접근 권한이 필요합니다."
-            AppPermissions.WRITE_EXTERNAL_STORAGE -> "사진을 저장하기 위해 저장소 쓰기 권한이 필요합니다."
-            AppPermissions.READ_MEDIA_IMAGES -> "갤러리에서 사진을 선택하기 위해 사진 접근 권한이 필요합니다."
-            AppPermissions.READ_MEDIA_VIDEO -> "갤러리에서 동영상을 선택하기 위해 동영상 접근 권한이 필요합니다."
-            AppPermissions.RECORD_AUDIO -> "음성을 녹음하기 위해 마이크 권한이 필요합니다."
-            AppPermissions.ACCESS_FINE_LOCATION -> "정확한 위치 정보를 사용하기 위해 위치 권한이 필요합니다."
-            AppPermissions.ACCESS_COARSE_LOCATION -> "대략적인 위치 정보를 사용하기 위해 위치 권한이 필요합니다."
-            AppPermissions.POST_NOTIFICATIONS -> "알림을 보내기 위해 알림 권한이 필요합니다."
-            else -> "앱을 정상적으로 사용하기 위해 권한이 필요합니다."
+            AppPermissions.CAMERA -> context.getString(R.string.permission_camera_description)
+            AppPermissions.READ_EXTERNAL_STORAGE -> context.getString(R.string.permission_read_external_storage_description)
+            AppPermissions.WRITE_EXTERNAL_STORAGE -> context.getString(R.string.permission_write_external_storage_description)
+            AppPermissions.READ_MEDIA_IMAGES -> context.getString(R.string.permission_read_media_images_description)
+            AppPermissions.READ_MEDIA_VIDEO -> context.getString(R.string.permission_read_media_video_description)
+            AppPermissions.RECORD_AUDIO -> context.getString(R.string.permission_record_audio_description)
+            AppPermissions.ACCESS_FINE_LOCATION -> context.getString(R.string.permission_access_fine_location_description)
+            AppPermissions.ACCESS_COARSE_LOCATION -> context.getString(R.string.permission_access_coarse_location_description)
+            AppPermissions.POST_NOTIFICATIONS -> context.getString(R.string.permission_post_notifications_description)
+            else -> context.getString(R.string.permission_default_description)
         }
     }
 }

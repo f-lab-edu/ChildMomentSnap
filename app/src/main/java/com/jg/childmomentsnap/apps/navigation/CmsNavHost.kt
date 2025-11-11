@@ -17,7 +17,7 @@ fun CmsNavHost(
     appState: CmsAppState,
     modifier: Modifier = Modifier
 ) {
-    val navController = appState.nvaController
+    val navController = appState.navController
 
     SharedTransitionLayout {
         NavHost(

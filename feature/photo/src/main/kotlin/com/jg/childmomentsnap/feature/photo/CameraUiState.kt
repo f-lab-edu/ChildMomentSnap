@@ -22,7 +22,6 @@ data class CameraUiState(
     val showCapturedImageDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val visionAnalysis: VisionAnalysis? = null,
-    val errorMessage: String? = null
 )
 
 /**

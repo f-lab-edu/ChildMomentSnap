@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.photo
 
+import android.content.Context
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
@@ -7,8 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.data.repository.PhotoRepository
+import com.jg.childmomentsnap.feature.photo.model.CameraUiEffect
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,7 +30,11 @@ class CameraViewModel @Inject constructor(
     
     private val _uiState = MutableStateFlow(CameraUiState())
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
-    
+
+    private val _uiEffect = MutableSharedFlow<CameraUiEffect>()
+    val uiEffect = _uiEffect.asSharedFlow()
+
+
     /**
      * 현재 권한 상태를 기반으로 권한 상태를 업데이트
      */
@@ -134,7 +143,9 @@ class CameraViewModel @Inject constructor(
      * 현재 에러 메시지를 클리어
      */
     fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
+        viewModelScope.launch {
+            _uiEffect.emit(CameraUiEffect.ShowError(""))
+        }
     }
     
     /**
@@ -144,8 +155,11 @@ class CameraViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 cameraState = CameraState.Error,
-                errorMessage = error
             )
+        }
+
+        viewModelScope.launch {
+            _uiEffect.emit(CameraUiEffect.ShowError(error))
         }
     }
     
@@ -173,12 +187,13 @@ class CameraViewModel @Inject constructor(
     /**
      * 선택된 이미지 사용을 확인하고 AI 처리를 시작
      */
-    fun confirmSelectedImage() {
+    fun confirmSelectedImage(app: Context) {
         val currentUri = _uiState.value.selectedImageUri ?: return
         
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
             try {
+                //  TODO 해당 코드 수정 예정
                 val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
                     ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
 
@@ -196,10 +211,11 @@ class CameraViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update { currentState ->
                     currentState.copy(
-                        isProcessingImage = false,
-                        errorMessage = "이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"
+                        isProcessingImage = false
                     )
                 }
+
+                _uiEffect.emit(CameraUiEffect.ShowError("이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"))
             }
         }
     }
@@ -228,7 +244,7 @@ class CameraViewModel @Inject constructor(
     /**
      * 촬영된 사진 사용을 확인하고 AI 처리를 시작
      */
-    fun confirmCapturedImage() {
+    fun confirmCapturedImage(app: Context) {
         val currentUri = _uiState.value.capturedImageUri ?: return
         
         viewModelScope.launch {
@@ -240,6 +256,7 @@ class CameraViewModel @Inject constructor(
                 )
             }
             try {
+                //  TODO 해당 코드 수정 예정
                 val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
                     ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
 
@@ -257,10 +274,11 @@ class CameraViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update { currentState ->
                     currentState.copy(
-                        isProcessingImage = false,
-                        errorMessage = "이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"
+                        isProcessingImage = false
                     )
                 }
+                _uiEffect.emit(CameraUiEffect.ShowError("이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"))
+
             }
         }
     }
@@ -303,8 +321,7 @@ class CameraViewModel @Inject constructor(
                 showGalleryPicker = false,
                 showCapturedImageDialog = false,
                 isProcessingImage = false,
-                visionAnalysis = null,
-                errorMessage = null
+                visionAnalysis = null
             )
         }
     }

@@ -39,8 +39,6 @@ class CmsAppState(
             .map { it.route }
             .contains(currentDestination?.route ?: "")
 
-    var isLoading by mutableStateOf(false)
-
     companion object {
         private const val TAG = "CmsAppState"
     }
