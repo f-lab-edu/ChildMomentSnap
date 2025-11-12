@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
-import com.jg.childmomentsnap.feature.photo.navigation.CAMERA_GRAPH
-import com.jg.childmomentsnap.feature.photo.navigation.cameraGraph
+import com.jg.childmomentsnap.feature.moment.navigation.CAMERA_GRAPH
+import com.jg.childmomentsnap.feature.moment.navigation.cameraGraph
 
 @SuppressLint("ContextCastToActivity")
 @OptIn(ExperimentalSharedTransitionApi::class)

@@ -107,9 +107,7 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.calendar)
     implementation(projects.feature.diary)
-    implementation(projects.feature.dairyDetail)
-    implementation(projects.feature.photo)
-    implementation(projects.feature.voice)
+    implementation(projects.feature.moment)
 
 
     implementation(libs.androidx.activity.compose)
