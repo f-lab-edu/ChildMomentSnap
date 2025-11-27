@@ -33,10 +33,12 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
-            storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
-            keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
-            keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
+                storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
+                keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
+                keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+            }
         }
     }
 
@@ -57,7 +59,8 @@ android {
                 "GOOGLE_APPLICATION_CREDENTIALS",
                 "\"google_credentials\""
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Debug 빌드에서는 기본 debug keystore 사용
+            // signingConfig = signingConfigs.getByName("release")
         }
 
         release {
@@ -66,7 +69,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Release 빌드에서만 keystore가 있을 때 release signing 사용
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             buildConfigField(
                 "String",
                 "GOOGLE_CLOUD_API_KEY",

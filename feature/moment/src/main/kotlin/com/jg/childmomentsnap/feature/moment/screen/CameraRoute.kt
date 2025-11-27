@@ -2,7 +2,7 @@ package com.jg.childmomentsnap.feature.moment.screen
 
 import android.app.Activity
 import android.widget.Toast
-import com.jg.childmomentsnap.feature.moment.CameraViewModel
+import com.jg.childmomentsnap.feature.moment.viewmodel.CameraViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
