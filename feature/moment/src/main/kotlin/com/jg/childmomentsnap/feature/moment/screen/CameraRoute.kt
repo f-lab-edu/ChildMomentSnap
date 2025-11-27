@@ -48,8 +48,9 @@ fun CameraRoute(
     
     // 화면 진입 시 권한 확인
     LaunchedEffect(Unit) {
-        val hasAllPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-        viewModel.updatePermissionState(hasAllPermissions)
+        val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+        val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+        viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
     }
     
     // 앱이 포그라운드로 돌아올 때 권한 재확인
@@ -61,11 +62,12 @@ fun CameraRoute(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    val hasAllPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+                    val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+                    val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
                     //  상태 변경 시에만 UI 업데이트
-                    if (lastPermissionState != hasAllPermissions) {
-                        lastPermissionState = hasAllPermissions
-                        viewModel.updatePermissionState(hasAllPermissions)
+                    if (lastPermissionState != hasAllCameraPermissions) {
+                        lastPermissionState = hasAllCameraPermissions
+                        viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
                     }
                 }
                 Lifecycle.Event.ON_STOP -> {
@@ -100,6 +102,13 @@ fun CameraRoute(
     CameraScreen(
         uiState = uiState,
         onPermissionResult = viewModel::onPermissionResult,
+        onVoicePermissionResult = { permissions, isPermanentlyDenied ->
+            viewModel.onVoicePermissionResult(permissions, isPermanentlyDenied)
+            // 권한 상태 업데이트
+            val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+            val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+            viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
+        },
         onCameraReady = viewModel::onCameraReady,
         onSwitchCamera = viewModel::switchCamera,
         onCapturePhoto = viewModel::capturePhoto,
@@ -118,6 +127,13 @@ fun CameraRoute(
             viewModel.confirmCapturedImage(context)
         },
         onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
+        onConfirmVoiceRecording = {
+            viewModel.confirmVoiceRecording(context)
+        },
+        onSkipVoiceRecording = {
+            viewModel.skipVoiceRecording(context)
+        },
+        onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
         onNavigateUp = onNavigateUp,
         modifier = modifier
     )

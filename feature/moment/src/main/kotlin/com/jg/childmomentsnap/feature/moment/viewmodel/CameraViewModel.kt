@@ -40,10 +40,15 @@ class CameraViewModel @Inject constructor(
     /**
      * 현재 권한 상태를 기반으로 권한 상태를 업데이트
      */
-    fun updatePermissionState(hasAllPermissions: Boolean) {
+    fun updatePermissionState(hasAllCameraPermissions: Boolean, hasAllVoicePermissions: Boolean) {
         _uiState.update { currentState ->
             currentState.copy(
-                permissionState = if (hasAllPermissions) {
+                cameraPermissionState = if (hasAllCameraPermissions) {
+                    PermissionState.Granted
+                } else {
+                    PermissionState.Denied
+                },
+                voicePermissionState = if (hasAllVoicePermissions) {
                     PermissionState.Granted
                 } else {
                     PermissionState.Denied
@@ -64,7 +69,33 @@ class CameraViewModel @Inject constructor(
 
         _uiState.update { currentState ->
             currentState.copy(
-                permissionState = when {
+                cameraPermissionState = when {
+                    allGranted -> {
+                        PermissionState.Granted
+                    }
+                    hasAnyPermanentlyDenied -> {
+                        PermissionState.PermanentlyDenied
+                    }
+                    else -> {
+                        PermissionState.Denied
+                    }
+                }
+            )
+        }
+    }
+
+    /**
+     * 음성 권한 요청 결과를 처리
+     */
+    fun onVoicePermissionResult(
+        permissions: Map<String, Boolean>,
+        hasAnyPermanentlyDenied: Boolean = false
+    ) {
+        val allGranted = permissions.values.all { it }
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                voicePermissionState = when {
                     allGranted -> {
                         PermissionState.Granted
                     }
@@ -244,16 +275,31 @@ class CameraViewModel @Inject constructor(
     }
 
     /**
-     * 촬영된 사진 사용을 확인하고 AI 처리를 시작
+     * 촬영된 사진 사용을 확인하고 음성 녹음 다이얼로그 표시
      */
     fun confirmCapturedImage(app: Context) {
+        val currentUri = _uiState.value.capturedImageUri ?: return
+
+        // API 호출 전에 먼저 음성 녹음 다이얼로그 표시
+        _uiState.update {
+            it.copy(
+                showCapturedImageDialog = false,
+                showVoiceRecordingDialog = true
+            )
+        }
+    }
+
+    /**
+     * 음성 녹음 완료 후 AI 분석 처리
+     */
+    fun processImageWithVoice(app: Context) {
         val currentUri = _uiState.value.capturedImageUri ?: return
 
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     isProcessingImage = true,
-                    showCapturedImageDialog = false,
+                    showVoiceRecordingDialog = false,
                     visionAnalysis = null
                 )
             }
@@ -264,7 +310,7 @@ class CameraViewModel @Inject constructor(
 
                 val analysis = photoRepository.analyzeImage(imageBytes)
 
-                // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
+                // 성공 시, 결과 화면으로 이동
                 _uiState.update { currentState ->
                     currentState.copy(
                         isProcessingImage = false,
@@ -310,6 +356,46 @@ class CameraViewModel @Inject constructor(
     }
 
     /**
+     * 음성 녹음 다이얼로그 표시
+     */
+    fun showVoiceRecordingDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(showVoiceRecordingDialog = true)
+        }
+    }
+
+    /**
+     * 음성 녹음 다이얼로그 닫기
+     */
+    fun dismissVoiceRecordingDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(showVoiceRecordingDialog = false)
+        }
+    }
+
+    /**
+     * 음성 녹음 사용을 확인하고 권한 요청 또는 녹음 시작
+     */
+    fun confirmVoiceRecording(app: Context) {
+        // 음성 권한이 허용되어 있는지 확인
+        if (_uiState.value.voicePermissionState == PermissionState.Granted) {
+            // 권한이 있으면 녹음 완료 후 API 호출
+            processImageWithVoice(app)
+        } else {
+            // 권한이 없으면 권한 요청을 위해 다이얼로그 유지
+            // UI에서 권한 요청 처리
+        }
+    }
+
+    /**
+     * 음성 녹음 건너뛰기 - 기존 카메라 API 호출
+     */
+    fun skipVoiceRecording(app: Context) {
+        // 음성 녹음 없이 기존 카메라 API 호출
+        processImageWithVoice(app)
+    }
+
+    /**
      * 카메라 상태를 대기 상태로 초기화
      */
     fun resetCameraState() {
@@ -322,6 +408,7 @@ class CameraViewModel @Inject constructor(
                 selectedImageUri = null,
                 showGalleryPicker = false,
                 showCapturedImageDialog = false,
+                showVoiceRecordingDialog = false,
                 isProcessingImage = false,
                 visionAnalysis = null
             )

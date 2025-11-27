@@ -3,11 +3,8 @@ package com.jg.childmomentsnap.core.ui.navigation
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.navigation.NavController
 import androidx.navigation.NavType
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.Serializable as KotlinSerializable
 import java.io.Serializable
 
 /**
@@ -46,7 +43,7 @@ inline fun <reified T: Serializable> Bundle.getNavArg(): T? {
 /**
  * 커스텀 [NavType] 생성
  */
-inline fun <reified T: Serializable> createLegacyNavType(
+inline fun <reified T: Serializable> createNavType(
     isNullableAllowed: Boolean = false
 ): NavType<T> {
     return object : NavType<T>(isNullableAllowed) {
@@ -66,35 +63,6 @@ inline fun <reified T: Serializable> createLegacyNavType(
             return createJson().decodeFromString(value)
         }
     }
-}
-
-
-inline fun <reified T: @KotlinSerializable Any> createTypeSafeNavType(
-    isNullableAllowed: Boolean = false
-): NavType<T> {
-    return object : NavType<T>(isNullableAllowed) {
-        override fun put(bundle: Bundle, key: String, value: T) {
-            bundle.putString(key, Json.encodeToString(value))
-        }
-
-        override fun get(bundle: Bundle, key: String): T? {
-            return bundle.getString(key)?.let { 
-                Json.decodeFromString<T>(it) 
-            }
-        }
-
-        override fun parseValue(value: String): T {
-            return Json.decodeFromString(value)
-        }
-    }
-}
-
-inline fun <reified T: @KotlinSerializable Any> NavController.navigateTypeSafe(route: T) {
-    this.navigate(route)
-}
-
-inline fun <reified T: Serializable> NavController.navigateLegacy(route: String, args: T) {
-    this.navigate(route.asNavArg(args))
 }
 
 fun createJson(): Json {

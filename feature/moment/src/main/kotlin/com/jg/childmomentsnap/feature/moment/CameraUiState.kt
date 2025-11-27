@@ -11,7 +11,8 @@ import com.jg.childmomentsnap.core.model.VisionAnalysis
  * 카메라 기능에 필요한 모든 상태를 나타냅니다.
  */
 data class CameraUiState(
-    val permissionState: PermissionState = PermissionState.Checking,
+    val cameraPermissionState: PermissionState = PermissionState.Checking,
+    val voicePermissionState: PermissionState = PermissionState.Checking,
     val cameraState: CameraState = CameraState.Idle,
     val lensFacing: Int = CameraSelector.LENS_FACING_BACK,
     val isCapturing: Boolean = false,
@@ -20,6 +21,7 @@ data class CameraUiState(
     val selectedImageUri: Uri? = null,
     val showGalleryPicker: Boolean = false,
     val showCapturedImageDialog: Boolean = false,
+    val showVoiceRecordingDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val visionAnalysis: VisionAnalysis? = null,
 )

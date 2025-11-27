@@ -7,6 +7,7 @@ import com.jg.childmomentsnap.feature.moment.PermissionState
 import com.jg.childmomentsnap.feature.moment.components.CapturedImagePreview
 import com.jg.childmomentsnap.feature.moment.components.PhotoPicker
 import com.jg.childmomentsnap.feature.moment.components.SelectedImagePreview
+import com.jg.childmomentsnap.feature.moment.components.ConfirmStartRecordingDialog
 import components.CameraLoadingScreen
 import components.CameraPermissionPermanentlyDeniedScreen
 import components.CameraPermissionScreen
@@ -52,6 +53,7 @@ import components.CameraPreviewContainer
 internal fun CameraScreen(
     uiState: CameraUiState,
     onPermissionResult: (Map<String, Boolean>, Boolean) -> Unit,
+    onVoicePermissionResult: (Map<String, Boolean>, Boolean) -> Unit,
     onCameraReady: () -> Unit,
     onSwitchCamera: () -> Unit,
     onCapturePhoto: () -> Unit,
@@ -64,6 +66,9 @@ internal fun CameraScreen(
     onCaptureComplete: () -> Unit,
     onConfirmCapturedImage: () -> Unit,
     onRetakeCapturedPhoto: () -> Unit,
+    onConfirmVoiceRecording: () -> Unit,
+    onSkipVoiceRecording: () -> Unit,
+    onDismissVoiceRecordingDialog: () -> Unit,
     onClearError: () -> Unit,
     onCameraError: (String) -> Unit,
     onNavigateUp: () -> Unit,
@@ -71,7 +76,7 @@ internal fun CameraScreen(
 ) {
 
     // 권한 상태에 따른 조건부 렌더링
-    when (uiState.permissionState) {
+    when (uiState.cameraPermissionState) {
         PermissionState.Checking -> {
             CameraLoadingScreen(
                 onNavigateUp = onNavigateUp,
@@ -142,4 +147,16 @@ internal fun CameraScreen(
         onImageSelected = onImageSelected,
         onDismiss = onDismissGalleryPicker
     )
+    
+    // 음성 녹음 다이얼로그
+    if (uiState.showVoiceRecordingDialog) {
+        ConfirmStartRecordingDialog(
+            voicePermissionState = uiState.voicePermissionState,
+            onVoicePermissionResult = onVoicePermissionResult,
+            onConfirmVoiceRecording = onConfirmVoiceRecording,
+            onSkipVoiceRecording = onSkipVoiceRecording,
+            onDismiss = onDismissVoiceRecordingDialog,
+            modifier = modifier
+        )
+    }
 }

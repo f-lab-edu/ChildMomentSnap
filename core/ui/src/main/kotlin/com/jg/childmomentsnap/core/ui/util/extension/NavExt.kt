@@ -19,12 +19,16 @@ fun NavDestination?.isHomeLevelTab(route: HomeRoute): Boolean =
         it.route == route::class.qualifiedName
     } ?: false
 
-
-fun NavDestination?.matchesHomeRoute(route: HomeRoute): Boolean {
-    val routeClassName = route::class.simpleName
-    return this?.hierarchy?.any {
-        it.route?.contains(routeClassName ?: "", ignoreCase = true) ?: false
-    } ?: false
+fun NavDestination?.shouldShowBottomBar(homeTabTypes: List<HomeTabType>): Boolean {
+    if (this?.route == HomeRoute.Moment::class.qualifiedName) {
+        return false
+    }
+    
+    return homeTabTypes
+        .filterNot { it == HomeTabType.MOMENT }
+        .any { tab -> 
+             this.isHomeLevelTab(tab.typeSafeRoute)
+        }
 }
 
 fun NavDestination?.matchesTab(tab: HomeTabType): Boolean =
