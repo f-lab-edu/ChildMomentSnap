@@ -4,13 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.jg.childmomentsnap.feature.moment.CameraUiState
 import com.jg.childmomentsnap.feature.moment.PermissionState
-import com.jg.childmomentsnap.feature.moment.components.CameraLoadingScreen
-import com.jg.childmomentsnap.feature.moment.components.CameraPermissionPermanentlyDeniedScreen
-import com.jg.childmomentsnap.feature.moment.components.CameraPermissionScreen
-import com.jg.childmomentsnap.feature.moment.components.CameraPreviewContainer
 import com.jg.childmomentsnap.feature.moment.components.CapturedImagePreview
 import com.jg.childmomentsnap.feature.moment.components.PhotoPicker
 import com.jg.childmomentsnap.feature.moment.components.SelectedImagePreview
+import components.CameraLoadingScreen
+import components.CameraPermissionPermanentlyDeniedScreen
+import components.CameraPermissionScreen
+import components.CameraPreviewContainer
 
 
 /**

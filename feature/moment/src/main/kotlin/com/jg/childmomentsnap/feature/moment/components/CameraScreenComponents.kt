@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components
+package components
 
 import android.content.Intent
 import android.net.Uri
@@ -34,9 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.CameraUiState
+import com.jg.childmomentsnap.feature.moment.R
+import com.jg.childmomentsnap.feature.moment.components.CameraBottomControls
+import com.jg.childmomentsnap.feature.moment.components.CameraPreview
+import com.jg.childmomentsnap.feature.moment.components.CameraTopBar
 
 /**
  * 권한 확인 중에 표시되는 로딩 화면
@@ -60,7 +65,7 @@ internal fun CameraLoadingScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "카메라 권한 확인 중...",
+                text = stringResource(R.string.feature_moment_checking_camera_permission),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -138,7 +143,7 @@ internal fun CameraPermissionScreen(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "카메라 권한 필요",
+            text = stringResource(R.string.feature_moment_camera_permission_required),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
@@ -147,7 +152,7 @@ internal fun CameraPermissionScreen(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "사진을 촬영하고 갤러리에 접근하기 위해\n다음 권한이 필요합니다:\n\n• 카메라\n• 저장소 접근",
+            text = stringResource(R.string.feature_moment_camera_permission_description),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -162,13 +167,13 @@ internal fun CameraPermissionScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("권한 허용하기")
+            Text(stringResource(R.string.feature_moment_grant_permission))
         }
         
         Spacer(modifier = Modifier.height(8.dp))
         
         TextButton(onClick = onNavigateUp) {
-            Text("뒤로 가기")
+            Text(stringResource(R.string.feature_moment_back_button))
         }
     }
 }
@@ -200,7 +205,7 @@ internal fun CameraPermissionPermanentlyDeniedScreen(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "권한이 영구적으로 거부됨",
+            text = stringResource(R.string.feature_moment_permission_permanently_denied),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
@@ -209,7 +214,7 @@ internal fun CameraPermissionPermanentlyDeniedScreen(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "카메라 기능을 사용하려면\n설정에서 직접 권한을 허용해주세요.",
+            text = stringResource(R.string.feature_moment_permission_settings_description),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -227,13 +232,13 @@ internal fun CameraPermissionPermanentlyDeniedScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("설정으로 이동")
+            Text(stringResource(R.string.feature_moment_go_to_settings))
         }
         
         Spacer(modifier = Modifier.height(8.dp))
         
         TextButton(onClick = onNavigateUp) {
-            Text("뒤로 가기")
+            Text(stringResource(R.string.feature_moment_back_button))
         }
     }
 }
@@ -318,7 +323,7 @@ internal fun CaptureLoadingOverlay(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "촬영 중...",
+                text = stringResource(R.string.feature_moment_camera_taking_photo),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium

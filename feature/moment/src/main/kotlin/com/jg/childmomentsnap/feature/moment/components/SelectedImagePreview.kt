@@ -32,7 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
+import com.jg.childmomentsnap.feature.moment.R
 
 /**
  * 갤러리에서 선택된 이미지를 미리보기하고 확인/취소할 수 있는 화면
@@ -61,7 +63,7 @@ internal fun SelectedImagePreview(
         // 이미지 표시
         AsyncImage(
             model = imageUri,
-            contentDescription = "선택된 이미지",
+            contentDescription = stringResource(R.string.feature_moment_selected_image),
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +87,7 @@ internal fun SelectedImagePreview(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "뒤로 가기",
+                    contentDescription = stringResource(R.string.feature_moment_back_button),
                     tint = Color.White
                 )
             }
@@ -93,7 +95,7 @@ internal fun SelectedImagePreview(
             Spacer(modifier = Modifier.weight(1f))
             
             Text(
-                text = "이미지 미리보기",
+                text = stringResource(R.string.feature_moment_image_preview_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
@@ -126,7 +128,7 @@ internal fun SelectedImagePreview(
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "이미지 처리 중...",
+                    text = stringResource(R.string.feature_moment_image_processing),
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -146,7 +148,7 @@ internal fun SelectedImagePreview(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.size(8.dp))
-                        Text("취소")
+                        Text(stringResource(R.string.feature_moment_cancel))
                     }
                     
                     Button(
@@ -159,14 +161,14 @@ internal fun SelectedImagePreview(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.size(8.dp))
-                        Text("사용하기")
+                        Text(stringResource(R.string.feature_moment_use_image))
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "이 이미지로 일기를 작성하시겠어요?",
+                    text = stringResource(R.string.feature_moment_use_image_question),
                     color = Color.White.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.bodySmall
                 )

@@ -24,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.jg.childmomentsnap.feature.moment.R
 
 /**
  * 네비게이션을 포함한 카메라 화면의 상단 바
@@ -57,7 +59,7 @@ internal fun CameraTopBar(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "뒤로 가기",
+                contentDescription = stringResource(R.string.feature_moment_back_button),
                 tint = Color.White
             )
         }
@@ -66,7 +68,7 @@ internal fun CameraTopBar(
 
         // 제목
         Text(
-            text = "사진 촬영",
+            text = stringResource(R.string.feature_moment_camera_title),
             color = Color.White,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium
@@ -108,7 +110,7 @@ internal fun CameraBottomControls(
         ) {
             Icon(
                 imageVector = Icons.Default.PhotoLibrary,
-                contentDescription = "갤러리",
+                contentDescription = stringResource(R.string.feature_moment_gallery),
                 tint = if (isCapturing) Color.Gray else Color.White,
                 modifier = Modifier.size(32.dp)
             )
@@ -136,7 +138,7 @@ internal fun CameraBottomControls(
             } else {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "촬영",
+                    contentDescription = stringResource(R.string.feature_moment_capture_photo),
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
@@ -158,7 +160,7 @@ internal fun CameraBottomControls(
         ) {
             Icon(
                 imageVector = Icons.Default.Cameraswitch,
-                contentDescription = "카메라 전환",
+                contentDescription = stringResource(R.string.feature_moment_switch_camera),
                 tint = if (isCapturing) Color.Gray else Color.White,
                 modifier = Modifier.size(32.dp)
             )

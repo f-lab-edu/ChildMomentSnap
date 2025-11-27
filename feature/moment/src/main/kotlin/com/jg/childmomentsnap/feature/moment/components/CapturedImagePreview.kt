@@ -36,9 +36,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
+import com.jg.childmomentsnap.feature.moment.R
 
 /**
  * 촬영된 사진 확인 다이얼로그
@@ -80,7 +82,7 @@ internal fun CapturedImagePreview(
                 // 촬영된 이미지 표시
                 Image(
                     painter = rememberAsyncImagePainter(imageUri),
-                    contentDescription = "촬영된 사진",
+                    contentDescription = stringResource(R.string.feature_moment_captured_photo_description),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
@@ -100,13 +102,13 @@ internal fun CapturedImagePreview(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "뒤로 가기",
+                            contentDescription = stringResource(R.string.feature_moment_back_button),
                             tint = Color.White
                         )
                     }
                     
                     Text(
-                        text = "촬영된 사진",
+                        text = stringResource(R.string.feature_moment_captured_photo_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold
@@ -144,7 +146,7 @@ internal fun CapturedImagePreview(
                                 Spacer(modifier = Modifier.height(12.dp))
                                 
                                 Text(
-                                    text = "AI가 사진을 분석하고 있습니다...",
+                                    text = stringResource(R.string.feature_moment_ai_analyzing_photo),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.White,
                                     textAlign = TextAlign.Center
@@ -153,7 +155,7 @@ internal fun CapturedImagePreview(
                         } else {
                             // 확인/재촬영 버튼들
                             Text(
-                                text = "이 사진을 사용하시겠습니까?",
+                                text = stringResource(R.string.feature_moment_use_this_photo),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold,
@@ -163,7 +165,7 @@ internal fun CapturedImagePreview(
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             Text(
-                                text = "AI가 사진을 분석하여 감정과 상황을 파악한 후\n일기 작성을 도와드릴게요.",
+                                text = stringResource(R.string.feature_moment_ai_analysis_description),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.8f),
                                 textAlign = TextAlign.Center
@@ -189,7 +191,7 @@ internal fun CapturedImagePreview(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("다시 촬영")
+                                    Text(stringResource(R.string.feature_moment_retake_photo))
                                 }
                                 
                                 // 사용 확인 버튼
@@ -206,7 +208,7 @@ internal fun CapturedImagePreview(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("사용하기")
+                                    Text(stringResource(R.string.feature_moment_use_image))
                                 }
                             }
                         }
