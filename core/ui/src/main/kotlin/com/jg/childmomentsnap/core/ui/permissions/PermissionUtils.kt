@@ -37,15 +37,13 @@ object AppPermissions {
             READ_EXTERNAL_STORAGE
         )
 
-        val VIDEO_PERMISSIONS = listOf(
-            CAMERA,
+        val VOICE_PERMISSIONS = listOf(
             RECORD_AUDIO,
             READ_MEDIA_VIDEO
         )
         
         // Android 12 이하를 위한 레거시 비디오 권한
-        val VIDEO_PERMISSIONS_LEGACY = listOf(
-            CAMERA,
+        val VOICE_PERMISSIONS_LEGACY = listOf(
             RECORD_AUDIO,
             READ_EXTERNAL_STORAGE
         )
@@ -67,13 +65,13 @@ object AppPermissions {
         }
         
         /**
-         * Android 버전에 따라 적절한 비디오 권한을 반환
+         * Android 버전에 따라 적절한 음성 녹음 권한을 반환
          */
-        fun getVideoPermissions(): List<String> {
+        fun getVoicePermissions(): List<String> {
             return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                VIDEO_PERMISSIONS // Android 13+ (API 33+)
+                VOICE_PERMISSIONS // Android 13+ (API 33+)
             } else {
-                VIDEO_PERMISSIONS_LEGACY // Android 12 이하
+                VOICE_PERMISSIONS_LEGACY // Android 12 이하
             }
         }
     }
