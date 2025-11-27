@@ -94,6 +94,8 @@ android {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            excludes.add("**/OSGI-INF/MANIFEST.MF")
+            pickFirsts.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
         }
     }
     

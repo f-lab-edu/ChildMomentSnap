@@ -5,6 +5,11 @@ plugins {
 
 android {
     namespace = "com.jg.childmomentsnap.feature.moment"
+    packaging {
+        resources {
+            excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+        }
+    }
 }
 
 dependencies {
