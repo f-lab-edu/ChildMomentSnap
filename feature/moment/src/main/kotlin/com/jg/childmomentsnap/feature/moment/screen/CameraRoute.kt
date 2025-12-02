@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -18,17 +19,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * ViewModel과 통합된 카메라 라우트 진입점
- * 
+ *
  * 이 컴포저블은 카메라 기능의 메인 진입점 역할을 하며,
  * ViewModel 통합과 UI 레이어에서의 권한 확인을 처리합니다.
- * 
+ *
  * @param onNavigateUp 뒤로 이동 콜백
  * @param modifier 스타일링을 위한 Modifier
  * @param viewModel 카메라 ViewModel 인스턴스
@@ -40,48 +44,72 @@ fun CameraRoute(
     modifier: Modifier = Modifier,
     viewModel: CameraViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     // 뒤로가기 임시
     BackHandler(onBack = onBackClick)
-    
+
     // 화면 진입 시 권한 확인
     LaunchedEffect(Unit) {
-        val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-        val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+        val hasAllCameraPermissions =
+            context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+        val hasAllVoicePermissions =
+            context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
         viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
     }
-    
+
     // 앱이 포그라운드로 돌아올 때 권한 재확인
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = context as? Activity
     var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
+    val imageBytes: ByteArray? by produceState<ByteArray?>(
+        initialValue = null,
+        key1 = uiState.capturedImageUri
+    ) {
+        val uri = uiState.capturedImageUri
+        value = if (uri != null) {
+            withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    inputStream.readBytes()
+                }
+            }
+        } else {
+            null
+        }
+    }
 
     DisposableEffect(lifecycleOwner, activity) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-                    val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+                    val hasAllCameraPermissions =
+                        context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+                    val hasAllVoicePermissions =
+                        context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
                     //  상태 변경 시에만 UI 업데이트
                     if (lastPermissionState != hasAllCameraPermissions) {
                         lastPermissionState = hasAllCameraPermissions
-                        viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
+                        viewModel.updatePermissionState(
+                            hasAllCameraPermissions,
+                            hasAllVoicePermissions
+                        )
                     }
                 }
+
                 Lifecycle.Event.ON_STOP -> {
                     //  설정 변경 (화면 회전 등)이 아닐 때만 초기화
                     if (activity?.isChangingConfigurations == false) {
                         viewModel.resetCameraState()
                     }
                 }
+
                 else -> Unit
             }
         }
-        
+
         lifecycleOwner.lifecycle.addObserver(observer)
-        
+
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
@@ -98,15 +126,17 @@ fun CameraRoute(
                 }
             }
     }
-    
+
     CameraScreen(
         uiState = uiState,
         onPermissionResult = viewModel::onPermissionResult,
         onVoicePermissionResult = { permissions, isPermanentlyDenied ->
             viewModel.onVoicePermissionResult(permissions, isPermanentlyDenied)
             // 권한 상태 업데이트
-            val hasAllCameraPermissions = context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-            val hasAllVoicePermissions = context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+            val hasAllCameraPermissions =
+                context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+            val hasAllVoicePermissions =
+                context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
             viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
         },
         onCameraReady = viewModel::onCameraReady,
@@ -116,7 +146,11 @@ fun CameraRoute(
         onImageSelected = viewModel::onImageSelected,
         onDismissGalleryPicker = viewModel::dismissGalleryPicker,
         onConfirmImage = {
-            viewModel.confirmSelectedImage(context)
+            imageBytes?.let {
+                viewModel.confirmSelectedImage(
+                    imageBytes = it
+                )
+            }
         },
         onCancelImage = viewModel::cancelSelectedImage,
         onClearError = viewModel::clearError,
@@ -124,14 +158,18 @@ fun CameraRoute(
         onPhotoCaptured = viewModel::onPhotoCaptured,
         onCaptureComplete = viewModel::onCaptureComplete,
         onConfirmCapturedImage = {
-            viewModel.confirmCapturedImage(context)
+            viewModel.confirmCapturedImage()
         },
         onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
         onConfirmVoiceRecording = {
-            viewModel.confirmVoiceRecording(context)
+            imageBytes?.let {
+                viewModel.confirmVoiceRecording(
+                    imageBytes = it
+                )
+            }
         },
         onSkipVoiceRecording = {
-            viewModel.skipVoiceRecording(context)
+            imageBytes?.let { viewModel.skipVoiceRecording(it) }
         },
         onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
         onNavigateUp = onNavigateUp,

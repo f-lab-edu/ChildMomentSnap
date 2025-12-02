@@ -220,16 +220,10 @@ class CameraViewModel @Inject constructor(
     /**
      * 선택된 이미지 사용을 확인하고 AI 처리를 시작
      */
-    fun confirmSelectedImage(app: Context) {
-        val currentUri = _uiState.value.selectedImageUri ?: return
-
+    fun confirmSelectedImage(imageBytes: ByteArray) {
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
             try {
-                //  TODO 해당 코드 수정 예정
-                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
-                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
-
                 val analysis = photoRepository.analyzeImage(imageBytes)
 
                 // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
@@ -277,9 +271,7 @@ class CameraViewModel @Inject constructor(
     /**
      * 촬영된 사진 사용을 확인하고 음성 녹음 다이얼로그 표시
      */
-    fun confirmCapturedImage(app: Context) {
-        val currentUri = _uiState.value.capturedImageUri ?: return
-
+    fun confirmCapturedImage() {
         // API 호출 전에 먼저 음성 녹음 다이얼로그 표시
         _uiState.update {
             it.copy(
@@ -292,9 +284,7 @@ class CameraViewModel @Inject constructor(
     /**
      * 음성 녹음 완료 후 AI 분석 처리
      */
-    fun processImageWithVoice(app: Context) {
-        val currentUri = _uiState.value.capturedImageUri ?: return
-
+    fun processImageWithVoice(imageBytes: ByteArray) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -304,10 +294,6 @@ class CameraViewModel @Inject constructor(
                 )
             }
             try {
-                //  TODO 해당 코드 수정 예정
-                val imageBytes = app.contentResolver.openInputStream(currentUri)?.use { it.readBytes() }
-                    ?: throw IllegalArgumentException("Cannot open input stream for URI: $currentUri")
-
                 val analysis = photoRepository.analyzeImage(imageBytes)
 
                 // 성공 시, 결과 화면으로 이동
@@ -376,11 +362,11 @@ class CameraViewModel @Inject constructor(
     /**
      * 음성 녹음 사용을 확인하고 권한 요청 또는 녹음 시작
      */
-    fun confirmVoiceRecording(app: Context) {
+    fun confirmVoiceRecording(imageBytes: ByteArray) {
         // 음성 권한이 허용되어 있는지 확인
         if (_uiState.value.voicePermissionState == PermissionState.Granted) {
             // 권한이 있으면 녹음 완료 후 API 호출
-            processImageWithVoice(app)
+            processImageWithVoice(imageBytes)
         } else {
             // 권한이 없으면 권한 요청을 위해 다이얼로그 유지
             // UI에서 권한 요청 처리
@@ -390,9 +376,9 @@ class CameraViewModel @Inject constructor(
     /**
      * 음성 녹음 건너뛰기 - 기존 카메라 API 호출
      */
-    fun skipVoiceRecording(app: Context) {
+    fun skipVoiceRecording(imageBytes: ByteArray) {
         // 음성 녹음 없이 기존 카메라 API 호출
-        processImageWithVoice(app)
+        processImageWithVoice(imageBytes)
     }
 
     /**
