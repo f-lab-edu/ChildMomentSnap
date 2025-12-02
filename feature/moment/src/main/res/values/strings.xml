@@ -45,4 +45,11 @@
     <string name="feature_moment_grant_voice_permission">음성 권한 허용</string>
     <string name="feature_moment_voice_permission_permanently_denied">음성 권한이 영구적으로 거부되어 설정에서 직접 허용해주세요.</string>
     <string name="feature_moment_checking_voice_permission">음성 권한 확인 중...</string>
+
+    <!-- Voice BottomSheet -->
+    <string name="feature_moment_bottom_sheet_recoding">녹음 중...</string>
+    <string name="feature_moment_bottom_sheet_playing">재생 중..</string>
+    <string name="feature_moment_bottom_sheet_paused">일시정지</string>
+    <string name="feature_moment_bottom_sheet_ready">녹음 준비</string>
+
 </resources>

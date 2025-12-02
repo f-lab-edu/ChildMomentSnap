@@ -37,6 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -74,10 +75,10 @@ internal fun VoiceRecordingBottomSheet(
             // 상태 텍스트
             Text(
                 text = when {
-                    state.isRecording -> "녹음 중..."
-                    state.isPlaying -> "재생 중..."
-                    state.isPaused -> "일시정지"
-                    else -> "녹음 준비"
+                    state.isRecording -> stringResource(R.string.feature_moment_bottom_sheet_recoding)
+                    state.isPlaying -> stringResource(R.string.feature_moment_bottom_sheet_playing)
+                    state.isPaused -> stringResource(R.string.feature_moment_bottom_sheet_paused)
+                    else -> stringResource(R.string.feature_moment_bottom_sheet_ready)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
@@ -192,7 +193,7 @@ private fun DrawScope.drawVoiceWaveform(
         val x = index * barWidth + barWidth / 2
         val barHeight = (amplitude * height * 0.8f).coerceAtLeast(4.dp.toPx())
         
-        // 애니메이션 효과를 위한 높이 조정 (실제 로직에서는 시간 기반 애니메이션 사용)
+        // 애니메이션 효과를 위한 높이 조정
         val actualHeight = if (isAnimated) {
             barHeight * (0.7f + 0.3f * sin(index * 0.5f + System.currentTimeMillis() * 0.01f).coerceAtLeast(0f))
         } else {
