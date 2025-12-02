@@ -1,6 +1,7 @@
 package com.jg.childmomentsnap.feature.moment
 
 import androidx.compose.runtime.Stable
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 @Stable
 data class RecordingControlsState(
@@ -19,3 +20,14 @@ enum class RecordingState {
     PAUSED,
     STOPPED
 }
+
+/**
+ * 음성 녹음 기능의 UI 상태
+ */
+@Stable
+data class VoiceUiState(
+    val voicePermissionState: PermissionState = PermissionState.Checking,
+    val showVoiceRecordingDialog: Boolean = false,
+    val isProcessingImage: Boolean = false,
+    val visionAnalysis: VisionAnalysis? = null
+)

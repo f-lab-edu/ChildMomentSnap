@@ -12,7 +12,6 @@ import com.jg.childmomentsnap.core.model.VisionAnalysis
  */
 data class CameraUiState(
     val cameraPermissionState: PermissionState = PermissionState.Checking,
-    val voicePermissionState: PermissionState = PermissionState.Checking,
     val cameraState: CameraState = CameraState.Idle,
     val lensFacing: Int = CameraSelector.LENS_FACING_BACK,
     val isCapturing: Boolean = false,
@@ -21,7 +20,6 @@ data class CameraUiState(
     val selectedImageUri: Uri? = null,
     val showGalleryPicker: Boolean = false,
     val showCapturedImageDialog: Boolean = false,
-    val showVoiceRecordingDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val visionAnalysis: VisionAnalysis? = null,
 )
