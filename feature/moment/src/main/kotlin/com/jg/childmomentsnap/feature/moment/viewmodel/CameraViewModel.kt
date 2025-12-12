@@ -1,6 +1,5 @@
 package com.jg.childmomentsnap.feature.moment.viewmodel
 
-import android.content.Context
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
@@ -38,6 +37,26 @@ class CameraViewModel @Inject constructor(
 
 
     /**
+     * 카메라와 음성 권한 상태를 업데이트
+     */
+    fun updatePermissionState(hasAllCameraPermissions: Boolean, hasAllVoicePermissions: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                cameraPermissionState = if (hasAllCameraPermissions) {
+                    PermissionState.Granted
+                } else {
+                    PermissionState.Denied
+                },
+                voicePermissionState = if (hasAllVoicePermissions) {
+                    PermissionState.Granted
+                } else {
+                    PermissionState.Denied
+                }
+            )
+        }
+    }
+
+    /**
      * 카메라 권한 상태를 업데이트
      */
     fun updateCameraPermissionState(hasAllCameraPermissions: Boolean) {
@@ -47,6 +66,41 @@ class CameraViewModel @Inject constructor(
                     PermissionState.Granted
                 } else {
                     PermissionState.Denied
+                }
+            )
+        }
+    }
+
+    /**
+     * 음성 권한 상태를 업데이트
+     */
+    fun updateVoicePermissionState(hasAllVoicePermissions: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                voicePermissionState = if (hasAllVoicePermissions) {
+                    PermissionState.Granted
+                } else {
+                    PermissionState.Denied
+                }
+            )
+        }
+    }
+
+    /**
+     * 음성 권한 요청 결과를 처리
+     */
+    fun onVoicePermissionResult(
+        permissions: Map<String, Boolean>,
+        hasAnyPermanentlyDenied: Boolean = false
+    ) {
+        val allGranted = permissions.values.all { it }
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                voicePermissionState = when {
+                    allGranted -> PermissionState.Granted
+                    hasAnyPermanentlyDenied -> PermissionState.PermanentlyDenied
+                    else -> PermissionState.Denied
                 }
             )
         }
@@ -68,9 +122,11 @@ class CameraViewModel @Inject constructor(
                     allGranted -> {
                         PermissionState.Granted
                     }
+
                     hasAnyPermanentlyDenied -> {
                         PermissionState.PermanentlyDenied
                     }
+
                     else -> {
                         PermissionState.Denied
                     }
@@ -262,7 +318,89 @@ class CameraViewModel @Inject constructor(
     }
 
 
+    /**
+     * 음성 녹음 다이얼로그 표시
+     */
+    fun showVoiceRecordingDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(showVoiceRecordingDialog = true)
+        }
+    }
 
+    /**
+     * 음성 녹음 다이얼로그 닫기
+     */
+    fun dismissVoiceRecordingDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(showVoiceRecordingDialog = false)
+        }
+    }
+
+    /**
+     * 음성 녹음을 확인하고 BottomSheet 표시
+     */
+    fun confirmVoiceRecording(imageBytes: ByteArray) {
+        // 음성 권한이 허용되어 있는지 확인
+        if (_uiState.value.voicePermissionState == PermissionState.Granted) {
+            // 권한이 있으면 다이얼로그 닫고 BottomSheet 표시는 VoiceRecordingViewModel에서 처리
+            _uiState.update { currentState ->
+                currentState.copy(showVoiceRecordingDialog = false)
+            }
+            // TODO: VoiceRecordingViewModel의 showVoiceRecordingBottomSheet 호출 필요
+        } else {
+            // 권한이 없으면 다이얼로그에서 권한 요청 처리
+            // ConfirmStartRecordingDialog에서 권한 요청을 처리하므로 다이얼로그 유지
+        }
+    }
+
+    /**
+     * 음성 녹음 건너뛰기 - 이미지만으로 AI API 호출
+     */
+    fun skipVoiceRecording(imageBytes: ByteArray) {
+        processImageWithoutVoice(imageBytes)
+    }
+
+    /**
+     * 음성 녹음 완료 후 콜백 처리
+     */
+    fun onVoiceRecordingCompleted(imageBytes: ByteArray, voiceFilePath: String?) {
+        processImageWithVoice(imageBytes, voiceFilePath)
+    }
+
+    /**
+     * 음성과 함께 이미지 처리 (AI API 호출)
+     */
+    private fun processImageWithVoice(imageBytes: ByteArray, voiceFilePath: String?) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isProcessingImage = true)
+            }
+            try {
+                // TODO: 음성 파일도 함께 API에 전달
+                val analysis = photoRepository.analyzeImage(imageBytes)
+
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false,
+                        visionAnalysis = analysis
+                    )
+                }
+
+            } catch (e: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(isProcessingImage = false)
+                }
+                _uiEffect.emit(CameraUiEffect.ShowError("이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"))
+            }
+        }
+    }
+
+    /**
+     * 음성 없이 이미지만 처리 (AI API 호출)
+     */
+    private fun processImageWithoutVoice(imageBytes: ByteArray) {
+        processImageWithVoice(imageBytes, null)
+    }
 
     /**
      * 카메라 상태를 대기 상태로 초기화

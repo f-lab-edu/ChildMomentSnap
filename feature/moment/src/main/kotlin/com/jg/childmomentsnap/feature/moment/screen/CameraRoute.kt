@@ -24,6 +24,8 @@ import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
+import com.jg.childmomentsnap.feature.moment.PermissionState
+import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -112,6 +114,7 @@ fun CameraRoute(
         }
     }
 
+    // Camera UI Effects 처리
     LaunchedEffect(Unit) {
         viewModel.uiEffect
             .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -123,6 +126,25 @@ fun CameraRoute(
                 }
             }
     }
+
+    // TODO: VoiceRecording Navigation Events 처리 (임시 비활성화)
+    // LaunchedEffect(Unit) {
+    //     voiceViewModel.navigationEvents
+    //         .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+    //         .collect { event ->
+    //             when (event) {
+    //                 is VoiceRecordingNavigationEvent.NotifyRecordingCompleted -> {
+    //                     imageBytes?.let { bytes ->
+    //                         viewModel.onVoiceRecordingCompleted(bytes, event.voiceFilePath)
+    //                         onNavigateUp()
+    //                     }
+    //                 }
+    //                 is VoiceRecordingNavigationEvent.ShowError -> {
+    //                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+    //                 }
+    //             }
+    //         }
+    // }
 
     CameraScreen(
         uiState = uiState,
@@ -160,13 +182,15 @@ fun CameraRoute(
         onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
         onConfirmVoiceRecording = {
             imageBytes?.let {
-                viewModel.confirmVoiceRecording(
-                    imageBytes = it
-                )
+                viewModel.confirmVoiceRecording(it)
+                // TODO: VoiceRecordingBottomSheet 표시 로직 추가
             }
         },
         onSkipVoiceRecording = {
-            imageBytes?.let { viewModel.skipVoiceRecording(it) }
+            imageBytes?.let { 
+                viewModel.skipVoiceRecording(it)
+                onNavigateUp()
+            }
         },
         onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
         onNavigateUp = onNavigateUp,

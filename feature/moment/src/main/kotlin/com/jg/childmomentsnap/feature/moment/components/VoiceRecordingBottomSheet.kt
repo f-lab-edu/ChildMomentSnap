@@ -52,6 +52,7 @@ internal fun VoiceRecordingBottomSheet(
     showBottomSheet: Boolean,
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),
+    onReset: () -> Unit,
     onRecordingStart: () -> Unit,
     onRecordingPause: () -> Unit,
     onRecordingResume: () -> Unit,
@@ -96,6 +97,7 @@ internal fun VoiceRecordingBottomSheet(
             // 버튼 영역
             RecordingControls(
                 state = state,
+                onReset = onReset,
                 onRecordingStart = onRecordingStart,
                 onRecordingPause = onRecordingPause,
                 onRecordingResume = onRecordingResume,
@@ -212,6 +214,7 @@ private fun DrawScope.drawVoiceWaveform(
 @Composable
 private fun RecordingControls(
     state: RecordingControlsState,
+    onReset: () -> Unit,
     onRecordingStart: () -> Unit,
     onRecordingPause: () -> Unit,
     onRecordingResume: () -> Unit,
@@ -224,20 +227,17 @@ private fun RecordingControls(
     ) {
         FloatingActionButton(
             onClick = {
-                when {
-                    state.canStartRecording -> onRecordingStart()
-
-                    state.canPauseRecording -> onRecordingPause()
-
-                    state.canResumeRecording -> onRecordingResume()
+                if (state.isRecording || state.isPlaying) {
+                    onReset()
                 }
             },
             modifier = Modifier.size(54.dp),
             containerColor = MaterialTheme.colorScheme.secondary
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_reset),
-                contentDescription = "리셋"
+                painter = painterResource(R.drawable.ic_replay),
+                contentDescription = "리셋",
+                tint = if (state.isRecording || state.isPlaying) Color.Gray else Color.Unspecified
             )
         }
 
@@ -302,6 +302,7 @@ private fun VoiceRecordingBottomSheetPreview() {
             isPlaying = false,
             isPaused = false
         ),
+        onReset = {},
         onRecordingStart = {},
         onRecordingPause = {},
         onRecordingResume = {},
