@@ -298,10 +298,12 @@ class CameraViewModel @Inject constructor(
      * 촬영된 사진 사용을 확인
      */
     fun confirmCapturedImage() {
-        _uiState.update {
-            it.copy(
-                showCapturedImageDialog = false
-            )
+        _uiState.update { currentState ->
+            if (currentState.showVoiceRecordingDialog) {
+                currentState
+            } else {
+                currentState.copy(showVoiceRecordingDialog = true)
+            }
         }
     }
 
@@ -357,6 +359,13 @@ class CameraViewModel @Inject constructor(
      * 음성 녹음 건너뛰기 - 이미지만으로 AI API 호출
      */
     fun skipVoiceRecording(imageBytes: ByteArray) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showVoiceRecordingDialog = false,
+                showCapturedImageDialog = false,
+                capturedImageUri = null
+            )
+        }
         processImageWithoutVoice(imageBytes)
     }
 
@@ -364,6 +373,12 @@ class CameraViewModel @Inject constructor(
      * 음성 녹음 완료 후 콜백 처리
      */
     fun onVoiceRecordingCompleted(imageBytes: ByteArray, voiceFilePath: String?) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showCapturedImageDialog = false,
+                capturedImageUri = null
+            )
+        }
         processImageWithVoice(imageBytes, voiceFilePath)
     }
 

@@ -176,7 +176,10 @@ internal fun ConfirmStartRecordingDialog(
                                 onClick = onSkipVoiceRecording,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text(stringResource(R.string.feature_moment_skip_recording))
+                                Text(
+                                    text = stringResource(R.string.feature_moment_skip_recording),
+                                    textAlign = TextAlign.Center
+                                )
                             }
 
                             Button(
@@ -185,7 +188,10 @@ internal fun ConfirmStartRecordingDialog(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text(stringResource(R.string.feature_moment_grant_voice_permission))
+                                Text(
+                                    text = stringResource(R.string.feature_moment_grant_voice_permission),
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
                     }

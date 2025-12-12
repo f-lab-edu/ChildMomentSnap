@@ -66,7 +66,9 @@ enum class RecordingState {
     /** 녹음 일시 정지 */
     PAUSED,
     /** 녹음 완료 */
-    STOPPED
+    STOPPED,
+    /** 플레이 */
+    ON_PLAYING
 }
 
 /**
@@ -78,9 +80,12 @@ data class RecordingControlsState(
     val canPauseRecording: Boolean,
     val canResumeRecording: Boolean,
     val canStopRecording: Boolean,
+    val canPlayRecording: Boolean,
+    val canResetRecording: Boolean,
     val isRecording: Boolean,
     val isPlaying: Boolean,
-    val isPaused: Boolean
+    val isPaused: Boolean,
+    val isStopped: Boolean
 ) {
     companion object {
         fun fromRecordingState(recordingState: RecordingState): RecordingControlsState {
@@ -90,36 +95,60 @@ data class RecordingControlsState(
                     canPauseRecording = false,
                     canResumeRecording = false,
                     canStopRecording = false,
+                    canPlayRecording = false,
+                    canResetRecording = false,
                     isRecording = false,
                     isPlaying = false,
-                    isPaused = false
+                    isPaused = false,
+                    isStopped = false
                 )
                 RecordingState.RECODING -> RecordingControlsState(
                     canStartRecording = false,
                     canPauseRecording = true,
                     canResumeRecording = false,
                     canStopRecording = true,
+                    canPlayRecording = false,
+                    canResetRecording = true,
                     isRecording = true,
                     isPlaying = false,
-                    isPaused = false
+                    isPaused = false,
+                    isStopped = false
                 )
                 RecordingState.PAUSED -> RecordingControlsState(
                     canStartRecording = false,
                     canPauseRecording = false,
                     canResumeRecording = true,
                     canStopRecording = true,
+                    canPlayRecording = false,
+                    canResetRecording = true,
                     isRecording = false,
                     isPlaying = false,
-                    isPaused = true
+                    isPaused = true,
+                    isStopped = false
                 )
                 RecordingState.STOPPED -> RecordingControlsState(
-                    canStartRecording = true,
+                    canStartRecording = false,
                     canPauseRecording = false,
                     canResumeRecording = false,
                     canStopRecording = false,
+                    canPlayRecording = true,
+                    canResetRecording = true,
                     isRecording = false,
                     isPlaying = false,
-                    isPaused = false
+                    isPaused = false,
+                    isStopped = true
+                )
+                RecordingState.ON_PLAYING -> RecordingControlsState(
+                    canStartRecording = false,
+                    canPauseRecording = false,
+                    canResumeRecording = false,
+                    canStopRecording = false,
+                    canPlayRecording = false,
+                    canResetRecording = true,
+                    isRecording = false,
+                    isPlaying = true,
+                    isPaused = false,
+                    isStopped = false
                 )
             }
         }

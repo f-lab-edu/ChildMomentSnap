@@ -50,6 +50,20 @@
     <string name="feature_moment_bottom_sheet_recoding">녹음 중...</string>
     <string name="feature_moment_bottom_sheet_playing">재생 중..</string>
     <string name="feature_moment_bottom_sheet_paused">일시정지</string>
+    <string name="feature_moment_bottom_sheet_completed">녹음 완료</string>
     <string name="feature_moment_bottom_sheet_ready">녹음 준비</string>
+
+    <!-- Voice Recording Errors -->
+    <string name="feature_moment_error_recording_file_path_not_set">녹음 파일 경로가 설정되지 않았습니다.</string>
+    <string name="feature_moment_error_recording_start_failed">녹음 시작 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_pause_failed">녹음 일시정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_resume_failed">녹음 재개 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_stop_failed">녹음 정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_no_recording_file_to_play">재생할 녹음 파일이 없습니다.</string>
+    <string name="feature_moment_error_recording_file_not_found">녹음 파일을 찾을 수 없습니다.</string>
+    <string name="feature_moment_error_playback_start_failed">재생 시작 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_playback_error">재생 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_playback_stop_failed">재생 정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_reset_failed">리셋 중 오류가 발생했습니다.</string>
 
 </resources>

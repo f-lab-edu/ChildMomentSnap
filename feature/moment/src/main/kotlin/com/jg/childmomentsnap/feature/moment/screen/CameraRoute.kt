@@ -7,7 +7,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -23,11 +22,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
+import com.jg.childmomentsnap.feature.moment.components.VoiceRecordingBottomSheet
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
 import com.jg.childmomentsnap.feature.moment.PermissionState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent
+import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
+import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
+import com.jg.childmomentsnap.feature.moment.viewmodel.VoiceRecordingViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.content.Context
 
 /**
  * ViewModel과 통합된 카메라 라우트 진입점
@@ -40,13 +44,15 @@ import kotlinx.coroutines.withContext
  * @param viewModel 카메라 ViewModel 인스턴스
  */
 @Composable
-fun CameraRoute(
+internal fun CameraRoute(
     onBackClick: () -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CameraViewModel = hiltViewModel()
+    viewModel: CameraViewModel = hiltViewModel(),
+    voiceViewModel: VoiceRecordingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val voiceUiState by voiceViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     // 뒤로가기 임시
@@ -127,24 +133,25 @@ fun CameraRoute(
             }
     }
 
-    // TODO: VoiceRecording Navigation Events 처리 (임시 비활성화)
-    // LaunchedEffect(Unit) {
-    //     voiceViewModel.navigationEvents
-    //         .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-    //         .collect { event ->
-    //             when (event) {
-    //                 is VoiceRecordingNavigationEvent.NotifyRecordingCompleted -> {
-    //                     imageBytes?.let { bytes ->
-    //                         viewModel.onVoiceRecordingCompleted(bytes, event.voiceFilePath)
-    //                         onNavigateUp()
-    //                     }
-    //                 }
-    //                 is VoiceRecordingNavigationEvent.ShowError -> {
-    //                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-    //                 }
-    //             }
-    //         }
-    // }
+    // VoiceRecording UI Effects 처리
+    LaunchedEffect(Unit) {
+        voiceViewModel.uiEffect
+            .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .collect { effect ->
+                when (effect) {
+                    is VoiceRecordingUiEffect.ShowErrorToast -> {
+                        val message = getVoiceRecordingErrorMessage(context, effect.errorType)
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
+                    is VoiceRecordingUiEffect.NotifyRecordingCompleted -> {
+                        imageBytes?.let { bytes ->
+                            viewModel.onVoiceRecordingCompleted(bytes, effect.voiceFilePath)
+                            onNavigateUp()
+                        }
+                    }
+                }
+            }
+    }
 
     CameraScreen(
         uiState = uiState,
@@ -183,7 +190,13 @@ fun CameraRoute(
         onConfirmVoiceRecording = {
             imageBytes?.let {
                 viewModel.confirmVoiceRecording(it)
-                // TODO: VoiceRecordingBottomSheet 표시 로직 추가
+                // 파일 경로 설정
+                val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
+                voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
+                // BottomSheet 표시
+                if (uiState.voicePermissionState == PermissionState.Granted) {
+                    voiceViewModel.showVoiceRecordingBottomSheet()
+                }
             }
         },
         onSkipVoiceRecording = {
@@ -196,4 +209,51 @@ fun CameraRoute(
         onNavigateUp = onNavigateUp,
         modifier = modifier
     )
+
+    if (voiceUiState.showVoiceRecordingBottomSheet) {
+        VoiceRecordingBottomSheet(
+            state = voiceUiState.toRecordingControlsState(),
+            amplitudes = voiceUiState.amplitudes,
+            onReset = voiceViewModel::resetRecording,
+            onRecordingStart = voiceViewModel::startRecording,
+            onRecordingPause = voiceViewModel::pauseRecording,
+            onRecordingResume = voiceViewModel::resumeRecording,
+            onRecordingStop = voiceViewModel::stopRecording,
+            onPlaybackStart = voiceViewModel::playRecording,
+            onPlaybackStop = voiceViewModel::stopPlayback,
+            onDismiss = voiceViewModel::onBottomSheetDismissed
+        )
+    }
+}
+
+private const val FILE_NAME = "recording.mp4"
+
+/**
+ * VoiceRecordingError enum을 String Resource 기반 에러 메시지로 변환
+ */
+private fun getVoiceRecordingErrorMessage(context: Context, errorType: VoiceRecordingError): String {
+    return when (errorType) {
+        VoiceRecordingError.RECORDING_FILE_PATH_NOT_SET -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_file_path_not_set)
+        VoiceRecordingError.RECORDING_START_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_start_failed)
+        VoiceRecordingError.RECORDING_PAUSE_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_pause_failed)
+        VoiceRecordingError.RECORDING_RESUME_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_resume_failed)
+        VoiceRecordingError.RECORDING_STOP_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_stop_failed)
+        VoiceRecordingError.NO_RECORDING_FILE_TO_PLAY -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_no_recording_file_to_play)
+        VoiceRecordingError.RECORDING_FILE_NOT_FOUND -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_file_not_found)
+        VoiceRecordingError.PLAYBACK_START_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_start_failed)
+        VoiceRecordingError.PLAYBACK_ERROR -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_error)
+        VoiceRecordingError.PLAYBACK_STOP_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_stop_failed)
+        VoiceRecordingError.RESET_FAILED -> 
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_reset_failed)
+    }
 }

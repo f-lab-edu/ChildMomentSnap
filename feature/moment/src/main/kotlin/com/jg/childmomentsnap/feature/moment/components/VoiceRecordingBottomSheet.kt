@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +50,6 @@ import com.jg.childmomentsnap.feature.moment.RecordingControlsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VoiceRecordingBottomSheet(
-    showBottomSheet: Boolean,
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),
     onReset: () -> Unit,
@@ -57,10 +57,12 @@ internal fun VoiceRecordingBottomSheet(
     onRecordingPause: () -> Unit,
     onRecordingResume: () -> Unit,
     onRecordingStop: () -> Unit,
+    onPlaybackStart: () -> Unit,
     onPlaybackStop: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
@@ -79,6 +81,7 @@ internal fun VoiceRecordingBottomSheet(
                     state.isRecording -> stringResource(R.string.feature_moment_bottom_sheet_recoding)
                     state.isPlaying -> stringResource(R.string.feature_moment_bottom_sheet_playing)
                     state.isPaused -> stringResource(R.string.feature_moment_bottom_sheet_paused)
+                    state.isStopped -> stringResource(R.string.feature_moment_bottom_sheet_completed)
                     else -> stringResource(R.string.feature_moment_bottom_sheet_ready)
                 },
                 style = MaterialTheme.typography.titleMedium,
@@ -102,6 +105,7 @@ internal fun VoiceRecordingBottomSheet(
                 onRecordingPause = onRecordingPause,
                 onRecordingResume = onRecordingResume,
                 onRecordingStop = onRecordingStop,
+                onPlaybackStart = onPlaybackStart,
                 onPlaybackStop = onPlaybackStop
             )
         }
@@ -219,6 +223,7 @@ private fun RecordingControls(
     onRecordingPause: () -> Unit,
     onRecordingResume: () -> Unit,
     onRecordingStop: () -> Unit,
+    onPlaybackStart: () -> Unit,
     onPlaybackStop: () -> Unit
 ) {
     Row(
@@ -226,47 +231,47 @@ private fun RecordingControls(
         verticalAlignment = Alignment.CenterVertically
     ) {
         FloatingActionButton(
-            onClick = {
-                if (state.isRecording || state.isPlaying) {
-                    onReset()
-                }
-            },
+            onClick = { if (state.canResetRecording) onReset() },
             modifier = Modifier.size(54.dp),
             containerColor = MaterialTheme.colorScheme.secondary
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_replay),
                 contentDescription = "리셋",
-                tint = if (state.isRecording || state.isPlaying) Color.Gray else Color.Unspecified
+                tint = if (state.canResetRecording) Color.Unspecified else Color.Gray
             )
         }
 
-
-        //  재생 또는 일시정지
         FloatingActionButton(
             onClick = {
                 when {
+                    state.isPlaying -> onPlaybackStop()
+                    state.canPlayRecording -> onPlaybackStart()
                     state.canStartRecording -> onRecordingStart()
-
                     state.canPauseRecording -> onRecordingPause()
-
                     state.canResumeRecording -> onRecordingResume()
                 }
             },
             modifier = Modifier.size(54.dp),
             containerColor = MaterialTheme.colorScheme.secondary
         ) {
-            if (state.isRecording) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_pause),
-                    contentDescription = "일시정지"
-                )
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_play_arrow),
-                    contentDescription = "재생"
-                )
+            val iconPainter = when {
+                state.isPlaying -> R.drawable.ic_pause
+                state.canPlayRecording -> R.drawable.ic_play_arrow
+                state.isRecording -> R.drawable.ic_pause
+                else -> R.drawable.ic_record
             }
+            val contentDescription = when {
+                state.isPlaying -> "재생 일시정지"
+                state.canPlayRecording -> "재생"
+                state.isRecording -> "일시정지"
+                state.canResumeRecording -> "재개"
+                else -> "녹음"
+            }
+            Icon(
+                painter = painterResource(id = iconPainter),
+                contentDescription = contentDescription
+            )
         }
 
         FloatingActionButton(
@@ -292,21 +297,24 @@ private fun RecordingControls(
 @Preview
 private fun VoiceRecordingBottomSheetPreview() {
     VoiceRecordingBottomSheet(
-        showBottomSheet = true,
         state = RecordingControlsState(
             canStartRecording = true,
             canPauseRecording = true,
             canResumeRecording = false,
             canStopRecording = true,
+            canPlayRecording = false,
+            canResetRecording = true,
             isRecording = false,
             isPlaying = false,
-            isPaused = false
+            isPaused = false,
+            isStopped = false
         ),
         onReset = {},
         onRecordingStart = {},
         onRecordingPause = {},
         onRecordingResume = {},
         onRecordingStop = {},
+        onPlaybackStart = {},
         onPlaybackStop = {},
         onDismiss = {}
     )
