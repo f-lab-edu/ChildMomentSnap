@@ -2,6 +2,7 @@ package com.jg.childmomentsnap.feature.moment
 
 import android.net.Uri
 import androidx.camera.core.CameraSelector
+import androidx.compose.runtime.Stable
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 /**
@@ -20,6 +21,7 @@ data class CameraUiState(
     val selectedImageUri: Uri? = null,
     val showGalleryPicker: Boolean = false,
     val showCapturedImageDialog: Boolean = false,
+    val showVoiceRecordingDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val visionAnalysis: VisionAnalysis? = null,
 )
@@ -50,4 +52,75 @@ enum class CameraState {
     Capturing,
     /** 카메라에서 오류가 발생함 */
     Error
+}
+
+/**
+ * 녹음 상태를 나타냅니다
+ */
+enum class RecordingState {
+    /** 녹음 대기 상태 */
+    IDLE,
+    /** 녹음 중 */
+    RECODING,
+    /** 녹음 일시 정지 */
+    PAUSED,
+    /** 녹음 완료 */
+    STOPPED
+}
+
+/**
+ * 녹음 컨트롤의 상태를 나타냅니다
+ */
+@Stable
+data class RecordingControlsState(
+    val canStartRecording: Boolean,
+    val canPauseRecording: Boolean,
+    val canResumeRecording: Boolean,
+    val canStopRecording: Boolean,
+    val isRecording: Boolean,
+    val isPlaying: Boolean,
+    val isPaused: Boolean
+) {
+    companion object {
+        fun fromRecordingState(recordingState: RecordingState): RecordingControlsState {
+            return when (recordingState) {
+                RecordingState.IDLE -> RecordingControlsState(
+                    canStartRecording = true,
+                    canPauseRecording = false,
+                    canResumeRecording = false,
+                    canStopRecording = false,
+                    isRecording = false,
+                    isPlaying = false,
+                    isPaused = false
+                )
+                RecordingState.RECODING -> RecordingControlsState(
+                    canStartRecording = false,
+                    canPauseRecording = true,
+                    canResumeRecording = false,
+                    canStopRecording = true,
+                    isRecording = true,
+                    isPlaying = false,
+                    isPaused = false
+                )
+                RecordingState.PAUSED -> RecordingControlsState(
+                    canStartRecording = false,
+                    canPauseRecording = false,
+                    canResumeRecording = true,
+                    canStopRecording = true,
+                    isRecording = false,
+                    isPlaying = false,
+                    isPaused = true
+                )
+                RecordingState.STOPPED -> RecordingControlsState(
+                    canStartRecording = true,
+                    canPauseRecording = false,
+                    canResumeRecording = false,
+                    canStopRecording = false,
+                    isRecording = false,
+                    isPlaying = false,
+                    isPaused = false
+                )
+            }
+        }
+    }
 }

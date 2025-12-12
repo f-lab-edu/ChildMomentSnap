@@ -67,7 +67,7 @@ internal fun VoiceRecordingBottomSheet(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -222,6 +222,26 @@ private fun RecordingControls(
         horizontalArrangement = Arrangement.spacedBy(54.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        FloatingActionButton(
+            onClick = {
+                when {
+                    state.canStartRecording -> onRecordingStart()
+
+                    state.canPauseRecording -> onRecordingPause()
+
+                    state.canResumeRecording -> onRecordingResume()
+                }
+            },
+            modifier = Modifier.size(54.dp),
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_reset),
+                contentDescription = "리셋"
+            )
+        }
+
+
         //  재생 또는 일시정지
         FloatingActionButton(
             onClick = {

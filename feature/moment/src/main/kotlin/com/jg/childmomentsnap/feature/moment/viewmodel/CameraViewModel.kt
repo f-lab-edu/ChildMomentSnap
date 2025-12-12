@@ -38,7 +38,7 @@ class CameraViewModel @Inject constructor(
 
 
     /**
-     * 현재 카메라 권한 상태를 업데이트
+     * 카메라 권한 상태를 업데이트
      */
     fun updateCameraPermissionState(hasAllCameraPermissions: Boolean) {
         _uiState.update { currentState ->
@@ -263,6 +263,7 @@ class CameraViewModel @Inject constructor(
 
 
 
+
     /**
      * 카메라 상태를 대기 상태로 초기화
      */
@@ -276,6 +277,7 @@ class CameraViewModel @Inject constructor(
                 selectedImageUri = null,
                 showGalleryPicker = false,
                 showCapturedImageDialog = false,
+                showVoiceRecordingDialog = false,
                 isProcessingImage = false,
                 visionAnalysis = null
             )

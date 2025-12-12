@@ -90,10 +90,7 @@ fun CameraRoute(
                     //  상태 변경 시에만 UI 업데이트
                     if (lastPermissionState != hasAllCameraPermissions) {
                         lastPermissionState = hasAllCameraPermissions
-                        viewModel.updatePermissionState(
-                            hasAllCameraPermissions,
-                            hasAllVoicePermissions
-                        )
+                        viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
                     }
                 }
 
