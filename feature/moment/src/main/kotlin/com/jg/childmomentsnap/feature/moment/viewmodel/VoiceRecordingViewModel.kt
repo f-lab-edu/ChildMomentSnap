@@ -1,25 +1,24 @@
 package com.jg.childmomentsnap.feature.moment.viewmodel
 
-import android.media.MediaPlayer
-import android.media.MediaRecorder
 import androidx.lifecycle.ViewModel
-import java.io.File
-import java.util.Timer
-import java.util.TimerTask
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.data.repository.PhotoRepository
 import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.VoiceRecordingUiState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
+import com.jg.childmomentsnap.feature.moment.util.VoicePlayer
+import com.jg.childmomentsnap.feature.moment.util.VoiceRecorder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 private const val MAX_AMPLITUDE_HISTORY = 40
@@ -37,7 +36,9 @@ private val MAX_MEDIA_RECORDER_AMPLITUDE = Short.MAX_VALUE.toFloat()
  */
 @HiltViewModel
 class VoiceRecordingViewModel @Inject constructor(
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
+    private val voiceRecorder: VoiceRecorder,
+    private val voicePlayer: VoicePlayer
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VoiceRecordingUiState())
@@ -46,10 +47,40 @@ class VoiceRecordingViewModel @Inject constructor(
     private val _uiEffect = MutableSharedFlow<VoiceRecordingUiEffect>(extraBufferCapacity = 1)
     val uiEffect = _uiEffect.asSharedFlow()
 
-    private var recorder: MediaRecorder? = null
-    private var player: MediaPlayer? = null
-    private var recordingTimer: Timer? = null
-    private var playbackTimer: Timer? = null
+    init {
+        observeRecordingData()
+        observePlaybackPosition()
+    }
+
+    private fun observeRecordingData() {
+        viewModelScope.launch {
+            voiceRecorder.recordingData.collectLatest { data ->
+                if (_uiState.value.recordingState == RecordingState.RECODING) {
+                    _uiState.update { currentState ->
+                        val normalizedAmplitude = normalizeAmplitude(data.maxAmplitude)
+                        val updatedAmplitudes = appendAmplitude(
+                            currentState.amplitudes,
+                            normalizedAmplitude
+                        )
+                        currentState.copy(
+                            recordingDurationMs = data.durationMs,
+                            amplitudes = updatedAmplitudes
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observePlaybackPosition() {
+        viewModelScope.launch {
+            voicePlayer.playbackPosition.collectLatest { position ->
+                if (_uiState.value.isPlayingRecording) {
+                    _uiState.update { it.copy(playbackPositionMs = position) }
+                }
+            }
+        }
+    }
 
     fun setVoiceRecordingFilePath(filePath: String) {
         _uiState.update {
@@ -96,17 +127,7 @@ class VoiceRecordingViewModel @Inject constructor(
                     return@launch
                 }
 
-                // 기존 파일 삭제
-                File(filePath).apply { if (exists()) delete() }
-
-                recorder = MediaRecorder().apply {
-                    setAudioSource(MediaRecorder.AudioSource.MIC)
-                    setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                    setOutputFile(filePath)
-                    prepare()
-                    start()
-                }
+                voiceRecorder.startRecording(filePath, viewModelScope)
 
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -115,9 +136,6 @@ class VoiceRecordingViewModel @Inject constructor(
                         amplitudes = emptyList()
                     )
                 }
-
-                // 녹음 시간 타이머 시작
-                startRecordingTimer()
 
             } catch (e: Exception) {
                 _uiState.update { 
@@ -129,48 +147,12 @@ class VoiceRecordingViewModel @Inject constructor(
     }
 
     /**
-     * 녹음 시간 타이머 시작
-     */
-    private fun startRecordingTimer() {
-        recordingTimer?.cancel()
-        recordingTimer = Timer()
-        var duration = 0L
-        
-        recordingTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                if (_uiState.value.recordingState == RecordingState.RECODING) {
-                    duration += 100
-                    val amplitude = try {
-                        recorder?.maxAmplitude ?: 0
-                    } catch (e: Exception) {
-                        0
-                    }
-                    val currentDuration = duration
-                    viewModelScope.launch {
-                        _uiState.update { currentState ->
-                            val normalizedAmplitude = normalizeAmplitude(amplitude)
-                            val updatedAmplitudes = appendAmplitude(
-                                currentState.amplitudes,
-                                normalizedAmplitude
-                            )
-                            currentState.copy(
-                                recordingDurationMs = currentDuration,
-                                amplitudes = updatedAmplitudes
-                            )
-                        }
-                    }
-                }
-            }
-        }, 0, 100) // 100ms 간격으로 업데이트
-    }
-
-    /**
      * 녹음 일시정지
      */
     fun pauseRecording() {
         viewModelScope.launch {
             try {
-                recorder?.pause()
+                voiceRecorder.pauseRecording()
                 _uiState.update { currentState ->
                     currentState.copy(recordingState = RecordingState.PAUSED)
                 }
@@ -186,7 +168,7 @@ class VoiceRecordingViewModel @Inject constructor(
     fun resumeRecording() {
         viewModelScope.launch {
             try {
-                recorder?.resume()
+                voiceRecorder.resumeRecording(viewModelScope)
                 _uiState.update { currentState ->
                     currentState.copy(recordingState = RecordingState.RECODING)
                 }
@@ -202,14 +184,7 @@ class VoiceRecordingViewModel @Inject constructor(
     fun stopRecording() {
         viewModelScope.launch {
             try {
-                recorder?.apply {
-                    stop()
-                    release()
-                }
-                recorder = null
-                
-                recordingTimer?.cancel()
-                recordingTimer = null
+                voiceRecorder.stopRecording()
                 
                 _uiState.update { currentState ->
                     currentState.copy(recordingState = RecordingState.STOPPED)
@@ -235,39 +210,30 @@ class VoiceRecordingViewModel @Inject constructor(
                     return@launch
                 }
 
-                val file = File(filePath)
-                if (!file.exists()) {
-                    _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.RECORDING_FILE_NOT_FOUND))
-                    return@launch
-                }
-
-                player?.release()
-                player = MediaPlayer().apply {
-                    setDataSource(filePath)
-                    prepareAsync()
-                    setOnPreparedListener {
-                        start()
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isPlayingRecording = true,
-                                playbackPositionMs = 0L,
-                                recordingState = RecordingState.ON_PLAYING
-                            )
-                        }
-                        startPlaybackTimer()
-                    }
-                    setOnCompletionListener {
-                        stopPlayback()
-                    }
-                    setOnErrorListener { _, _, _ ->
+                voicePlayer.play(
+                    filePath = filePath,
+                    scope = viewModelScope,
+                    onCompletion = {
+                         viewModelScope.launch {
+                             stopPlayback()
+                         }
+                    },
+                    onError = {
                         viewModelScope.launch {
                             _uiState.update { 
                                 it.copy(isPlayingRecording = false) 
                             }
                             _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.PLAYBACK_ERROR))
                         }
-                        true
                     }
+                )
+
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isPlayingRecording = true,
+                        playbackPositionMs = 0L,
+                        recordingState = RecordingState.ON_PLAYING
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -279,40 +245,12 @@ class VoiceRecordingViewModel @Inject constructor(
     }
 
     /**
-     * 재생 시간 타이머 시작
-     */
-    private fun startPlaybackTimer() {
-        playbackTimer?.cancel()
-        playbackTimer = Timer()
-        
-        playbackTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                player?.let { mediaPlayer ->
-                    if (mediaPlayer.isPlaying) {
-                        val position = mediaPlayer.currentPosition.toLong()
-                        viewModelScope.launch {
-                            _uiState.update { it.copy(playbackPositionMs = position) }
-                        }
-                    }
-                }
-            }
-        }, 0, 100) // 100ms 간격으로 업데이트
-    }
-
-    /**
      * 녹음 파일 재생 정지
      */
     fun stopPlayback() {
         viewModelScope.launch {
             try {
-                player?.apply {
-                    if (isPlaying) stop()
-                    release()
-                }
-                player = null
-                
-                playbackTimer?.cancel()
-                playbackTimer = null
+                voicePlayer.stopPlayback()
                 
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -440,33 +378,8 @@ class VoiceRecordingViewModel @Inject constructor(
     fun resetRecording() {
         viewModelScope.launch {
             try {
-                // 진행 중인 녹음 정지
-                recorder?.apply {
-                    try {
-                        stop()
-                        release()
-                    } catch (e: Exception) {
-                        // 이미 정지된 경우 무시
-                    }
-                }
-                recorder = null
-                
-                // 재생 정지
-                player?.apply {
-                    try {
-                        if (isPlaying) stop()
-                        release()
-                    } catch (e: Exception) {
-                        // 이미 정지된 경우 무시
-                    }
-                }
-                player = null
-                
-                // 타이머 정리
-                recordingTimer?.cancel()
-                recordingTimer = null
-                playbackTimer?.cancel()
-                playbackTimer = null
+                voiceRecorder.stopRecording()
+                voicePlayer.stopPlayback()
                 
                 // 녹음 파일 삭제
                 _uiState.value.recordingFilePath?.let { filePath ->
@@ -508,30 +421,8 @@ class VoiceRecordingViewModel @Inject constructor(
         viewModelScope.launch {
             // 진행 중인 모든 작업 정리
             try {
-                recorder?.apply {
-                    try {
-                        stop()
-                        release()
-                    } catch (e: Exception) {
-                        // 이미 정지된 경우 무시
-                    }
-                }
-                recorder = null
-                
-                player?.apply {
-                    try {
-                        if (isPlaying) stop()
-                        release()
-                    } catch (e: Exception) {
-                        // 이미 정지된 경우 무시
-                    }
-                }
-                player = null
-                
-                recordingTimer?.cancel()
-                recordingTimer = null
-                playbackTimer?.cancel()
-                playbackTimer = null
+                voiceRecorder.stopRecording()
+                voicePlayer.stopPlayback()
                 
                 // 녹음 파일 삭제
                 _uiState.value.recordingFilePath?.let { filePath ->
@@ -560,27 +451,7 @@ class VoiceRecordingViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        
-        // 리소스 정리
-        recorder?.apply {
-            try {
-                stop()
-                release()
-            } catch (e: Exception) {
-                // 이미 정지된 경우 무시
-            }
-        }
-        
-        player?.apply {
-            try {
-                if (isPlaying) stop()
-                release()
-            } catch (e: Exception) {
-                // 이미 정지된 경우 무시
-            }
-        }
-        
-        recordingTimer?.cancel()
-        playbackTimer?.cancel()
+        voiceRecorder.stopRecording()
+        voicePlayer.stopPlayback()
     }
 }
