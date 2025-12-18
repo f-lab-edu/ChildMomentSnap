@@ -95,7 +95,17 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
             excludes.add("**/OSGI-INF/MANIFEST.MF")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/INDEX.LIST")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/license.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/notice.txt")
+            excludes.add("META-INF/ASL2.0")
             pickFirsts.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            pickFirsts.add("META-INF/flogger_logger_backend_configuration.properties")
         }
     }
     
@@ -110,6 +120,7 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.network)
     implementation(projects.core.ui)
+    implementation(projects.core.device)
     implementation(projects.core.common)
 
     implementation(projects.feature.home)

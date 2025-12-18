@@ -8,6 +8,12 @@ android {
     packaging {
         resources {
             excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            excludes.add("META-INF/INDEX.LIST")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
         }
     }
 }
@@ -21,6 +27,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.video)
     implementation(libs.coil.compose)
+    implementation(libs.google.cloud.speech)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

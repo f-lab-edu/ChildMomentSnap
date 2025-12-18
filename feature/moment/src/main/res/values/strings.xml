@@ -50,8 +50,9 @@
     <string name="feature_moment_bottom_sheet_recoding">녹음 중...</string>
     <string name="feature_moment_bottom_sheet_playing">재생 중..</string>
     <string name="feature_moment_bottom_sheet_paused">일시정지</string>
-    <string name="feature_moment_bottom_sheet_completed">녹음 완료</string>
+    <string name="feature_moment_bottom_sheet_record_completed">녹음 완료</string>
     <string name="feature_moment_bottom_sheet_ready">녹음 준비</string>
+    <string name="feature_moment_bottom_sheet_completed">완료</string>
 
     <!-- Voice Recording Errors -->
     <string name="feature_moment_error_recording_file_path_not_set">녹음 파일 경로가 설정되지 않았습니다.</string>

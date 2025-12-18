@@ -42,7 +42,7 @@ androidx-compose-ui-tooling = "1.9.4"
 androidxComposeMaterial3Adaptive = "1.2.0"
 androidxComposeRuntimeTracing = "1.9.4"
 androidxDataStore = "1.1.7"
-google-cloud-sppech = "4.73.0"
+google-cloud-speech = "4.73.0"
 google-cloud-vision = "3.76.0"
 google-auth-library-library-auth2-http = "3.19.0"
 media = "1.7.1"
@@ -148,7 +148,7 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "androidxCameraX"}
 
 # Google
-google-cloud-sppech = { group = "com.google.cloud", name = "google-cloud-speech", version.ref = "google-cloud-sppech"}
+google-cloud-speech = { group = "com.google.cloud", name = "google-cloud-speech", version.ref = "google-cloud-speech"}
 google-cloud-vision = { group = "com.google.cloud", name = "google-cloud-vision", version.ref = "google-cloud-vision"}
 google-auth-library-auth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "google-auth-library-library-auth2-http"}
 
