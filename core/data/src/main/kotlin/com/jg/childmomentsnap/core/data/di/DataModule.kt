@@ -1,6 +1,6 @@
 package com.jg.childmomentsnap.core.data.di
 
-import com.jg.childmomentsnap.core.data.repository.PhotoRepository
+import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
 import com.jg.childmomentsnap.core.data.repository.PhotoRepositoryImpl
 import dagger.Binds
 import dagger.Module
@@ -13,9 +13,12 @@ import javax.inject.Singleton
 abstract class DataModule {
 
     @Binds
-    @Singleton
-    abstract fun bindsPhotoRepository(
-        photoRepository: PhotoRepositoryImpl
+    abstract fun bindPhotoRepository(
+        photoRepositoryImpl: PhotoRepositoryImpl
     ): PhotoRepository
 
+    @Binds
+    abstract fun bindVoiceRepository(
+        voiceRepositoryImpl: com.jg.childmomentsnap.core.data.repository.VoiceRepositoryImpl
+    ): com.jg.childmomentsnap.core.domain.repository.VoiceRepository
 }
