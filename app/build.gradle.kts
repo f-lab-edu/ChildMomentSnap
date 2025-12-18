@@ -120,7 +120,7 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.network)
     implementation(projects.core.ui)
-    implementation(projects.core.device)
+    implementation(projects.core.commonAndroid)
     implementation(projects.core.common)
 
     implementation(projects.feature.home)
