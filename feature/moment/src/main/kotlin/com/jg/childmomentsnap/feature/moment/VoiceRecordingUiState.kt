@@ -16,7 +16,8 @@ data class VoiceRecordingUiState(
     val recordingFilePath: String? = null,
     val isPlayingRecording: Boolean = false,
     val playbackPositionMs: Long = 0L,
-    val amplitudes: List<Float> = emptyList()
+    val amplitudes: List<Float> = emptyList(),
+    val isProcessing: Boolean = false
 ) {
     /**
      * RecordingControlsState로 변환하는 편의 함수

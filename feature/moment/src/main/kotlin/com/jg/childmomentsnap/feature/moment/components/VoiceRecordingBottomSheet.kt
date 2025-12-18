@@ -12,11 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -25,25 +26,17 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.sin
-import kotlin.random.Random
 import com.jg.childmomentsnap.feature.moment.R
 import com.jg.childmomentsnap.feature.moment.RecordingControlsState
 
@@ -52,6 +45,7 @@ import com.jg.childmomentsnap.feature.moment.RecordingControlsState
 internal fun VoiceRecordingBottomSheet(
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),
+    isProcessing: Boolean = false,
     onReset: () -> Unit,
     onRecordingStart: () -> Unit,
     onRecordingPause: () -> Unit,
@@ -59,6 +53,7 @@ internal fun VoiceRecordingBottomSheet(
     onRecordingStop: () -> Unit,
     onPlaybackStart: () -> Unit,
     onPlaybackStop: () -> Unit,
+    onCompleted: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -81,7 +76,7 @@ internal fun VoiceRecordingBottomSheet(
                     state.isRecording -> stringResource(R.string.feature_moment_bottom_sheet_recoding)
                     state.isPlaying -> stringResource(R.string.feature_moment_bottom_sheet_playing)
                     state.isPaused -> stringResource(R.string.feature_moment_bottom_sheet_paused)
-                    state.isStopped -> stringResource(R.string.feature_moment_bottom_sheet_completed)
+                    state.isStopped -> stringResource(R.string.feature_moment_bottom_sheet_record_completed)
                     else -> stringResource(R.string.feature_moment_bottom_sheet_ready)
                 },
                 style = MaterialTheme.typography.titleMedium,
@@ -108,6 +103,33 @@ internal fun VoiceRecordingBottomSheet(
                 onPlaybackStart = onPlaybackStart,
                 onPlaybackStop = onPlaybackStop
             )
+
+            if (state.isStopped || state.isPlaying) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = {
+                        if (!isProcessing) {
+                            onCompleted()
+                        }
+                    },
+                    enabled = !isProcessing,
+                    shape = RoundedCornerShape(12.dp),
+                    content = {
+                        if (isProcessing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.feature_moment_bottom_sheet_completed),
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -118,12 +140,8 @@ private fun VoiceAmplitudeVisualizer(
     isRecording: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // 데모용 진폭 데이터 (실제 로직이 없으므로)
-    val demoAmplitudes = remember { 
-        List(30) { Random.nextFloat() * 0.8f + 0.1f }
-    }
     
-    val displayAmplitudes = if (amplitudes.isNotEmpty()) amplitudes else demoAmplitudes
+    val displayAmplitudes = amplitudes
     
     Box(
         modifier = modifier
@@ -315,7 +333,10 @@ private fun VoiceRecordingBottomSheetPreview() {
         onRecordingResume = {},
         onRecordingStop = {},
         onPlaybackStart = {},
-        onPlaybackStop = {},
-        onDismiss = {}
+        onCompleted = {},
+        onDismiss = {},
+        amplitudes = TODO(),
+        isProcessing = TODO(),
+        onPlaybackStop = TODO()
     )
 }

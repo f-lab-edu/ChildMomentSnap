@@ -1,5 +1,7 @@
 package com.jg.childmomentsnap.feature.moment.util
 
+import com.jg.childmomentsnap.core.common.config.VoiceConfig
+
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
@@ -46,8 +48,9 @@ class VoiceRecorder @Inject constructor(
         try {
             mediaRecorder = createMediaRecorder(context).apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setOutputFormat(MediaRecorder.OutputFormat.AMR_WB)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB)
+                setAudioSamplingRate(VoiceConfig.SAMPLE_RATE_HZ)
                 setOutputFile(filePath)
                 prepare()
                 start()

@@ -143,11 +143,18 @@ internal fun CameraRoute(
                         val message = getVoiceRecordingErrorMessage(context, effect.errorType)
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
+                    is VoiceRecordingUiEffect.MomentAnalysisCompleted -> {
+                        // AI 분석 완료 처리
+                        // TODO: 결과 데이터를 가지고 다음 화면(글쓰기/확인)으로 이동
+                        // 우선은 이전 로직 유지하여 종료 처리
+                         imageBytes?.let { bytes ->
+                             viewModel.onVoiceRecordingCompleted(bytes, effect.momentData.transcription)
+                             onNavigateUp()
+                         }
+                    }
                     is VoiceRecordingUiEffect.NotifyRecordingCompleted -> {
-                        imageBytes?.let { bytes ->
-                            viewModel.onVoiceRecordingCompleted(bytes, effect.voiceFilePath)
-                            onNavigateUp()
-                        }
+                        // 이전 호환성을 위해 유지 (필요 없는 경우 제거 가능)
+                        onNavigateUp()
                     }
                 }
             }
@@ -221,6 +228,8 @@ internal fun CameraRoute(
             onRecordingStop = voiceViewModel::stopRecording,
             onPlaybackStart = voiceViewModel::playRecording,
             onPlaybackStop = voiceViewModel::stopPlayback,
+            onCompleted = voiceViewModel::finishRecording,
+            isProcessing = voiceUiState.isProcessing,
             onDismiss = voiceViewModel::onBottomSheetDismissed
         )
     }

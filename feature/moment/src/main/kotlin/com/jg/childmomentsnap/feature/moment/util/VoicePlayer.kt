@@ -77,17 +77,17 @@ class VoicePlayer @Inject constructor() {
 
     private fun startTimer(scope: CoroutineScope) {
         playbackJob?.cancel()
-        playbackJob = scope.launch(Dispatchers.IO) {
+        playbackJob = scope.launch(Dispatchers.Main) {
             while (isActive) {
                 delay(100)
-                mediaPlayer?.let { mp ->
-                    if (mp.isPlaying) {
-                        try {
+                try {
+                    mediaPlayer?.let { mp ->
+                        if (mp.isPlaying) {
                             _playbackPosition.value = mp.currentPosition.toLong()
-                        } catch (e: Exception) {
-                            // Ignore
                         }
                     }
+                } catch (e: Exception) {
+                    // Ignore if illegal state or other errors during polling
                 }
             }
         }

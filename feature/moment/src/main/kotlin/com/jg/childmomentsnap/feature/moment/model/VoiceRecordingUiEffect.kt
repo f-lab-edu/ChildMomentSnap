@@ -1,5 +1,7 @@
 package com.jg.childmomentsnap.feature.moment.model
 
+import com.jg.childmomentsnap.core.model.MomentData
+
 /**
  * 음성 녹음 관련 UI 이벤트
  * ViewModel에서 Screen으로 일회성 이벤트를 전달하기 위한 sealed class
@@ -16,4 +18,6 @@ sealed interface VoiceRecordingUiEffect {
      * @param voiceFilePath 녹음된 파일 경로 (null이면 녹음 실패)
      */
     data class NotifyRecordingCompleted(val voiceFilePath: String?) : VoiceRecordingUiEffect
+
+    data class MomentAnalysisCompleted(val momentData: MomentData) : VoiceRecordingUiEffect
 }

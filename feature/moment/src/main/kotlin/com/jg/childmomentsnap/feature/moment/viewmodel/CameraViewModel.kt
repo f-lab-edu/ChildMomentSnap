@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jg.childmomentsnap.core.data.repository.PhotoRepository
+import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
 import com.jg.childmomentsnap.feature.moment.CameraState
 import com.jg.childmomentsnap.feature.moment.CameraUiState
 import com.jg.childmomentsnap.feature.moment.PermissionState
