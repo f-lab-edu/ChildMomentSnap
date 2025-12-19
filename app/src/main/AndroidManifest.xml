@@ -8,6 +8,9 @@
 
     <!-- 알림 권한 (Android 13+) - 포그라운드 서비스 알림용 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- 인터넷 권한 - Vision API 호출용 -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".CmsApplication"

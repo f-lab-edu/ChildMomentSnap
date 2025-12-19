@@ -47,19 +47,18 @@ internal object NetworkModule {
 
         val authInterceptor = Interceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
-                .addHeader(NetworkHeaderKey.X_ANDROID_PACKAGE, appInfoProvider.getPackageName())
+            requestBuilder.addHeader(NetworkHeaderKey.X_ANDROID_PACKAGE, appInfoProvider.getPackageName())
 
             val certFingerprint = appInfoProvider.getCertificateFingerprint()
             if (certFingerprint != null) {
                 requestBuilder.addHeader(NetworkHeaderKey.X_ANDROID_CERT, certFingerprint)
             }
-
             chain.proceed(requestBuilder.build())
         }
 
         return OkHttpClient.Builder()
-            .addInterceptor(logger)
             .addInterceptor(authInterceptor)
+            .addInterceptor(logger)
             .build()
     }
 
