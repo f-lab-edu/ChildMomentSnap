@@ -20,6 +20,9 @@ local.properties
 **/build-history.bin
 # Build logic
 /build-logic/convention/build/
+/build-logic/convention/bin/
+/build-logic/**/build/
+/build-logic/**/bin/
 \n# Google Cloud credentials\n/app/src/main/res/raw/google_credentials.json
 
 # Keystore files

@@ -59,10 +59,9 @@ ChildMomentSnap/
 └── feature/                       # 기능별 모듈
     ├── calendar/                  # 📅 달력 및 일기 목록 뷰
     ├── diary/                     # ✏️ 일기 작성/편집/삭제
-    ├── dairy-detail/              # 📖 일기 상세 보기 (CRUD)
-    ├── home/                      # 🏠 홈 화면
-    ├── photo/                     # 📸 사진 촬영/갤러리
-    └── voice/                     # 🎤 음성 녹음/변환
+    ├── my/                        # 📖 나의 정보 관리
+    ├── home/                      # 🏠 홈 화면 (Bottom Navigation 관리)
+    └── moment/                    # 📸🎤 사진 촬영/갤러리, 음성 녹음/변환
 ```
 
 ### 모듈별 역할

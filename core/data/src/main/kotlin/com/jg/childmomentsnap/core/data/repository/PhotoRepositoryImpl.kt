@@ -2,6 +2,7 @@ package com.jg.childmomentsnap.core.data.repository
 
 import com.jg.childmomentsnap.core.common.util.ImageEncoder
 import com.jg.childmomentsnap.core.data.mapper.toDomain
+import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.network.datasource.GoogleVisionRemoteDataSource
 import com.jg.childmomentsnap.core.network.model.vision.VisionAnnotateImageRequestDto

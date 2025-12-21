@@ -33,10 +33,12 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
-            storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
-            keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
-            keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties["CMS_STORE_FILE"] as String)
+                storePassword = keystoreProperties["CMS_STORE_PASSWORD"] as String
+                keyAlias = keystoreProperties["CMS_KEY_ALIAS"] as String
+                keyPassword = keystoreProperties["CMS_KEY_PASSWORD"] as String
+            }
         }
     }
 
@@ -57,7 +59,8 @@ android {
                 "GOOGLE_APPLICATION_CREDENTIALS",
                 "\"google_credentials\""
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Debug 빌드에서는 기본 debug keystore 사용
+            // signingConfig = signingConfigs.getByName("release")
         }
 
         release {
@@ -66,7 +69,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Release 빌드에서만 keystore가 있을 때 release signing 사용
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             buildConfigField(
                 "String",
                 "GOOGLE_CLOUD_API_KEY",
@@ -88,6 +94,18 @@ android {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            excludes.add("**/OSGI-INF/MANIFEST.MF")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/INDEX.LIST")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/license.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/notice.txt")
+            excludes.add("META-INF/ASL2.0")
+            pickFirsts.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            pickFirsts.add("META-INF/flogger_logger_backend_configuration.properties")
         }
     }
     
@@ -102,14 +120,13 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.network)
     implementation(projects.core.ui)
+    implementation(projects.core.commonAndroid)
     implementation(projects.core.common)
 
     implementation(projects.feature.home)
     implementation(projects.feature.calendar)
     implementation(projects.feature.diary)
-    implementation(projects.feature.dairyDetail)
-    implementation(projects.feature.photo)
-    implementation(projects.feature.voice)
+    implementation(projects.feature.moment)
 
 
     implementation(libs.androidx.activity.compose)

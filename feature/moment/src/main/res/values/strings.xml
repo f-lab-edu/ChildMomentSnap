@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Camera Controls -->
+    <string name="feature_moment_camera_title">사진 촬영</string>
+    <string name="feature_moment_camera_taking_photo">촬영 중...</string>
+    <string name="feature_moment_back_button">뒤로 가기</string>
+    <string name="feature_moment_gallery">갤러리</string>
+    <string name="feature_moment_capture_photo">촬영</string>
+    <string name="feature_moment_switch_camera">카메라 전환</string>
+    
+    <!-- Image Preview -->
+    <string name="feature_moment_image_preview_title">이미지 미리보기</string>
+    <string name="feature_moment_image_processing">이미지 처리 중...</string>
+    <string name="feature_moment_cancel">취소</string>
+    <string name="feature_moment_use_image">사용하기</string>
+    <string name="feature_moment_use_image_question">이 이미지로 일기를 작성하시겠어요?</string>
+    
+    <!-- Captured Image Preview -->
+    <string name="feature_moment_captured_photo_title">촬영된 사진</string>
+    <string name="feature_moment_ai_analyzing_photo">AI가 사진을 분석하고 있습니다...</string>
+    <string name="feature_moment_use_this_photo">이 사진을 사용하시겠습니까?</string>
+    <string name="feature_moment_ai_analysis_description">AI가 사진을 분석하여 감정과 상황을 파악한 후\n일기 작성을 도와드릴게요.</string>
+    <string name="feature_moment_retake_photo">다시 촬영</string>
+    
+    <!-- Camera Permissions -->
+    <string name="feature_moment_checking_camera_permission">카메라 권한 확인 중...</string>
+    <string name="feature_moment_camera_permission_required">카메라 권한 필요</string>
+    <string name="feature_moment_camera_permission_description">사진을 촬영하고 갤러리에 접근하기 위해\n다음 권한이 필요합니다:\n\n• 카메라\n• 저장소 접근</string>
+    <string name="feature_moment_grant_permission">권한 허용하기</string>
+    <string name="feature_moment_permission_permanently_denied">권한이 영구적으로 거부됨</string>
+    <string name="feature_moment_permission_settings_description">카메라 기능을 사용하려면\n설정에서 직접 권한을 허용해주세요.</string>
+    <string name="feature_moment_go_to_settings">설정으로 이동</string>
+    
+    <!-- Selected Image Preview -->
+    <string name="feature_moment_selected_image">선택된 이미지</string>
+    
+    <!-- Captured Image Preview -->
+    <string name="feature_moment_captured_photo_description">촬영된 사진</string>
+    
+    <!-- Voice Recording Dialog -->
+    <string name="feature_moment_voice_recording_title">풍성한 일기 작성</string>
+    <string name="feature_moment_voice_recording_description">음성 녹음을 통해 더욱 풍성한 일기를 작성하시겠어요?\nAI가 음성을 분석하여 감정과 추억을 더 자세히 기록해드립니다.</string>
+    <string name="feature_moment_start_recording">녹음 시작</string>
+    <string name="feature_moment_skip_recording">건너뛰기</string>
+    <string name="feature_moment_grant_voice_permission">음성 권한 허용</string>
+    <string name="feature_moment_voice_permission_permanently_denied">음성 권한이 영구적으로 거부되어 설정에서 직접 허용해주세요.</string>
+    <string name="feature_moment_checking_voice_permission">음성 권한 확인 중...</string>
+
+    <!-- Voice BottomSheet -->
+    <string name="feature_moment_bottom_sheet_recoding">녹음 중...</string>
+    <string name="feature_moment_bottom_sheet_playing">재생 중..</string>
+    <string name="feature_moment_bottom_sheet_paused">일시정지</string>
+    <string name="feature_moment_bottom_sheet_record_completed">녹음 완료</string>
+    <string name="feature_moment_bottom_sheet_ready">녹음 준비</string>
+    <string name="feature_moment_bottom_sheet_completed">완료</string>
+
+    <!-- Voice Recording Errors -->
+    <string name="feature_moment_error_recording_file_path_not_set">녹음 파일 경로가 설정되지 않았습니다.</string>
+    <string name="feature_moment_error_recording_start_failed">녹음 시작 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_pause_failed">녹음 일시정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_resume_failed">녹음 재개 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_recording_stop_failed">녹음 정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_no_recording_file_to_play">재생할 녹음 파일이 없습니다.</string>
+    <string name="feature_moment_error_recording_file_not_found">녹음 파일을 찾을 수 없습니다.</string>
+    <string name="feature_moment_error_playback_start_failed">재생 시작 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_playback_error">재생 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_playback_stop_failed">재생 정지 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_reset_failed">리셋 중 오류가 발생했습니다.</string>
+
+</resources>

@@ -8,6 +8,11 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.moment)
+    implementation(projects.feature.calendar)
+    implementation(projects.feature.my)
+    implementation(projects.feature.diary)
+
     implementation(projects.core.model)
     implementation(projects.core.common)
 

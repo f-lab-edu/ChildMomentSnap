@@ -16,6 +16,11 @@ android {
             "GOOGLE_VISION_BASE_URL",
             "\"https://vision.googleapis.com/\""
         )
+        buildConfigField(
+            "String",
+            "GOOGLE_SPEECH_BASE_URL",
+            "\"https://speech.googleapis.com/\""
+        )
     }
 }
 

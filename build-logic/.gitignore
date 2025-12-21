@@ -1,3 +1,4 @@
 /build
+/bin/
 /.kotlin/
 /convention/build
