@@ -63,6 +63,8 @@ ChildMomentSnap/
     ├── home/                      # 🏠 홈 화면 (Bottom Navigation 관리)
     └── moment/                    # 📸🎤 사진 촬영/갤러리, 음성 녹음/변환
 ```
+### Navigation Flow
+![Navigation Architecture](navigation_architecture.png)
 
 ### 모듈별 역할
 
