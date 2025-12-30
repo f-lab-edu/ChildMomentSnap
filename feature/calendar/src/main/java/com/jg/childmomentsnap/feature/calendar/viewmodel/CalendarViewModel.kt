@@ -42,6 +42,13 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(selectedDate = date) }
     }
 
+    fun updateYearMonth(yearMonth: YearMonth) {
+        _uiState.update { currentState ->
+            updateCalendarDays(yearMonth)
+            currentState.copy(yearMonth = yearMonth)
+        }
+    }
+
     private fun updateCalendarDays(yearMonth: YearMonth) {
         val calendarDays = generateCalendarDays(yearMonth)
         _uiState.update { it.copy(calendarDays = calendarDays) }

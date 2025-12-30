@@ -26,5 +26,6 @@ data class CalendarUiState(
 data class CalendarDay(
     val date: LocalDate,
     val isCurrentMonth: Boolean,
-    val isToday: Boolean
+    val isToday: Boolean,
+    val content: String? = null
 )
