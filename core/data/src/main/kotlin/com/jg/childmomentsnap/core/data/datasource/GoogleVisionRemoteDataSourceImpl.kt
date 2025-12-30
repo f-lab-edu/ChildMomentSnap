@@ -1,7 +1,6 @@
-package com.jg.childmomentsnap.core.network.datasource
+package com.jg.childmomentsnap.core.data.datasource
 
 import com.jg.childmomentsnap.core.common.provider.ApiKeyProvider
-import com.jg.childmomentsnap.core.network.datasource.GoogleVisionRemoteDataSource
 import com.jg.childmomentsnap.core.network.api.GoogleVisionApiService
 import com.jg.childmomentsnap.core.network.model.vision.VisionRequestDto
 import com.jg.childmomentsnap.core.network.model.vision.VisionResponseDto

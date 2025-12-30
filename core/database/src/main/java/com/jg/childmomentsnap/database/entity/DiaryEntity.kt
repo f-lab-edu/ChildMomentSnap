@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "diary_table")
 data class DiaryEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: String,
+    val id: Long = 0,
     @ColumnInfo(name = "date")
     val date: String,
     @ColumnInfo(name = "time")

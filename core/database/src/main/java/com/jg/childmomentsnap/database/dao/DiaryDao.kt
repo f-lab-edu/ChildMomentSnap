@@ -19,7 +19,7 @@ interface DiaryDao {
     @Delete
     suspend fun deleteDiary(diary: DiaryEntity)
 
-    @Update
+    @Query("UPDATE diary_table SET is_favorite = :isFavorite WHERE id = :id")
     suspend fun updateFavoriteStatus(id: Long, isFavorite: Boolean)
 
     @Query("SELECT * FROM diary_table WHERE date LIKE :yearMonth || '%'")
