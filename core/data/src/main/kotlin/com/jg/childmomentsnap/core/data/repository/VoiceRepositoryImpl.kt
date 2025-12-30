@@ -1,7 +1,7 @@
 package com.jg.childmomentsnap.core.data.repository
 
 import com.jg.childmomentsnap.core.domain.repository.VoiceRepository
-import com.jg.childmomentsnap.core.network.datasource.GoogleSpeechRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.GoogleSpeechRemoteDataSource
 import com.jg.childmomentsnap.core.network.model.speech.SpeechAudioDto
 import com.jg.childmomentsnap.core.network.model.speech.SpeechConfigDto
 import com.jg.childmomentsnap.core.network.model.speech.SpeechRequestDto
