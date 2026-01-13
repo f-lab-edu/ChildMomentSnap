@@ -16,6 +16,12 @@ data object DiaryGraph
 @Serializable
 data object DiaryScreenRoute
 
+@Serializable
+data class DiaryDetailRoute(val id: Long)
+
+@Serializable
+data class DiaryWriteRoute(val date: String)
+
 const val DIARY_GRAPH = "diary_graph"
 
 private const val DIARY_ROUTE = "diary_route"
