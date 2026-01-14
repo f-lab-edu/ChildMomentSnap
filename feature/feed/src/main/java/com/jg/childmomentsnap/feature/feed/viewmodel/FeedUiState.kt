@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.calendar.viewmodel
+package com.jg.childmomentsnap.feature.feed.viewmodel
 
 import com.jg.childmomentsnap.core.model.Diary
 import java.time.LocalDate
@@ -11,7 +11,7 @@ import java.time.YearMonth
  * @property calendarDays 달력 그리드에 표시될 날짜 목록
  * @property selectedDate 사용자가 선택한 날짜
  */
-data class CalendarUiState(
+data class FeedUiState(
     val selectedDate: LocalDate? = null,
     val currentMonth: YearMonth = YearMonth.now(),
     val diaries: Map<LocalDate, List<Diary>> = emptyMap(),
@@ -26,15 +26,15 @@ data class CalendarUiState(
  * @property isCurrentMonth 현재 표시 중인 월에 속하는지 여부 (이전/다음 달 날짜 구분용)
  * @property isToday 오늘 날짜인지 여부
  */
-data class CalendarDay(
+data class FeedDay(
     val date: LocalDate,
     val isCurrentMonth: Boolean,
     val isToday: Boolean,
     val content: String? = null
 )
-sealed interface CalendarSideEffect {
-    data class ShowWriteSelectionDialog(val date: LocalDate) : CalendarSideEffect
-    data class NavigateToDetail(val diaryId: Long) : CalendarSideEffect
-    data object NavigateToCamera : CalendarSideEffect
-    data class NavigateToWrite(val date: LocalDate) : CalendarSideEffect
+sealed interface FeedSideEffect {
+    data class ShowWriteSelectionDialog(val date: LocalDate) : FeedSideEffect
+    data class NavigateToDetail(val diaryId: Long) : FeedSideEffect
+    data object NavigateToCamera : FeedSideEffect
+    data class NavigateToWrite(val date: LocalDate) : FeedSideEffect
 }

@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.calendar.viewmodel
+package com.jg.childmomentsnap.feature.feed.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,14 +17,14 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
-class CalendarViewModel @Inject constructor(
+class FeedViewModel @Inject constructor(
     private val diaryRepository: DiaryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CalendarUiState())
-    val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(FeedUiState())
+    val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
-    private val _sideEffect = Channel<CalendarSideEffect>()
+    private val _sideEffect = Channel<FeedSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
     init {
@@ -53,7 +53,7 @@ class CalendarViewModel @Inject constructor(
                         isBottomSheetVisible = false,
                         bottomSheetDiaries = emptyList()
                     ) }
-                    _sideEffect.send(CalendarSideEffect.ShowWriteSelectionDialog(date))
+                    _sideEffect.send(FeedSideEffect.ShowWriteSelectionDialog(date))
                 }
                 1 -> {
                     _uiState.update { it.copy(
@@ -61,7 +61,7 @@ class CalendarViewModel @Inject constructor(
                         isBottomSheetVisible = false,
                         bottomSheetDiaries = emptyList()
                     ) }
-                    _sideEffect.send(CalendarSideEffect.NavigateToDetail(diaries.first().id))
+                    _sideEffect.send(FeedSideEffect.NavigateToDetail(diaries.first().id))
                 }
                 else -> { // N >= 2
                     _uiState.update { it.copy(
@@ -85,9 +85,9 @@ class CalendarViewModel @Inject constructor(
     fun onWriteTypeSelected(isPhoto: Boolean, date: LocalDate) {
         viewModelScope.launch {
             if (isPhoto) {
-                _sideEffect.send(CalendarSideEffect.NavigateToCamera)
+                _sideEffect.send(FeedSideEffect.NavigateToCamera)
             } else {
-                _sideEffect.send(CalendarSideEffect.NavigateToWrite(date))
+                _sideEffect.send(FeedSideEffect.NavigateToWrite(date))
             }
         }
     }

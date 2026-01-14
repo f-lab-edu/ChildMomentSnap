@@ -124,7 +124,7 @@ dependencies {
     implementation(projects.core.common)
 
     implementation(projects.feature.home)
-    implementation(projects.feature.calendar)
+    implementation(projects.feature.feed)
     implementation(projects.feature.diary)
     implementation(projects.feature.moment)
 

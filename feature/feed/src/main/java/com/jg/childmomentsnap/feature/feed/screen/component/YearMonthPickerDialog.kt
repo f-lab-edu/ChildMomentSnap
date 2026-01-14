@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.calendar.screen.component
+package com.jg.childmomentsnap.feature.feed.screen.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.jg.childmomentsnap.feature.calendar.R
+import com.jg.childmomentsnap.feature.feed.R
 import java.time.YearMonth
 
 private enum class PickerMode {

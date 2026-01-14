@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.calendar.navigation
+package com.jg.childmomentsnap.feature.feed.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -7,38 +7,38 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.jg.childmomentsnap.core.ui.component.home.HomeRoute
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
-import com.jg.childmomentsnap.feature.calendar.screen.CalendarRoute
+import com.jg.childmomentsnap.feature.feed.screen.FeedRoute
 import kotlinx.serialization.Serializable
 
 
 @Serializable
-data object CalendarGraph
+data object FeedGraph
 
 @Serializable
-data object CalendarScreenRoute
+data object FeedScreenRoute
 
 
-const val CALENDAR_GRAPH = "calendar_graph"
+const val FEED_GRAPH = "feed_graph"
 
-private const val CALENDAR_ROUTE = "calendar_route"
+private const val FEED_ROUTE = "feed_route"
 
-fun NavHostController.navigateToCalendarGraph(navOptions: NavOptions? = null) {
-    this.navigate(CalendarGraph, navOptions)
+fun NavHostController.navigateToFeedGraph(navOptions: NavOptions? = null) {
+    this.navigate(FeedGraph, navOptions)
 }
 
-fun NavHostController.navigateToCalendarGraphXML(navOptions: NavOptions? = null) {
-    this.navigate(CALENDAR_GRAPH, navOptions)
+fun NavHostController.navigateToFeedGraphXML(navOptions: NavOptions? = null) {
+    this.navigate(FEED_GRAPH, navOptions)
 }
 
-fun NavGraphBuilder.calendarGraph(
+fun NavGraphBuilder.feedGraph(
     appState: CmsAppState,
     useCompose: Boolean = true
 ) {
     val navController = appState.navController
 
     if (useCompose) {
-        composable<HomeRoute.Calendar> {
-            CalendarRoute(
+        composable<HomeRoute.Feed> { // TODO: Update to HomeRoute.Feed if changed in HomeRoute
+            FeedRoute(
                 onNavigateToDetail = { diaryId ->
                   //  navController.navigate(DiaryDetailRoute(diaryId))
                 },
@@ -51,11 +51,11 @@ fun NavGraphBuilder.calendarGraph(
     } else {
         //   XML Navigation
         navigation(
-            route = CALENDAR_GRAPH,
-            startDestination = CALENDAR_ROUTE
+            route = FEED_GRAPH,
+            startDestination = FEED_ROUTE
         ) {
-            composable(route = CALENDAR_ROUTE) {
-                CalendarRoute(
+            composable(route = FEED_ROUTE) {
+                FeedRoute(
                     onNavigateToDetail = { diaryId ->
                         // TODO
                     },

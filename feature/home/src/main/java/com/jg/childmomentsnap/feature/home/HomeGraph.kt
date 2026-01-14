@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.navigation
 import com.jg.childmomentsnap.core.ui.component.home.HomeRoute
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
-import com.jg.childmomentsnap.feature.calendar.navigation.calendarGraph
+import com.jg.childmomentsnap.feature.feed.navigation.feedGraph
 import com.jg.childmomentsnap.feature.diary.navigation.diaryGraph
 import com.jg.childmomentsnap.feature.moment.navigation.momentGraph
 import com.jg.childmomentsnap.feature.my.navigation.myGraph
@@ -21,10 +21,10 @@ fun NavGraphBuilder.homeGraph(
     cmsAppState: CmsAppState,
 ) {
     navigation<HomeGraphRoute>(
-        startDestination = HomeRoute.Calendar
+        startDestination = HomeRoute.Feed
     ) {
-        // Calendar Tab
-        calendarGraph(
+        // Feed Tab
+        feedGraph(
             appState = cmsAppState,
             useCompose = true
         )

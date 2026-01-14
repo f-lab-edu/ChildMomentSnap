@@ -1,13 +1,10 @@
-package com.jg.childmomentsnap.feature.calendar.screen
+package com.jg.childmomentsnap.feature.feed.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,22 +18,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,39 +37,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.jg.childmomentsnap.feature.calendar.R
-import com.jg.childmomentsnap.feature.calendar.screen.component.YearMonthPickerDialog
-import com.jg.childmomentsnap.feature.calendar.viewmodel.CalendarDay
-import com.jg.childmomentsnap.feature.calendar.viewmodel.CalendarUiState
-import com.jg.childmomentsnap.feature.calendar.viewmodel.CalendarViewModel
-import java.time.LocalDate
-import java.time.YearMonth
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jg.childmomentsnap.feature.calendar.viewmodel.CalendarSideEffect
+import com.jg.childmomentsnap.feature.feed.viewmodel.FeedSideEffect
+import com.jg.childmomentsnap.feature.feed.viewmodel.FeedUiState
+import com.jg.childmomentsnap.feature.feed.viewmodel.FeedViewModel
+import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 @Composable
-internal fun CalendarRoute(
-    viewModel: CalendarViewModel = hiltViewModel(),
+internal fun FeedRoute(
+    viewModel: FeedViewModel = hiltViewModel(),
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToWrite: (LocalDate) -> Unit,
     onNavigateToCamera: () -> Unit
@@ -95,10 +64,10 @@ internal fun CalendarRoute(
     LaunchedEffect(viewModel.sideEffect) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
-                is CalendarSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
-                is CalendarSideEffect.NavigateToCamera -> onNavigateToCamera()
-                is CalendarSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
-                is CalendarSideEffect.ShowWriteSelectionDialog -> showDialog = effect.date
+                is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
+                is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
+                is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
+                is FeedSideEffect.ShowWriteSelectionDialog -> showDialog = effect.date
             }
         }
     }
@@ -115,7 +84,7 @@ internal fun CalendarRoute(
         )
     }
 
-    CalendarScreen(
+    FeedScreen(
         uiState = uiState,
         onDateClick = viewModel::onDateClick,
         onMonthChange = viewModel::loadDiariesForMonth,
@@ -129,8 +98,8 @@ internal fun CalendarRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CalendarScreen(
-    uiState: CalendarUiState,
+private fun FeedScreen(
+    uiState: FeedUiState,
     onDateClick: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit,
     onDismissBottomSheet: () -> Unit,
@@ -138,7 +107,7 @@ private fun CalendarScreen(
 ) {
     Scaffold(
         topBar = {
-            CalendarTopBar(
+            FeedTopBar(
                 currentMonth = uiState.currentMonth,
                 onMonthChange = onMonthChange
             )
@@ -149,7 +118,7 @@ private fun CalendarScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            CalendarGrid(
+            FeedGrid(
                 currentMonth = uiState.currentMonth,
                 diaries = uiState.diaries,
                 onDateClick = onDateClick
@@ -171,7 +140,7 @@ private fun CalendarScreen(
 }
 
 @Composable
-private fun CalendarTopBar(
+private fun FeedTopBar(
     currentMonth: YearMonth,
     onMonthChange: (YearMonth) -> Unit
 ) {
@@ -183,7 +152,10 @@ private fun CalendarTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
-            Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Previous Month")
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowLeft,
+                contentDescription = "Previous Month"
+            )
         }
         Text(
             text = currentMonth.format(DateTimeFormatter.ofPattern("yyyy년 MM월")),
@@ -196,7 +168,7 @@ private fun CalendarTopBar(
 }
 
 @Composable
-private fun CalendarGrid(
+private fun FeedGrid(
     currentMonth: YearMonth,
     diaries: Map<LocalDate, List<com.jg.childmomentsnap.core.model.Diary>>,
     onDateClick: (LocalDate) -> Unit
@@ -211,13 +183,13 @@ private fun CalendarGrid(
     ) {
         // Day headers
         val days = listOf(
-            com.jg.childmomentsnap.feature.calendar.R.string.day_sunday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_monday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_tuesday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_wednesday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_thursday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_friday,
-            com.jg.childmomentsnap.feature.calendar.R.string.day_saturday
+            com.jg.childmomentsnap.feature.feed.R.string.day_sunday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_monday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_tuesday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_wednesday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_thursday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_friday,
+            com.jg.childmomentsnap.feature.feed.R.string.day_saturday
         )
         items(days) { dayResId ->
             Text(

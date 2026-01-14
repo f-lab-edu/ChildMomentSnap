@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class HomeRoute {
     @Serializable
-    data object Calendar : HomeRoute()
+    data object Feed : HomeRoute()
     
     @Serializable
     data object Moment : HomeRoute()
@@ -28,10 +28,10 @@ enum class HomeTabType(
     @DrawableRes val unselectedIconId: Int,
     @StringRes val iconTextId: Int
 ) {
-    CALENDAR(
-        typeSafeRoute = HomeRoute.Calendar,
-        xmlRoute = "calendar/home_route",
-        graph = "calendar/graph",
+    FEED(
+        typeSafeRoute = HomeRoute.Feed,
+        xmlRoute = "feed/home_route",
+        graph = "feed/graph",
         selectedIconId = R.drawable.ic_calendar_filled,
         unselectedIconId = R.drawable.ic_calendar,
         iconTextId = R.string.bottom_calendar
@@ -68,19 +68,19 @@ enum class HomeTabType(
         fun findHome(route: HomeRoute?): HomeTabType {
             return route?.let { homeRoute ->
                 entries.firstOrNull { it.typeSafeRoute == homeRoute }
-            } ?: CALENDAR
+            } ?: FEED
         }
 
         fun findHome(value: String?): HomeTabType {
             return if(!value.isNullOrEmpty()) {
-                entries.firstOrNull{ value.startsWith(it.xmlRoute) } ?: CALENDAR
+                entries.firstOrNull{ value.startsWith(it.xmlRoute) } ?: FEED
             } else {
-                CALENDAR
+                FEED
             }
         }
 
-        fun isCalendar(route: HomeRoute?): Boolean {
-            return route == HomeRoute.Calendar
+        fun isFeed(route: HomeRoute?): Boolean {
+            return route == HomeRoute.Feed
         }
     }
 }
