@@ -42,4 +42,9 @@ abstract class DataModule {
     abstract fun bindDiaryLocalDataSource(
         diaryLocalDataSourceImpl: DiaryLocalDataSourceImpl
     ): DiaryLocalDataSource
+
+    @Binds
+    abstract fun bindDiaryRepository(
+        diaryRepositoryImpl: com.jg.childmomentsnap.core.data.repository.DiaryRepositoryImpl
+    ): com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 }

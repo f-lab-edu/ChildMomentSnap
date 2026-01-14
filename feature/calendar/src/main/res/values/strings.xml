@@ -3,7 +3,7 @@
     <string name="date_year_format">%d년</string>
     <string name="date_month_format">%d월</string>
     <string name="date_year_month_format">%1$d년 %2$d월</string>
-    
+
     <string name="day_sunday">일</string>
     <string name="day_monday">월</string>
     <string name="day_tuesday">화</string>
@@ -16,7 +16,7 @@
     <string name="dialog_select_month_format">%d년 월 선택</string>
     <string name="dialog_cancel">취소</string>
     <string name="dialog_back">뒤로</string>
-    
+
     <string name="desc_prev_month">이전 달</string>
     <string name="desc_next_month">다음 달</string>
     <string name="desc_select_year_month">년/월 선택</string>

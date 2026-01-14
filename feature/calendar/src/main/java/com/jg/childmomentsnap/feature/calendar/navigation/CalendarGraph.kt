@@ -38,7 +38,15 @@ fun NavGraphBuilder.calendarGraph(
 
     if (useCompose) {
         composable<HomeRoute.Calendar> {
-            CalendarRoute()
+            CalendarRoute(
+                onNavigateToDetail = { diaryId ->
+                  //  navController.navigate(DiaryDetailRoute(diaryId))
+                },
+                onNavigateToWrite = { date ->
+                   //  navController.navigate(DiaryWriteRoute(date.toString()))
+                },
+                onNavigateToCamera = { navController.navigate(HomeRoute.Moment) }
+            )
         }
     } else {
         //   XML Navigation
@@ -47,7 +55,17 @@ fun NavGraphBuilder.calendarGraph(
             startDestination = CALENDAR_ROUTE
         ) {
             composable(route = CALENDAR_ROUTE) {
-                CalendarRoute()
+                CalendarRoute(
+                    onNavigateToDetail = { diaryId ->
+                        // TODO
+                    },
+                    onNavigateToWrite = { date ->
+                        //  TODO
+                    },
+                    onNavigateToCamera = {
+                        //  TODO
+                    }
+                )
             }
         }
     }

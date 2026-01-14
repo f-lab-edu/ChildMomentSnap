@@ -1,84 +1,94 @@
 package com.jg.childmomentsnap.feature.calendar.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import java.time.DayOfWeek
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
 @HiltViewModel
-class CalendarViewModel @Inject constructor() : ViewModel() {
+class CalendarViewModel @Inject constructor(
+    private val diaryRepository: DiaryRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalendarUiState())
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
+    private val _sideEffect = Channel<CalendarSideEffect>()
+    val sideEffect = _sideEffect.receiveAsFlow()
+
     init {
-        updateCalendarDays(_uiState.value.yearMonth)
+        loadDiariesForMonth(YearMonth.now())
     }
 
-    fun onPreviousMonthClick() {
-        _uiState.update { currentState ->
-            val prevMonth = currentState.yearMonth.minusMonths(1)
-            updateCalendarDays(prevMonth)
-            currentState.copy(yearMonth = prevMonth)
-        }
-    }
-
-    fun onNextMonthClick() {
-        _uiState.update { currentState ->
-            val nextMonth = currentState.yearMonth.plusMonths(1)
-            updateCalendarDays(nextMonth)
-            currentState.copy(yearMonth = nextMonth)
+    fun loadDiariesForMonth(yearMonth: YearMonth) {
+        _uiState.update { it.copy(currentMonth = yearMonth) }
+        viewModelScope.launch {
+            diaryRepository.getDiariesByMonth(yearMonth)
+                .catch { /* Handle error */ }
+                .collect { diaries ->
+                    val diariesMap = diaries.groupBy { LocalDate.parse(it.date) }
+                    _uiState.update { it.copy(diaries = diariesMap) }
+                }
         }
     }
 
     fun onDateClick(date: LocalDate) {
-        _uiState.update { it.copy(selectedDate = date) }
-    }
-
-    fun updateYearMonth(yearMonth: YearMonth) {
-        _uiState.update { currentState ->
-            updateCalendarDays(yearMonth)
-            currentState.copy(yearMonth = yearMonth)
+        val diaries = uiState.value.diaries[date] ?: emptyList()
+        viewModelScope.launch {
+            when (diaries.size) {
+                0 -> {
+                    _uiState.update { it.copy(
+                        selectedDate = null,
+                        isBottomSheetVisible = false,
+                        bottomSheetDiaries = emptyList()
+                    ) }
+                    _sideEffect.send(CalendarSideEffect.ShowWriteSelectionDialog(date))
+                }
+                1 -> {
+                    _uiState.update { it.copy(
+                        selectedDate = null,
+                        isBottomSheetVisible = false,
+                        bottomSheetDiaries = emptyList()
+                    ) }
+                    _sideEffect.send(CalendarSideEffect.NavigateToDetail(diaries.first().id))
+                }
+                else -> { // N >= 2
+                    _uiState.update { it.copy(
+                        selectedDate = date,
+                        isBottomSheetVisible = true,
+                        bottomSheetDiaries = diaries
+                    ) }
+                }
+            }
         }
     }
 
-    private fun updateCalendarDays(yearMonth: YearMonth) {
-        val calendarDays = generateCalendarDays(yearMonth)
-        _uiState.update { it.copy(calendarDays = calendarDays) }
+    fun dismissBottomSheet() {
+        _uiState.update { it.copy(
+            selectedDate = null,
+            isBottomSheetVisible = false,
+            bottomSheetDiaries = emptyList()
+        ) }
     }
 
-    private fun generateCalendarDays(yearMonth: YearMonth): List<CalendarDay> {
-        val firstDayOfMonth = yearMonth.atDay(1)
-        
-        // 달력 그리드의 시작 지점을 찾습니다 (첫 번째 주를 채우기 위한 이전 달의 날짜들).
-        // 그리드는 일요일 시작을 기준으로 합니다.
-        val startOfWeek = firstDayOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-        
-        // 달력 그리드의 끝 지점을 찾습니다 (마지막 주를 채우기 위한 다음 달의 날짜들).
-        // UI 일관성을 위해 항상 6행(42일)을 표시합니다.
-        val endOfGrid = startOfWeek.plusDays(41) // 총 42일
-
-        val days = mutableListOf<CalendarDay>()
-        var currentDate = startOfWeek
-        val today = LocalDate.now()
-
-        while (!currentDate.isAfter(endOfGrid)) {
-            days.add(
-                CalendarDay(
-                    date = currentDate,
-                    isCurrentMonth = yearMonth == YearMonth.from(currentDate),
-                    isToday = currentDate == today
-                )
-            )
-            currentDate = currentDate.plusDays(1)
+    fun onWriteTypeSelected(isPhoto: Boolean, date: LocalDate) {
+        viewModelScope.launch {
+            if (isPhoto) {
+                _sideEffect.send(CalendarSideEffect.NavigateToCamera)
+            } else {
+                _sideEffect.send(CalendarSideEffect.NavigateToWrite(date))
+            }
         }
-        return days
     }
 }

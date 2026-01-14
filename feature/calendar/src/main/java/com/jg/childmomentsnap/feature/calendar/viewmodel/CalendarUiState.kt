@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.calendar.viewmodel
 
+import com.jg.childmomentsnap.core.model.Diary
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -11,9 +12,11 @@ import java.time.YearMonth
  * @property selectedDate 사용자가 선택한 날짜
  */
 data class CalendarUiState(
-    val yearMonth: YearMonth = YearMonth.now(),
-    val calendarDays: List<CalendarDay> = emptyList(),
-    val selectedDate: LocalDate? = null
+    val selectedDate: LocalDate? = null,
+    val currentMonth: YearMonth = YearMonth.now(),
+    val diaries: Map<LocalDate, List<Diary>> = emptyMap(),
+    val isBottomSheetVisible: Boolean = false,
+    val bottomSheetDiaries: List<Diary> = emptyList()
 )
 
 /**
@@ -29,3 +32,9 @@ data class CalendarDay(
     val isToday: Boolean,
     val content: String? = null
 )
+sealed interface CalendarSideEffect {
+    data class ShowWriteSelectionDialog(val date: LocalDate) : CalendarSideEffect
+    data class NavigateToDetail(val diaryId: Long) : CalendarSideEffect
+    data object NavigateToCamera : CalendarSideEffect
+    data class NavigateToWrite(val date: LocalDate) : CalendarSideEffect
+}
