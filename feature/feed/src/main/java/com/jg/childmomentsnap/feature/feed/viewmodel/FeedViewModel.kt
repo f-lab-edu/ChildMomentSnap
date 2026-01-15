@@ -32,18 +32,57 @@ class FeedViewModel @Inject constructor(
     }
 
     fun loadDiariesForMonth(yearMonth: YearMonth) {
-        _uiState.update { it.copy(currentMonth = yearMonth) }
+        val calculatedMonthlyDays = calculateMonthlyDays(yearMonth)
+        
+        _uiState.update { it.copy(
+            currentMonth = yearMonth,
+            monthlyDays = calculatedMonthlyDays
+        ) }
+        
+        // Ensure weekly days are also updated if base date changes or just initial load
+        updateWeeklyDays(_uiState.value.selectedDate ?: LocalDate.now())
+
         viewModelScope.launch {
             diaryRepository.getDiariesByMonth(yearMonth)
                 .catch { /* Handle error */ }
                 .collect { diaries ->
                     val diariesMap = diaries.groupBy { LocalDate.parse(it.date) }
-                    _uiState.update { it.copy(diaries = diariesMap) }
+                    val sortedList = diaries.sortedByDescending { "${it.date} ${it.time}" }
+                    _uiState.update { it.copy(
+                        diaries = diariesMap,
+                        feedList = sortedList
+                    ) }
                 }
         }
     }
 
+    private fun calculateMonthlyDays(currentMonth: YearMonth): List<LocalDate?> {
+        val daysInMonth = currentMonth.lengthOfMonth()
+        val firstDayOfMonth = currentMonth.atDay(1)
+        val startOffset = firstDayOfMonth.dayOfWeek.value % 7 // Sun=0, Mon=1...Sat=6 (if Sunday start)
+        
+        val totalCells = daysInMonth + startOffset
+        val rows = (totalCells + 6) / 7
+        val totalGridSize = rows * 7
+        
+        val days = MutableList<LocalDate?>(totalGridSize) { null }
+        
+        for (day in 1..daysInMonth) {
+            days[startOffset + day - 1] = currentMonth.atDay(day)
+        }
+        return days
+    }
+
+    private fun updateWeeklyDays(baseDate: LocalDate) {
+        val startOfWeek = baseDate.minusDays(baseDate.dayOfWeek.value.toLong() % 7) // Sunday start
+        val days = (0..6).map { startOfWeek.plusDays(it.toLong()) }
+        _uiState.update { it.copy(weeklyDays = days) }
+    }
+
     fun onDateClick(date: LocalDate) {
+        // Update weekly view to center around selected date or just ensure selected date is visible (standard behavior)
+        updateWeeklyDays(date)
+
         val diaries = uiState.value.diaries[date] ?: emptyList()
         viewModelScope.launch {
             when (diaries.size) {
@@ -89,6 +128,16 @@ class FeedViewModel @Inject constructor(
             } else {
                 _sideEffect.send(FeedSideEffect.NavigateToWrite(date))
             }
+        }
+    }
+
+    fun toggleCalendarExpansion() {
+        _uiState.update { it.copy(isCalendarExpanded = !it.isCalendarExpanded) }
+    }
+
+    fun onFabClick(date: LocalDate) {
+        viewModelScope.launch {
+            _sideEffect.send(FeedSideEffect.ShowWriteSelectionDialog(date))
         }
     }
 }

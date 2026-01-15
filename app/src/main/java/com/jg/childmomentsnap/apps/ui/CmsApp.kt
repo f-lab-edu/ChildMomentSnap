@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.jg.childmomentsnap.apps.navigation.CmsNavHost
 import com.jg.childmomentsnap.core.ui.component.bottomAppBar.CmsBottomBar
+import com.jg.childmomentsnap.core.ui.component.home.HomeRoute
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
 import com.jg.childmomentsnap.core.ui.state.rememberCmsAppState
 
@@ -15,6 +16,8 @@ fun CmsApp(
     modifier: Modifier = Modifier,
     appState: CmsAppState = rememberCmsAppState()
 ) {
+
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
@@ -22,7 +25,10 @@ fun CmsApp(
         CmsNavHost(appState = appState)
 
         CmsBottomBar(
-            navController = appState.navController
+            navController = appState.navController,
+            onFabClick = {
+                appState.navController.navigate(HomeRoute.Moment)
+            }
         )
     }
 }

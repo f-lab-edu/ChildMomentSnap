@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="bottom_calendar" tools:ignore="ResourceName">달력</string>
+    <string name="bottom_calendar" tools:ignore="ResourceName">피드</string>
     <string name="bottom_camera" tools:ignore="ResourceName">카메라</string>
     <string name="bottom_daily" tools:ignore="ResourceName">일기</string>
     <string name="bottom_my" tools:ignore="ResourceName">My</string>

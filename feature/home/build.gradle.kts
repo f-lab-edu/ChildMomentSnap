@@ -9,7 +9,7 @@ android {
 
 dependencies {
     implementation(projects.feature.moment)
-    implementation(projects.feature.calendar)
+    implementation(projects.feature.feed)
     implementation(projects.feature.my)
     implementation(projects.feature.diary)
 

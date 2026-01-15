@@ -5,7 +5,7 @@ plugins {
 
 
 android {
-    namespace = "com.jg.childmomentsnap.feature.calendar"
+    namespace = "com.jg.childmomentsnap.feature.feed"
 
     packaging {
         resources {
