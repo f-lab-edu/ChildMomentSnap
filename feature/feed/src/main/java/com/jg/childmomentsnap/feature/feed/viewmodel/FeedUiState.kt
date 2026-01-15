@@ -15,8 +15,15 @@ data class FeedUiState(
     val selectedDate: LocalDate? = null,
     val currentMonth: YearMonth = YearMonth.now(),
     val diaries: Map<LocalDate, List<Diary>> = emptyMap(),
+    // Expanded state for calendar
+    val isCalendarExpanded: Boolean = false,
+    // Flattened list of diaries for the feed
+    val feedList: List<Diary> = emptyList(),
     val isBottomSheetVisible: Boolean = false,
-    val bottomSheetDiaries: List<Diary> = emptyList()
+    val bottomSheetDiaries: List<Diary> = emptyList(),
+    // Calendar Data (Pre-calculated in ViewModel)
+    val weeklyDays: List<LocalDate> = emptyList(),
+    val monthlyDays: List<LocalDate?> = emptyList() // Null represents empty grid cells if any, or just Logic handle
 )
 
 /**
