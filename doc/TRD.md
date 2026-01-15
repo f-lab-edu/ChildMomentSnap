@@ -63,7 +63,7 @@ sealed interface DiaryIntent {
 
 ```
 app
- ├─> feature:calendar ──┐
+ ├─> feature:feed ──────┐
  ├─> feature:diary ─────┤
  ├─> feature:home ──────┼─> core:ui ──────┐
  ├─> feature:moment ────┤                 │
@@ -234,30 +234,22 @@ interface GeminiApiService {
 
 **의존성**: core:ui, core:common
 
-#### feature:calendar
-**역할**: 캘린더 화면 및 일기 목록 표시
+#### feature:feed
+**역할**: 피드 화면, 캘린더 및 일기 목록 통합 표시
 
 **주요 화면:**
-- `CalendarScreen`: 월간/주간 캘린더 뷰
-- `DiaryListScreen`: 일기 목록 (피드 형태)
+- `FeedScreen`: 캘린더와 피드 리스트가 결합된 메인 화면
 
 **ViewModel:**
 ```kotlin
-class CalendarViewModel @Inject constructor(
+class FeedViewModel @Inject constructor(
     private val diaryRepository: DiaryRepository
 ) : ViewModel() {
     
-    private val _uiState = MutableStateFlow(CalendarUiState())
-    val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(FeedUiState())
+    val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
     
-    fun loadDiariesForMonth(yearMonth: YearMonth) {
-        viewModelScope.launch {
-            diaryRepository.getDiaries()
-                .collect { diaries ->
-                    _uiState.update { it.copy(diaries = diaries) }
-                }
-        }
-    }
+    // ...
 }
 ```
 

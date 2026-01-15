@@ -57,7 +57,7 @@ ChildMomentSnap/
 │   ├── network/                   # 네트워크 레이어
 │   └── ui/                        # 공통 UI 컴포넌트
 └── feature/                       # 기능별 모듈
-    ├── calendar/                  # 📅 달력 및 일기 목록 뷰
+    ├── feed/                      # 📅 피드 및 캘린더 뷰
     ├── diary/                     # ✏️ 일기 작성/편집/삭제
     ├── my/                        # 📖 나의 정보 관리
     ├── home/                      # 🏠 홈 화면 (Bottom Navigation 관리)
@@ -78,7 +78,7 @@ ChildMomentSnap/
 - **ui**: 재사용 가능한 Compose UI 컴포넌트
 
 #### Feature Modules
-- **calendar**: 메인 캘린더 화면과 일기 목록 표시
+- **feed**: 메인 피드 화면과 캘린더 기반 일기 목록 표시
 - **diary**: 일기 작성, 편집, 삭제 기능
 - **dairy-detail**: 일기 상세 보기 및 CRUD 기능
 - **home**: 앱 메인 홈 화면
