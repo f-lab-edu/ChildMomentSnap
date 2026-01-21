@@ -23,5 +23,9 @@ data class DiaryEntity(
     @ColumnInfo(name = "bgValue") // 배경 리소스 ID 또는 파일 경로 (
     val bgValue: String,
     @ColumnInfo(name = "is_favorite")
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    @ColumnInfo(name = "location") // 장소
+    val location: String = "",
+    @ColumnInfo(name = "is_milestone") // 마일스톤 (별표)
+    val isMilestone: Boolean = false
 )

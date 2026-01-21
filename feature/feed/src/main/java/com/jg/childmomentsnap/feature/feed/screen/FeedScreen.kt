@@ -30,8 +30,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -427,7 +427,6 @@ private fun MomentFeed(
                     moment = moment,
                     onLikeClick = { /* TODO */ },
                     onStarClick = { /* TODO */ },
-                    onPlayVoiceClick = { /* TODO */ },
                     onMoreClick = { /* TODO */ }
                 )
             }
@@ -489,7 +488,6 @@ fun MomentFeedItem(
     moment: Diary,
     onLikeClick: () -> Unit = {},
     onStarClick: () -> Unit = {},
-    onPlayVoiceClick: () -> Unit = {},
     onMoreClick: () -> Unit = {}
 ) {
     Card(
@@ -504,7 +502,7 @@ fun MomentFeedItem(
             // 1. 헤더 영역 (날짜, 장소, 더보기)
             MomentItemHeader(
                 date = moment.date,
-                location = stringResource(FeedR.string.location_unknown), // TODO: Add location to Diary
+                location = moment.location.ifEmpty { stringResource(FeedR.string.location_unknown) },
                 onMoreClick = onMoreClick
             )
 
@@ -527,11 +525,12 @@ fun MomentFeedItem(
                 )
             }
 
-            // 3. 액션 바 영역 (좋아요, 마일스톤 별, 음성 재생)
+            // 3. 액션 바 영역 (좋아요, 마일스톤 별)
             MomentItemActionBar(
+                isFavorite = moment.isFavorite,
+                isMilestone = moment.isMilestone,
                 onLikeClick = onLikeClick,
-                onStarClick = onStarClick,
-                onPlayVoiceClick = onPlayVoiceClick
+                onStarClick = onStarClick
             )
 
             // 4. 콘텐츠 영역 (태그, 일기 본문)
@@ -606,9 +605,10 @@ private fun MomentItemHeader(
 
 @Composable
 private fun MomentItemActionBar(
+    isFavorite: Boolean,
+    isMilestone: Boolean,
     onLikeClick: () -> Unit,
-    onStarClick: () -> Unit,
-    onPlayVoiceClick: () -> Unit
+    onStarClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -619,7 +619,7 @@ private fun MomentItemActionBar(
     ) {
         IconButton(onClick = onLikeClick) {
             Icon(
-                imageVector = Icons.Outlined.FavoriteBorder,
+                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = stringResource(FeedR.string.desc_like),
                 tint = Rose400,
                 modifier = Modifier.size(26.dp)
@@ -627,20 +627,10 @@ private fun MomentItemActionBar(
         }
         IconButton(onClick = onStarClick) {
             Icon(
-                imageVector = Icons.Outlined.StarBorder,
+                imageVector = if (isMilestone) Icons.Filled.Star else Icons.Outlined.StarBorder,
                 contentDescription = stringResource(FeedR.string.desc_milestone),
                 tint = Amber500,
                 modifier = Modifier.size(26.dp)
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        // 음성 재생 버튼은 우측에 배치하여 강조
-        IconButton(onClick = onPlayVoiceClick) {
-            Icon(
-                imageVector = Icons.Outlined.PlayCircle,
-                contentDescription = stringResource(FeedR.string.desc_play_voice),
-                tint = Stone200,
-                modifier = Modifier.size(28.dp)
             )
         }
     }

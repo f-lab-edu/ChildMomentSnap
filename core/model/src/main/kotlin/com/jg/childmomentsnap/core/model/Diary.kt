@@ -12,5 +12,7 @@ data class Diary(
     val mood: String,
     val bgType: String,
     val bgValue: String,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val location: String = "",
+    val isMilestone: Boolean = false
 )

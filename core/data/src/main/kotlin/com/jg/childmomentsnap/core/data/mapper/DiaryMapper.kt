@@ -13,7 +13,9 @@ internal fun DiaryEntity.toDomain(): Diary {
         mood = mood,
         bgType = bgType,
         bgValue = bgValue,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        location = location,
+        isMilestone = isMilestone
     )
 }
 
@@ -27,6 +29,8 @@ internal fun Diary.toEntity(): DiaryEntity {
         mood = mood,
         bgType = bgType,
         bgValue = bgValue,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        location = location,
+        isMilestone = isMilestone
     )
 }
