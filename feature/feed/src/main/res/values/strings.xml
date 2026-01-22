@@ -20,4 +20,26 @@
     <string name="desc_prev_month">이전 달</string>
     <string name="desc_next_month">다음 달</string>
     <string name="desc_select_year_month">년/월 선택</string>
+    
+    <!-- Feed Screen Strings -->
+    <string name="app_name_moments">Moments</string>
+    <string name="desc_search">검색</string>
+    <string name="desc_profile">프로필</string>
+    <string name="desc_toggle_calendar">달력 전환</string>
+    <string name="desc_add_moment">기록 추가</string>
+    <string name="desc_more_options">더보기</string>
+    <string name="desc_face_icon">얼굴 아이콘</string>
+    <string name="desc_image_placeholder">이미지 없음</string>
+    <string name="location_unknown">장소 정보 없음</string>
+
+    <string name="desc_like">좋아요</string>
+    <string name="desc_milestone">성장 마일스톤</string>
+    <string name="desc_play_voice">음성 기록 재생</string>
+    
+    <!-- Empty Feed State -->
+    <string name="empty_feed_title">지우와의 첫 순간을\n기록해볼까요?</string>
+    <string name="empty_feed_subtitle">사진 한 장과 짧은 목소리만 있으면\nAI가 따뜻한 일기를 대신 써드려요.</string>
+    
+    <!-- Calendar Format -->
+    <string name="calendar_header_format">yyyy년 MM월</string>
 </resources>

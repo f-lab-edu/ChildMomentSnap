@@ -36,11 +36,9 @@ AI를 통한 자동 일기 초안 생성으로 작성 시간 단축.
 
 4. 기능적 요구사항 (Functional Requirements)
 
-4.1. 홈 및 하이브리드 타임라인
-
-피드 보기 (Primary): 사진이 강조된 카드 형태의 피드. 무한 스크롤 지원.
-
-확장형 캘린더 (Secondary):
+### 4.1 피드 및 캘린더 (Unified Feed & Calendar)
+- **피드 보기 (Primary)**: 사진이 강조된 카드 형태의 피드 (Warm Minimalism 디자인 적용).
+- **확장형 캘린더 (Secondary)**:
 
 상단 주간(Week) 뷰 노출.
 
@@ -119,7 +117,7 @@ LLM Synthesis: Vision 데이터 + STT 텍스트를 조합해 다정한 문체의
 - **ui**: 재사용 가능한 Compose UI 컴포넌트
 
 #### Feature 모듈
-- **calendar**: 캘린더 화면 및 일기 목록 표시
+- **feed**: 피드 화면, 캘린더 및 일기 목록 표시
 - **diary**: 일기 작성, 편집, 삭제 기능
 - **diary-detail**: 일기 상세 보기 및 CRUD 기능
 - **home**: 앱 메인 홈 화면 (Bottom Navigation 관리)
@@ -131,7 +129,8 @@ LLM Synthesis: Vision 데이터 + STT 텍스트를 조합해 다정한 문체의
   - Home → Calendar (기본 화면)
   - Calendar → Diary Detail (날짜 선택)
   - Calendar → Diary Write (새 일기 작성)
-  - Diary Write → Camera/Gallery (사진 추가)
+  - Calendar/Feed → Diary Write (새 일기 작성)
+  - FAB Click → Camera Check (즉시 촬영 모드 진입)
   - Diary Write → Voice Recording (음성 녹음)
 
 7. UI/UX 디자인 전략
@@ -145,6 +144,8 @@ Typography: Serif(제목/일기 본문), Sans-serif(시스템 UI)
 Interaction:
 
 녹음 시 실시간 오디오 비주얼라이저.
+
+FAB 클릭 시 즉시 카메라/촬영 모드로 진입.
 
 캘린더 확장/축소 시 부드러운 전환 애니메이션.
 

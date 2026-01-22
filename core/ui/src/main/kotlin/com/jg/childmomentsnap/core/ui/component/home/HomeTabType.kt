@@ -32,27 +32,9 @@ enum class HomeTabType(
         typeSafeRoute = HomeRoute.Feed,
         xmlRoute = "feed/home_route",
         graph = "feed/graph",
-        selectedIconId = R.drawable.ic_calendar_filled,
-        unselectedIconId = R.drawable.ic_calendar,
+        selectedIconId = R.drawable.ic_feed_filled,
+        unselectedIconId = R.drawable.ic_feed,
         iconTextId = R.string.bottom_calendar
-    ),
-
-    MOMENT(
-        typeSafeRoute = HomeRoute.Moment,
-        xmlRoute = "moment/home_route",
-        graph = "moment/graph",
-        selectedIconId = R.drawable.ic_camera_filled,
-        unselectedIconId = R.drawable.ic_camera,
-        iconTextId = R.string.bottom_camera
-    ),
-
-    DAILY(
-        typeSafeRoute = HomeRoute.Daily,
-        xmlRoute = "daily/home_route",
-        graph = "daily/graph",
-        selectedIconId = R.drawable.ic_write_filled,
-        unselectedIconId = R.drawable.ic_write,
-        iconTextId = R.string.bottom_daily
     ),
 
     MY(

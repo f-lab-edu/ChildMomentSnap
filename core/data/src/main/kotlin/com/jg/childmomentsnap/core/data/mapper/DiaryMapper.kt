@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.core.data.mapper
 
+import com.jg.childmomentsnap.core.model.ChildEmotion
 import com.jg.childmomentsnap.core.model.Diary
 import com.jg.childmomentsnap.database.entity.DiaryEntity
 
@@ -13,7 +14,10 @@ internal fun DiaryEntity.toDomain(): Diary {
         mood = mood,
         bgType = bgType,
         bgValue = bgValue,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        location = location,
+        isMilestone = isMilestone,
+        emotion = emotion?.let { runCatching { ChildEmotion.valueOf(it) }.getOrNull() }
     )
 }
 
@@ -27,6 +31,9 @@ internal fun Diary.toEntity(): DiaryEntity {
         mood = mood,
         bgType = bgType,
         bgValue = bgValue,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        location = location,
+        isMilestone = isMilestone,
+        emotion = emotion?.name
     )
 }

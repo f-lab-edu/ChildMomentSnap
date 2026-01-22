@@ -20,15 +20,9 @@ fun NavDestination?.isHomeLevelTab(route: HomeRoute): Boolean =
     } ?: false
 
 fun NavDestination?.shouldShowBottomBar(homeTabTypes: List<HomeTabType>): Boolean {
-    if (this?.route == HomeRoute.Moment::class.qualifiedName) {
-        return false
+    return homeTabTypes.any { tab ->
+         this.isHomeLevelTab(tab.typeSafeRoute)
     }
-    
-    return homeTabTypes
-        .filterNot { it == HomeTabType.MOMENT }
-        .any { tab -> 
-             this.isHomeLevelTab(tab.typeSafeRoute)
-        }
 }
 
 fun NavDestination?.matchesTab(tab: HomeTabType): Boolean =
