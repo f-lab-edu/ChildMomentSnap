@@ -27,5 +27,7 @@ data class DiaryEntity(
     @ColumnInfo(name = "location") // 장소
     val location: String = "",
     @ColumnInfo(name = "is_milestone") // 마일스톤 (별표)
-    val isMilestone: Boolean = false
+    val isMilestone: Boolean = false,
+    @ColumnInfo(name = "emotion") // 감정 (Enum name)
+    val emotion: String? = null
 )

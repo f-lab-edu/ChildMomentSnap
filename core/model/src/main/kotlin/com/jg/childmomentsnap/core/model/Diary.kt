@@ -14,5 +14,6 @@ data class Diary(
     val bgValue: String,
     val isFavorite: Boolean,
     val location: String = "",
-    val isMilestone: Boolean = false
+    val isMilestone: Boolean = false,
+    val emotion: ChildEmotion? = null
 )

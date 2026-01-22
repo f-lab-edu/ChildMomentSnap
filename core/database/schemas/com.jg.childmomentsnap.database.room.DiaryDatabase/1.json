@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6f993649fe3598d2e114601144fecdff",
+    "identityHash": "d0a62660919032e600c9d9b6781b7e7e",
     "entities": [
       {
         "tableName": "diary_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `time` TEXT NOT NULL, `content` TEXT NOT NULL, `image_path` TEXT, `mood` TEXT NOT NULL, `bgType` TEXT NOT NULL, `bgValue` TEXT NOT NULL, `is_favorite` INTEGER NOT NULL, `location` TEXT NOT NULL, `is_milestone` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `time` TEXT NOT NULL, `content` TEXT NOT NULL, `image_path` TEXT, `mood` TEXT NOT NULL, `bgType` TEXT NOT NULL, `bgValue` TEXT NOT NULL, `is_favorite` INTEGER NOT NULL, `location` TEXT NOT NULL, `is_milestone` INTEGER NOT NULL, `emotion` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -72,6 +72,11 @@
             "columnName": "is_milestone",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "emotion",
+            "columnName": "emotion",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -84,7 +89,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6f993649fe3598d2e114601144fecdff')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd0a62660919032e600c9d9b6781b7e7e')"
     ]
   }
 }

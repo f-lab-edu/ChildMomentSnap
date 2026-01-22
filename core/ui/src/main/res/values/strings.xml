@@ -27,4 +27,12 @@
     <string name="permission_access_coarse_location_description">대략적인 위치 정보를 사용하기 위해 위치 권한이 필요합니다.</string>
     <string name="permission_post_notifications_description">알림을 보내기 위해 알림 권한이 필요합니다.</string>
     <string name="permission_default_description">앱을 정상적으로 사용하기 위해 권한이 필요합니다.</string>
+
+    <!-- Child Emotion Labels -->
+    <string name="emotion_happy">행복</string>
+    <string name="emotion_calm">평온</string>
+    <string name="emotion_curious">호기심</string>
+    <string name="emotion_surprised">놀람</string>
+    <string name="emotion_sad">서운</string>
+    <string name="emotion_cringe">찡긋</string>
 </resources>

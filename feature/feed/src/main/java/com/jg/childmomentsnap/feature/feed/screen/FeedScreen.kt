@@ -55,7 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jg.childmomentsnap.core.model.ChildEmotion
 import com.jg.childmomentsnap.core.model.Diary
+import com.jg.childmomentsnap.core.ui.component.MomentsEmotionChip
 import com.jg.childmomentsnap.core.ui.component.MomentsTagChip
 import com.jg.childmomentsnap.core.ui.theme.Amber100
 import com.jg.childmomentsnap.core.ui.theme.Amber500
@@ -536,6 +538,7 @@ fun MomentFeedItem(
             // 4. 콘텐츠 영역 (태그, 일기 본문)
             MomentItemContent(
                 tag = moment.mood,
+                emotion = moment.emotion,
                 content = moment.content
             )
         }
@@ -639,6 +642,7 @@ private fun MomentItemActionBar(
 @Composable
 private fun MomentItemContent(
     tag: String,
+    emotion: ChildEmotion?,
     content: String
 ) {
     Column(
@@ -646,8 +650,8 @@ private fun MomentItemContent(
             .fillMaxWidth()
             .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
     ) {
-        // 태그 컴포넌트 (디자인 시스템 활용)
-        MomentsTagChip(text = tag)
+        // 태그 영역 (감정 칩 + 일반 태그)
+        MomentTagArea(tag = tag, emotion = emotion)
         
         Spacer(modifier = Modifier.height(12.dp))
         
@@ -657,5 +661,26 @@ private fun MomentItemContent(
             color = Stone800,
             lineHeight = 26.sp
         )
+    }
+}
+
+@Composable
+fun MomentTagArea(
+    tag: String,
+    emotion: ChildEmotion?,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // AI 감정 분석 칩 (우선순위 높음)
+        if (emotion != null) {
+            MomentsEmotionChip(emotion = emotion)
+        }
+        
+        // 일반 장소/상황 태그
+        MomentsTagChip(text = tag)
     }
 }
