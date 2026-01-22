@@ -13,8 +13,8 @@ object AppPermissions {
     const val WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE
     
     // Android 13+ (API 33+) 새로운 미디어 권한
-    const val READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES"
-    const val READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO"
+    const val READ_MEDIA_IMAGES = Manifest.permission.READ_MEDIA_IMAGES
+    const val READ_MEDIA_VIDEO = Manifest.permission.READ_MEDIA_VIDEO
 
     const val RECORD_AUDIO = Manifest.permission.RECORD_AUDIO
 
@@ -73,6 +73,13 @@ object AppPermissions {
             } else {
                 VOICE_PERMISSIONS_LEGACY // Android 12 이하
             }
+        }
+
+        /**
+         * 위치 권한을 가져온다
+         */
+        fun getLocationPermission(): List<String> {
+            return LOCATION_PERMISSIONS
         }
     }
 }
