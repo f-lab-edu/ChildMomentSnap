@@ -57,7 +57,23 @@ import com.jg.childmomentsnap.feature.moment.RecordingControlsState
 import kotlin.math.sin
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
-
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.graphics.SolidColor
+import com.jg.childmomentsnap.core.model.VisionAnalysis
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import com.jg.childmomentsnap.feature.moment.R
 /**
  * 1. 고도화된 음성 녹음 및 실시간 STT 화면
  * 기존 BottomSheet의 정밀한 제어 기능과 전체 화면의 감성적인 레이아웃을 결합했습니다.
@@ -76,9 +92,61 @@ fun RecordingScreen(
     onRecordingStop: () -> Unit = {},
     onPlaybackStart: () -> Unit = {},
     onPlaybackStop: () -> Unit = {},
+    onPlaying: () -> Unit = {}, // Not used but compliant with previous? No wait, strict sig.
+    visionAnalysis: VisionAnalysis? = null,
+    hasVoicePermission: Boolean = false,
+    onRequestVoicePermission: () -> Unit = {},
     onCompleted: () -> Unit = {}
 ) {
-    println("!! RecordingScreen")
+
+    // 권한 요청 다이얼로그 상태
+    var showPermissionRationale by remember { mutableStateOf(false) }
+    
+    // 텍스트 필드 포커스 제어
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 초기 진입 시 권한 확인
+    LaunchedEffect(Unit) {
+        if (!hasVoicePermission) {
+            showPermissionRationale = true
+        }
+    }
+
+    if (showPermissionRationale) {
+        AlertDialog(
+            onDismissRequest = { 
+                showPermissionRationale = false 
+                // 거절 시 텍스트 포커스
+                focusRequester.requestFocus()
+                keyboardController?.show()
+            },
+            title = { Text(text = stringResource(R.string.feature_moment_recording_permission_title)) },
+            text = { Text(text = stringResource(R.string.feature_moment_recording_permission_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionRationale = false
+                        onRequestVoicePermission()
+                    }
+                ) {
+                    Text(stringResource(R.string.feature_moment_recording_permission_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionRationale = false
+                        focusRequester.requestFocus()
+                        keyboardController?.show()
+                    }
+                ) {
+                    Text(stringResource(R.string.feature_moment_recording_permission_dismiss))
+                }
+            },
+            containerColor = Color.White
+        )
+    }
     MomentsTheme {
         Box(
             modifier = Modifier
@@ -105,7 +173,7 @@ fun RecordingScreen(
                         if (capturedPhotoPath.isNotEmpty()) {
                             AsyncImage(
                                 model = capturedPhotoPath,
-                                contentDescription = "촬영된 사진",
+                                contentDescription = stringResource(R.string.feature_moment_recording_screen_photo_description),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
@@ -123,10 +191,10 @@ fun RecordingScreen(
                     
                     Text(
                         text = when {
-                            state.isRecording -> "아이의 순간을 기록하고 있어요"
-                            state.isPlaying -> "남겨주신 목소리를 듣고 있어요"
-                            state.isStopped -> "멋진 이야기가 완성되었네요!"
-                            else -> "이 순간에 대해 들려주세요"
+                            state.isRecording -> stringResource(R.string.feature_moment_recording_screen_title_recording)
+                            state.isPlaying -> stringResource(R.string.feature_moment_recording_screen_title_playing)
+                            state.isStopped -> stringResource(R.string.feature_moment_recording_screen_title_stopped)
+                            else -> stringResource(R.string.feature_moment_recording_screen_title_default)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
@@ -134,7 +202,7 @@ fun RecordingScreen(
                     )
                     
                     Text(
-                        text = "아이의 표정이나 당시의 기분도 좋아요",
+                        text = stringResource(R.string.feature_moment_recording_screen_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = Stone400,
                         modifier = Modifier.padding(top = 8.dp)
@@ -142,25 +210,50 @@ fun RecordingScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // 중앙: 실시간 STT 텍스트 영역
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 180.dp),
-                        shape = RoundedCornerShape(32.dp),
-                        colors = CardDefaults.cardColors(containerColor = Stone50)
+                    // 중앙: 분석 결과 칩 & 텍스트 편집 영역
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize().padding(24.dp),
-                            contentAlignment = Alignment.Center
+                        // Moment Chips
+                       if (visionAnalysis?.labels?.isNotEmpty() == true) {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp)
+                            ) {
+                                items(visionAnalysis.labels) { label ->
+                                    MomentChip(
+                                        text = "#${label.description}",
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // 텍스트 편집 카드
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 180.dp),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = CardDefaults.cardColors(containerColor = Stone50)
                         ) {
-                            Text(
-                                text = if (sttText.isEmpty()) "목소리를 기다리고 있어요..." else sttText,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                color = if (sttText.isEmpty()) Stone300 else Stone800,
-                                lineHeight = 28.sp
-                            )
+                            Box(
+                                modifier = Modifier.fillMaxSize().padding(24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                // STT 텍스트가 들어오면 그것을 보여주고, 아니면 분석된 텍스트나 힌트 표시
+                                val displayText = sttText.ifEmpty { visionAnalysis?.detectedText ?: "" }
+                                
+                                Text(
+                                    text = if (displayText.isEmpty()) stringResource(R.string.feature_moment_recording_screen_stt_placeholder) else displayText,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center,
+                                    color = if (displayText.isEmpty()) Stone300 else Stone800,
+                                    lineHeight = 28.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -179,23 +272,36 @@ fun RecordingScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 녹음 제어 버튼 영역 (3버튼 구조)
-                    RecordingControls(
-                        state = state,
-                        onReset = onReset,
-                        onRecordingStart = onRecordingStart,
-                        onRecordingPause = onRecordingPause,
-                        onRecordingResume = onRecordingResume,
-                        onRecordingStop = onRecordingStop,
-                        onPlaybackStart = onPlaybackStart,
-                        onPlaybackStop = onPlaybackStop
-                    )
+                    // 녹음 제어 버튼 영역 (권한 있을 때만 표시)
+                    if (hasVoicePermission) {
+                        RecordingControls(
+                            state = state,
+                            onReset = onReset,
+                            onRecordingStart = onRecordingStart,
+                            onRecordingPause = onRecordingPause,
+                            onRecordingResume = onRecordingResume,
+                            onRecordingStop = onRecordingStop,
+                            onPlaybackStart = onPlaybackStart,
+                            onPlaybackStop = onPlaybackStop
+                        )
+                    } else {
+                         // 권한 없을 때는 빈 공간 확보 (또는 텍스트 입력 안내)
+                         Spacer(modifier = Modifier.height(80.dp))
+                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // 최종 완료 버튼 (분석 단계 진입)
+                    // 최종 완료 버튼 (녹음 완료 또는 텍스트 모드일 때 표시)
+                    // 텍스트 모드일 때는 항상 표시, 녹음 모드일 때는 정지/재생 상태일 때 표시
+                    val showCompleteButton = if (hasVoicePermission) {
+                        state.isStopped || state.isPlaying
+                    } else {
+                        // 텍스트 모드면 항상 표시 (단, 처리중 아닐때)
+                        true
+                    }
+
                     AnimatedVisibility(
-                        visible = state.isStopped || state.isPlaying,
+                        visible = showCompleteButton,
                          modifier = Modifier.fillMaxWidth().height(56.dp)
                     ) {
                         Button(
@@ -212,7 +318,7 @@ fun RecordingScreen(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("이대로 AI 일기 만들기", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.feature_moment_recording_screen_button_completed), fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -239,7 +345,7 @@ private fun VoiceAmplitudeVisualizer(
         val centerY = height / 2
         
         // 데이터가 없을 때 기본 파형 생성
-        val data = if (amplitudes.isEmpty()) List(30) { 0.1f } else amplitudes
+        val data = amplitudes.ifEmpty { List(30) { 0.1f } }
         val barWidth = width / data.size
         
         data.forEachIndexed { index, amplitude ->
@@ -285,7 +391,7 @@ private fun RecordingControls(
             enabled = state.canResetRecording,
             modifier = Modifier.size(48.dp).background(Stone100, CircleShape)
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = "리셋", tint = if (state.canResetRecording) Stone800 else Stone200)
+            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_reset), tint = if (state.canResetRecording) Stone800 else Stone200)
         }
 
         // 메인 녹음/일시정지 버튼
@@ -310,7 +416,7 @@ private fun RecordingControls(
                 state.isRecording -> Icons.Default.Pause
                 else -> Icons.Default.Mic
             }
-            Icon(icon, contentDescription = "메인 액션", modifier = Modifier.size(36.dp))
+            Icon(icon, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_main), modifier = Modifier.size(36.dp))
         }
 
         // 정지 버튼
@@ -322,7 +428,7 @@ private fun RecordingControls(
             enabled = state.canStopRecording || state.isPlaying,
             modifier = Modifier.size(48.dp).background(Stone100, CircleShape)
         ) {
-            Icon(Icons.Default.Stop, contentDescription = "정지", tint = if (state.canStopRecording || state.isPlaying) Stone800 else Stone200)
+            Icon(Icons.Default.Stop, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_stop), tint = if (state.canStopRecording || state.isPlaying) Stone800 else Stone200)
         }
     }
 }

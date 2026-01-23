@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 
 /**
@@ -78,6 +80,15 @@ internal fun CameraRoute(
     // 앱이 포그라운드로 돌아올 때 권한 재확인
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = context as? Activity
+    
+    // 음성 권한 요청 Launcher
+    val voicePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            viewModel.onVoicePermissionResult(permissions)
+        }
+    )
+
     var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
     val imageBytes: ByteArray? by produceState<ByteArray?>(
         initialValue = null,
@@ -200,7 +211,10 @@ internal fun CameraRoute(
             onPhotoCaptured = viewModel::onPhotoCaptured,
             onCaptureComplete = viewModel::onCaptureComplete,
             onConfirmCapturedImage = {
-                viewModel.confirmCapturedImage()
+                imageBytes?.let { bytes ->
+                    viewModel.startAnalysis(bytes)
+                    voiceViewModel.showVoiceRecordingBottomSheet()
+                }
             },
             onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
             onConfirmVoiceRecording = {
@@ -244,7 +258,12 @@ internal fun CameraRoute(
                     onPlaybackStart = voiceViewModel::playRecording,
                     onPlaybackStop = voiceViewModel::stopPlayback,
                     onCompleted = voiceViewModel::finishRecording,
-                    isProcessing = voiceUiState.isProcessing
+                    isProcessing = voiceUiState.isProcessing,
+                    visionAnalysis = uiState.visionAnalysis,
+                    hasVoicePermission = uiState.voicePermissionState == PermissionState.Granted,
+                    onRequestVoicePermission = {
+                        voicePermissionLauncher.launch(AppPermissions.Groups.getVoicePermissions().toTypedArray())
+                    }
                 )
             }
         }
