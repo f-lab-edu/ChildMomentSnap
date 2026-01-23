@@ -155,8 +155,7 @@ internal fun CameraScreen(
             onVoicePermissionResult = onVoicePermissionResult,
             onConfirmVoiceRecording = onConfirmVoiceRecording,
             onSkipVoiceRecording = onSkipVoiceRecording,
-            onDismiss = onDismissVoiceRecordingDialog,
-            modifier = modifier
+            onDismiss = onDismissVoiceRecordingDialog
         )
     }
 }

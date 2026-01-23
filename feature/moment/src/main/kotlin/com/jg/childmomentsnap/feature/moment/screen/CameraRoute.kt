@@ -23,6 +23,7 @@ import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.components.VoiceRecordingBottomSheet
+import com.jg.childmomentsnap.feature.moment.components.RecordingScreen
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
 import com.jg.childmomentsnap.feature.moment.PermissionState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent
@@ -32,6 +33,12 @@ import com.jg.childmomentsnap.feature.moment.viewmodel.VoiceRecordingViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.content.Context
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+
 
 /**
  * ViewModel과 통합된 카메라 라우트 진입점
@@ -43,6 +50,7 @@ import android.content.Context
  * @param modifier 스타일링을 위한 Modifier
  * @param viewModel 카메라 ViewModel 인스턴스
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CameraRoute(
     onBackClick: () -> Unit,
@@ -160,78 +168,86 @@ internal fun CameraRoute(
             }
     }
 
-    CameraScreen(
-        uiState = uiState,
-        onPermissionResult = viewModel::onPermissionResult,
-        onVoicePermissionResult = { permissions, isPermanentlyDenied ->
-            viewModel.onVoicePermissionResult(permissions, isPermanentlyDenied)
-            // 권한 상태 업데이트
-            val hasAllCameraPermissions =
-                context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
-            val hasAllVoicePermissions =
-                context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
-            viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
-        },
-        onCameraReady = viewModel::onCameraReady,
-        onSwitchCamera = viewModel::switchCamera,
-        onCapturePhoto = viewModel::capturePhoto,
-        onGalleryClick = viewModel::openGallery,
-        onImageSelected = viewModel::onImageSelected,
-        onDismissGalleryPicker = viewModel::dismissGalleryPicker,
-        onConfirmImage = {
-            imageBytes?.let {
-                viewModel.confirmSelectedImage(
-                    imageBytes = it
-                )
-            }
-        },
-        onCancelImage = viewModel::cancelSelectedImage,
-        onClearError = viewModel::clearError,
-        onCameraError = viewModel::onCameraError,
-        onPhotoCaptured = viewModel::onPhotoCaptured,
-        onCaptureComplete = viewModel::onCaptureComplete,
-        onConfirmCapturedImage = {
-            viewModel.confirmCapturedImage()
-        },
-        onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
-        onConfirmVoiceRecording = {
-            imageBytes?.let {
-                viewModel.confirmVoiceRecording(it)
-                // 파일 경로 설정
-                val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
-                voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
-                // BottomSheet 표시
-                if (uiState.voicePermissionState == PermissionState.Granted) {
+    Box(modifier = modifier.fillMaxSize()) {
+        CameraScreen(
+            uiState = uiState,
+            onPermissionResult = viewModel::onPermissionResult,
+            onVoicePermissionResult = { permissions, isPermanentlyDenied ->
+                viewModel.onVoicePermissionResult(permissions, isPermanentlyDenied)
+                // 권한 상태 업데이트
+                val hasAllCameraPermissions =
+                    context.hasAllPermissions(AppPermissions.Groups.getPhotoPermissions())
+                val hasAllVoicePermissions =
+                    context.hasAllPermissions(AppPermissions.Groups.getVoicePermissions())
+                viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
+            },
+            onCameraReady = viewModel::onCameraReady,
+            onSwitchCamera = viewModel::switchCamera,
+            onCapturePhoto = viewModel::capturePhoto,
+            onGalleryClick = viewModel::openGallery,
+            onImageSelected = viewModel::onImageSelected,
+            onDismissGalleryPicker = viewModel::dismissGalleryPicker,
+            onConfirmImage = {
+                imageBytes?.let {
+                    viewModel.confirmSelectedImage(
+                        imageBytes = it
+                    )
+                }
+            },
+            onCancelImage = viewModel::cancelSelectedImage,
+            onClearError = viewModel::clearError,
+            onCameraError = viewModel::onCameraError,
+            onPhotoCaptured = viewModel::onPhotoCaptured,
+            onCaptureComplete = viewModel::onCaptureComplete,
+            onConfirmCapturedImage = {
+                viewModel.confirmCapturedImage()
+            },
+            onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
+            onConfirmVoiceRecording = {
+                imageBytes?.let {
+                    viewModel.confirmVoiceRecording(it)
+                    // 파일 경로 설정
+                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
+                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
+                    // BottomSheet 표시
                     voiceViewModel.showVoiceRecordingBottomSheet()
                 }
-            }
-        },
-        onSkipVoiceRecording = {
-            imageBytes?.let { 
-                viewModel.skipVoiceRecording(it)
-                onNavigateUp()
-            }
-        },
-        onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
-        onNavigateUp = onNavigateUp,
-        modifier = modifier
-    )
-
-    if (voiceUiState.showVoiceRecordingBottomSheet) {
-        VoiceRecordingBottomSheet(
-            state = voiceUiState.toRecordingControlsState(),
-            amplitudes = voiceUiState.amplitudes,
-            onReset = voiceViewModel::resetRecording,
-            onRecordingStart = voiceViewModel::startRecording,
-            onRecordingPause = voiceViewModel::pauseRecording,
-            onRecordingResume = voiceViewModel::resumeRecording,
-            onRecordingStop = voiceViewModel::stopRecording,
-            onPlaybackStart = voiceViewModel::playRecording,
-            onPlaybackStop = voiceViewModel::stopPlayback,
-            onCompleted = voiceViewModel::finishRecording,
-            isProcessing = voiceUiState.isProcessing,
-            onDismiss = voiceViewModel::onBottomSheetDismissed
+            },
+            onSkipVoiceRecording = {
+                imageBytes?.let {
+                    viewModel.skipVoiceRecording(it)
+                    onNavigateUp()
+                }
+            },
+            onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
+            onNavigateUp = onNavigateUp,
+            modifier = Modifier.fillMaxSize()
         )
+
+        if (voiceUiState.showVoiceRecordingBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = voiceViewModel::dismissVoiceRecordingBottomSheet,
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = androidx.compose.ui.graphics.Color.White,
+                dragHandle = null
+            ) {
+                RecordingScreen(
+                    capturedPhotoPath = uiState.capturedImageUri.toString(),
+                    sttText = "",
+                    state = voiceUiState.toRecordingControlsState(),
+                    amplitudes = voiceUiState.amplitudes,
+                    onReset = voiceViewModel::resetRecording,
+                    onRecordingStart = voiceViewModel::startRecording,
+                    onRecordingPause = voiceViewModel::pauseRecording,
+                    onRecordingResume = voiceViewModel::resumeRecording,
+                    onRecordingStop = voiceViewModel::stopRecording,
+                    onPlaybackStart = voiceViewModel::playRecording,
+                    onPlaybackStop = voiceViewModel::stopPlayback,
+                    onCompleted = voiceViewModel::finishRecording,
+                    isProcessing = voiceUiState.isProcessing
+                )
+            }
+        }
     }
 }
 
