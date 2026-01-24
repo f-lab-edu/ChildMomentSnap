@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components
+package com.jg.childmomentsnap.feature.moment.components.voice
 
 import android.content.Intent
 import android.net.Uri

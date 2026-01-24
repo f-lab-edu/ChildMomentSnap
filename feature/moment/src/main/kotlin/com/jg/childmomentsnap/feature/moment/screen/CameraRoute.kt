@@ -22,8 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
-import com.jg.childmomentsnap.feature.moment.components.VoiceRecordingBottomSheet
-import com.jg.childmomentsnap.feature.moment.components.RecordingScreen
+import com.jg.childmomentsnap.feature.moment.components.voice.RecordingScreen
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
 import com.jg.childmomentsnap.feature.moment.PermissionState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent

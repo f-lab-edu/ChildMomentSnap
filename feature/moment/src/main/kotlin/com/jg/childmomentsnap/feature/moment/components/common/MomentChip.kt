@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components
+package com.jg.childmomentsnap.feature.moment.components.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

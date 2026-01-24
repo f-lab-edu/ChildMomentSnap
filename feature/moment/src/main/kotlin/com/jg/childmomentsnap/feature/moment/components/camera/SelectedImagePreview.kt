@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components
+package com.jg.childmomentsnap.feature.moment.components.camera
 
 import android.net.Uri
 import androidx.compose.foundation.background

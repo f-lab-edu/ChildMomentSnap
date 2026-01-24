@@ -1,4 +1,6 @@
-package com.jg.childmomentsnap.feature.moment.components
+package com.jg.childmomentsnap.feature.moment.components.voice
+
+import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
