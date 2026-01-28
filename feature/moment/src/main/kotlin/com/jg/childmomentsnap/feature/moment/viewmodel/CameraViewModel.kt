@@ -256,7 +256,6 @@ class CameraViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     currentState.copy(
                         isProcessingImage = false,
-                        selectedImageUri = null, // 성공 후 선택된 이미지 초기화
                         visionAnalysis = analysis
                     )
                 }

@@ -95,9 +95,10 @@ internal fun CameraRoute(
     var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
     val imageBytes: ByteArray? by produceState<ByteArray?>(
         initialValue = null,
-        key1 = uiState.capturedImageUri
+        key1 = uiState.capturedImageUri,
+        key2 = uiState.selectedImageUri
     ) {
-        val uri = uiState.capturedImageUri
+        val uri = uiState.selectedImageUri ?: uiState.capturedImageUri
         value = if (uri != null) {
             withContext(Dispatchers.IO) {
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -206,6 +207,10 @@ internal fun CameraRoute(
                     viewModel.confirmSelectedImage(
                         imageBytes = it
                     )
+                    // 파일 경로 설정
+                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
+                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
+                    voiceViewModel.showVoiceRecordingBottomSheet()
                 }
             },
             onCancelImage = viewModel::cancelSelectedImage,
@@ -255,7 +260,7 @@ internal fun CameraRoute(
                     .padding(top = 80.dp)
             ) {
                 RecordingScreen(
-                    capturedPhotoPath = uiState.capturedImageUri.toString(),
+                    capturedPhotoPath = (uiState.selectedImageUri ?: uiState.capturedImageUri).toString(),
                     sttText = "",
                     state = voiceUiState.toRecordingControlsState(),
                     amplitudes = voiceUiState.amplitudes,
