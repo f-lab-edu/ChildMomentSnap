@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.jg.childmomentsnap.feature.moment.CameraUiState
 import com.jg.childmomentsnap.feature.moment.PermissionState
-import com.jg.childmomentsnap.feature.moment.components.CapturedImagePreview
-import com.jg.childmomentsnap.feature.moment.components.PhotoPicker
-import com.jg.childmomentsnap.feature.moment.components.SelectedImagePreview
-import com.jg.childmomentsnap.feature.moment.components.ConfirmStartRecordingDialog
-import components.CameraLoadingScreen
-import components.CameraPermissionPermanentlyDeniedScreen
-import components.CameraPermissionScreen
-import components.CameraPreviewContainer
+import com.jg.childmomentsnap.feature.moment.components.camera.CapturedImagePreview
+import com.jg.childmomentsnap.feature.moment.components.camera.PhotoPicker
+import com.jg.childmomentsnap.feature.moment.components.camera.SelectedImagePreview
+import com.jg.childmomentsnap.feature.moment.components.voice.ConfirmStartRecordingDialog
+import com.jg.childmomentsnap.feature.moment.components.camera.CameraLoadingScreen
+import com.jg.childmomentsnap.feature.moment.components.camera.CameraPermissionPermanentlyDeniedScreen
+import com.jg.childmomentsnap.feature.moment.components.camera.CameraPermissionScreen
+import com.jg.childmomentsnap.feature.moment.components.camera.CameraPreviewContainer
 
 
 /**
@@ -155,8 +155,7 @@ internal fun CameraScreen(
             onVoicePermissionResult = onVoicePermissionResult,
             onConfirmVoiceRecording = onConfirmVoiceRecording,
             onSkipVoiceRecording = onSkipVoiceRecording,
-            onDismiss = onDismissVoiceRecordingDialog,
-            modifier = modifier
+            onDismiss = onDismissVoiceRecordingDialog
         )
     }
 }

@@ -1,4 +1,4 @@
-package components
+package com.jg.childmomentsnap.feature.moment.components.camera
 
 import android.content.Intent
 import android.net.Uri
@@ -39,9 +39,6 @@ import androidx.compose.ui.unit.dp
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.CameraUiState
 import com.jg.childmomentsnap.feature.moment.R
-import com.jg.childmomentsnap.feature.moment.components.CameraBottomControls
-import com.jg.childmomentsnap.feature.moment.components.CameraPreview
-import com.jg.childmomentsnap.feature.moment.components.CameraTopBar
 
 /**
  * 권한 확인 중에 표시되는 로딩 화면

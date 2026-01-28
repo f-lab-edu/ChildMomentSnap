@@ -295,7 +295,35 @@ class CameraViewModel @Inject constructor(
     }
 
     /**
+     * 촬영된 이미지에 대한 AI 분석 시작
+     */
+    fun startAnalysis(imageBytes: ByteArray) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
+            try {
+                val analysis = photoRepository.analyzeImage(imageBytes)
+
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false,
+                        visionAnalysis = analysis
+                    )
+                }
+
+            } catch (e: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isProcessingImage = false
+                    )
+                }
+                _uiEffect.emit(CameraUiEffect.ShowError("이미지를 분석하는 중 오류가 발생했습니다: ${e.message}"))
+            }
+        }
+    }
+
+    /**
      * 촬영된 사진 사용을 확인
+     * (기존 다이얼로그 로직은 유지하되, 새로운 흐름에서는 startAnalysis를 직접 호출하여 사용됨)
      */
     fun confirmCapturedImage() {
         _uiState.update { currentState ->
@@ -314,10 +342,15 @@ class CameraViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 capturedImageUri = null,
-                showCapturedImageDialog = false
+                showCapturedImageDialog = false,
+                visionAnalysis = null, // 분석 결과 초기화
+                showVoiceRecordingDialog = false
             )
         }
     }
+
+    // ... (rest of the file)
+
 
 
     /**
