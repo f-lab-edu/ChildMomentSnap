@@ -34,11 +34,15 @@ import kotlinx.coroutines.withContext
 import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.graphics.Color.Companion.White
 
 
 /**
@@ -212,6 +216,9 @@ internal fun CameraRoute(
             onConfirmCapturedImage = {
                 imageBytes?.let { bytes ->
                     viewModel.startAnalysis(bytes)
+                    // 파일 경로 설정
+                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
+                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
                     voiceViewModel.showVoiceRecordingBottomSheet()
                 }
             },
@@ -241,8 +248,11 @@ internal fun CameraRoute(
             ModalBottomSheet(
                 onDismissRequest = voiceViewModel::dismissVoiceRecordingBottomSheet,
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                containerColor = androidx.compose.ui.graphics.Color.White,
-                dragHandle = null
+                containerColor = White,
+                dragHandle = null,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 80.dp)
             ) {
                 RecordingScreen(
                     capturedPhotoPath = uiState.capturedImageUri.toString(),
@@ -262,7 +272,8 @@ internal fun CameraRoute(
                     hasVoicePermission = uiState.voicePermissionState == PermissionState.Granted,
                     onRequestVoicePermission = {
                         voicePermissionLauncher.launch(AppPermissions.Groups.getVoicePermissions().toTypedArray())
-                    }
+                    },
+                    onBackClick = voiceViewModel::dismissVoiceRecordingBottomSheet
                 )
             }
         }
