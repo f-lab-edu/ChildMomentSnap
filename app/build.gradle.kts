@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.cms.android.application.compose)
     alias(libs.plugins.cms.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.secrets.gradle.plugin)
 }
 
 
@@ -59,6 +60,11 @@ android {
                 "GOOGLE_APPLICATION_CREDENTIALS",
                 "\"google_credentials\""
             )
+            buildConfigField(
+                "String",
+                "GEMINI_AI_API_KEY",
+                getLocalProperty("GEMINI_AI_API_KEY")
+            )
             // Debug 빌드에서는 기본 debug keystore 사용
             // signingConfig = signingConfigs.getByName("release")
         }
@@ -87,6 +93,11 @@ android {
                 "String",
                 "GOOGLE_APPLICATION_CREDENTIALS",
                 "\"google_credentials\""
+            )
+            buildConfigField(
+                "String",
+                "GEMINI_AI_API_KEY",
+                getLocalProperty("GEMINI_AI_API_KEY")
             )
         }
     }
