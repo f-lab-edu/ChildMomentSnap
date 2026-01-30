@@ -5,6 +5,7 @@ import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,21 +62,20 @@ import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.graphics.SolidColor
 import com.jg.childmomentsnap.core.model.VisionAnalysis
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import com.jg.childmomentsnap.feature.moment.R
+import kotlin.text.ifEmpty
+import kotlin.text.isEmpty
+
 /**
  * 1. 고도화된 음성 녹음 및 실시간 STT 화면
  * 기존 BottomSheet의 정밀한 제어 기능과 전체 화면의 감성적인 레이아웃을 결합했습니다.
@@ -98,7 +98,8 @@ fun RecordingScreen(
     visionAnalysis: VisionAnalysis? = null,
     hasVoicePermission: Boolean = false,
     onRequestVoicePermission: () -> Unit = {},
-    onCompleted: () -> Unit = {}
+    onCompleted: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
 
     // 권한 요청 다이얼로그 상태
@@ -107,6 +108,8 @@ fun RecordingScreen(
     // 텍스트 필드 포커스 제어
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val scrollState = rememberScrollState()
 
     // 초기 진입 시 권한 확인
     LaunchedEffect(Unit) {
@@ -160,57 +163,24 @@ fun RecordingScreen(
                     .fillMaxSize()
                     .padding(24.dp)
             ) {
-                // 상단 콘텐츠 영역
                 Column(
-                    modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .verticalScroll(scrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // 상단: 촬영된 사진 작은 프리뷰
-                    Box(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(Stone100)
-                    ) {
-                        if (capturedPhotoPath.isNotEmpty()) {
-                            AsyncImage(
-                                model = capturedPhotoPath,
-                                contentDescription = stringResource(R.string.feature_moment_recording_screen_photo_description),
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.Image,
-                                contentDescription = null,
-                                modifier = Modifier.align(Alignment.Center),
-                                tint = Stone200
-                            )
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    Text(
-                        text = when {
-                            state.isRecording -> stringResource(R.string.feature_moment_recording_screen_title_recording)
-                            state.isPlaying -> stringResource(R.string.feature_moment_recording_screen_title_playing)
-                            state.isStopped -> stringResource(R.string.feature_moment_recording_screen_title_stopped)
-                            else -> stringResource(R.string.feature_moment_recording_screen_title_default)
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Stone900
-                    )
-                    
-                    Text(
-                        text = stringResource(R.string.feature_moment_recording_screen_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Stone400,
-                        modifier = Modifier.padding(top = 8.dp)
+                    TopTitle(
+                        onBackClick = onBackClick
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    // 상단: 촬영된 사진 작은 프리뷰
+                    TopPreview(
+                        capturedPhotoPath = capturedPhotoPath
+                    )
+
+                    StateGuideMessage(state = state)
 
                     // 중앙: 분석 결과 칩 & 텍스트 편집 영역
                     Column(
@@ -234,45 +204,18 @@ fun RecordingScreen(
                         }
 
                         // 텍스트 편집 카드
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 180.dp),
-                            shape = RoundedCornerShape(32.dp),
-                            colors = CardDefaults.cardColors(containerColor = Stone50)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize().padding(24.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                // STT 텍스트가 들어오면 그것을 보여주고, 아니면 분석된 텍스트나 힌트 표시
-                                val displayText = sttText.ifEmpty { visionAnalysis?.detectedText ?: "" }
-                                
-                                Text(
-                                    text = if (displayText.isEmpty()) stringResource(R.string.feature_moment_recording_screen_stt_placeholder) else displayText,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center,
-                                    color = if (displayText.isEmpty()) Stone300 else Stone800,
-                                    lineHeight = 28.sp
-                                )
-                            }
-                        }
+                        TextEditorCard(
+                            sttText = sttText,
+                            visionAnalysis = visionAnalysis
+                        )
                     }
-                }
 
-                // 하단 컨트롤 영역
-                Column(
-                    modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
                     // 하단: 음성 진폭 시각화 (Canvas 기반)
                     VoiceAmplitudeVisualizer(
                         amplitudes = amplitudes,
                         isRecording = state.isRecording,
                         modifier = Modifier.fillMaxWidth().height(80.dp)
                     )
-
-                    Spacer(modifier = Modifier.height(24.dp))
 
                     // 녹음 제어 버튼 영역 (권한 있을 때만 표시)
                     if (hasVoicePermission) {
@@ -286,12 +229,11 @@ fun RecordingScreen(
                             onPlaybackStart = onPlaybackStart,
                             onPlaybackStop = onPlaybackStop
                         )
+                        Spacer(modifier = Modifier.height(24.dp))
                     } else {
-                         // 권한 없을 때는 빈 공간 확보 (또는 텍스트 입력 안내)
-                         Spacer(modifier = Modifier.height(80.dp))
+                        // 권한 없을 때는 빈 공간 확보 (또는 텍스트 입력 안내)
+                        Spacer(modifier = Modifier.height(80.dp))
                     }
-
-                    Spacer(modifier = Modifier.height(32.dp))
 
                     // 최종 완료 버튼 (녹음 완료 또는 텍스트 모드일 때 표시)
                     // 텍스트 모드일 때는 항상 표시, 녹음 모드일 때는 정지/재생 상태일 때 표시
@@ -304,7 +246,7 @@ fun RecordingScreen(
 
                     AnimatedVisibility(
                         visible = showCompleteButton,
-                         modifier = Modifier.fillMaxWidth().height(56.dp)
+                        modifier = Modifier.fillMaxWidth().height(56.dp)
                     ) {
                         Button(
                             onClick = onCompleted,
@@ -324,10 +266,117 @@ fun RecordingScreen(
                             }
                         }
                     }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+private fun TopTitle(
+    onBackClick: () -> Unit
+) {
+    Row (
+        modifier = Modifier
+            .height(56.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            modifier = Modifier.clickable(onClick = onBackClick),
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = stringResource(R.string.feature_moment_back_button),
+            tint = Color.Black
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = stringResource(R.string.feature_moment_recording_screen_title_recording),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+private fun TopPreview(
+    capturedPhotoPath: String
+) {
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Stone100)
+    ) {
+        if (capturedPhotoPath.isNotEmpty()) {
+            AsyncImage(
+                model = capturedPhotoPath,
+                contentDescription = stringResource(R.string.feature_moment_recording_screen_photo_description),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                Icons.Default.Image,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.Center),
+                tint = Stone200
+            )
+        }
+    }
+}
+
+@Composable
+private fun StateGuideMessage(
+    state: RecordingControlsState
+) {
+    Text(
+        text = when {
+            state.isRecording -> stringResource(R.string.feature_moment_recording_screen_title_recording)
+            state.isPlaying -> stringResource(R.string.feature_moment_recording_screen_title_playing)
+            state.isStopped -> stringResource(R.string.feature_moment_recording_screen_title_stopped)
+            else -> stringResource(R.string.feature_moment_recording_screen_title_default)
+        },
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = Stone900
+    )
+
+    Text(
+        text = stringResource(R.string.feature_moment_recording_screen_subtitle),
+        style = MaterialTheme.typography.bodySmall,
+        color = Stone400,
+        modifier = Modifier.padding(top = 8.dp)
+    )
+}
+
+@Composable
+private fun TextEditorCard(
+    sttText: String,
+    visionAnalysis: VisionAnalysis?
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 90.dp),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Stone50)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // STT 텍스트가 들어오면 그것을 보여주고, 아니면 분석된 텍스트나 힌트 표시
+            val displayText = sttText.ifEmpty { visionAnalysis?.detectedText ?: "" }
+
+            Text(
+                text = if (displayText.isEmpty()) stringResource(R.string.feature_moment_recording_screen_stt_placeholder) else displayText,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = if (displayText.isEmpty()) Stone300 else Stone800,
+                lineHeight = 28.sp
+            )
         }
     }
 }
