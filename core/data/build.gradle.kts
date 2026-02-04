@@ -10,7 +10,6 @@ android {
 
 dependencies {
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.google.generativeai)
 
     api(projects.core.common)
     api(projects.core.domain)

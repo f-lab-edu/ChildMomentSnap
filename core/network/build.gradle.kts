@@ -33,4 +33,5 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlin.serialization)
+    implementation(libs.google.generativeai)
 }
