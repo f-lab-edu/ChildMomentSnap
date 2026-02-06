@@ -7,7 +7,13 @@ import com.jg.childmomentsnap.core.data.datasource.GoogleVisionRemoteDataSource
 import com.jg.childmomentsnap.core.data.datasource.GoogleVisionRemoteDataSourceImpl
 import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSource
 import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSourceImpl
+import com.jg.childmomentsnap.core.data.repository.DiaryRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.PhotoRepositoryImpl
+import com.jg.childmomentsnap.core.data.repository.VoiceRepositoryImpl
+import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
+import com.jg.childmomentsnap.core.domain.repository.VoiceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,8 +31,8 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindVoiceRepository(
-        voiceRepositoryImpl: com.jg.childmomentsnap.core.data.repository.VoiceRepositoryImpl
-    ): com.jg.childmomentsnap.core.domain.repository.VoiceRepository
+        voiceRepositoryImpl: VoiceRepositoryImpl
+    ): VoiceRepository
 
     @Binds
     abstract fun bindGoogleSpeechRemoteDataSource(
@@ -45,6 +51,11 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindDiaryRepository(
-        diaryRepositoryImpl: com.jg.childmomentsnap.core.data.repository.DiaryRepositoryImpl
-    ): com.jg.childmomentsnap.core.domain.repository.DiaryRepository
+        diaryRepositoryImpl: DiaryRepositoryImpl
+    ): DiaryRepository
+
+    @Binds
+    abstract fun bindGeminiApiServiceRemoteDataSource(
+        geminiApiRemoteDataSource: GeminiApiRemoteDataSourceImpl
+    ): GeminiApiRemoteDataSource
 }
