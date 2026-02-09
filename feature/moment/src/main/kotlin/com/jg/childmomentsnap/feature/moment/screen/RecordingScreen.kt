@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components.voice
+package com.jg.childmomentsnap.feature.moment.screen
 
 import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
 
@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,7 +84,7 @@ import kotlin.text.isEmpty
 @Composable
 fun RecordingScreen(
     capturedPhotoPath: String,
-    visionAnalysisContent: String,
+    visionAnalysisContent: String? = null,
     sttText: String,
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),
@@ -162,12 +163,12 @@ fun RecordingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
+                        .padding(horizontal = 24.dp)
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -193,7 +194,7 @@ fun RecordingScreen(
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                                 horizontalArrangement = Arrangement.Center,
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp)
+                                contentPadding = PaddingValues(horizontal = 24.dp)
                             ) {
                                 items(visionAnalysis.labels) { label ->
                                     MomentChip(
@@ -207,7 +208,7 @@ fun RecordingScreen(
                         // 텍스트 편집 카드
                         TextEditorCard(
                             sttText = sttText,
-                            visionAnalysis = visionAnalysis
+                            visionAnalysisContent = visionAnalysisContent
                         )
                     }
 
@@ -355,7 +356,7 @@ private fun StateGuideMessage(
 @Composable
 private fun TextEditorCard(
     sttText: String,
-    visionAnalysis: VisionAnalysis?
+    visionAnalysisContent: String?,
 ) {
     Card(
         modifier = Modifier
@@ -369,10 +370,14 @@ private fun TextEditorCard(
             contentAlignment = Alignment.Center
         ) {
             // STT 텍스트가 들어오면 그것을 보여주고, 아니면 분석된 텍스트나 힌트 표시
-            val displayText = sttText.ifEmpty { visionAnalysis?.detectedText ?: "" }
+            val displayText= if (visionAnalysisContent?.isEmpty() == true) {
+                stringResource(R.string.feature_moment_recording_screen_stt_placeholder)
+            } else  {
+                "$visionAnalysisContent\n $sttText"
+            }
 
             Text(
-                text = if (displayText.isEmpty()) stringResource(R.string.feature_moment_recording_screen_stt_placeholder) else displayText,
+                text = displayText,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = if (displayText.isEmpty()) Stone300 else Stone800,

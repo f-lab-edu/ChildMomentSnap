@@ -6,7 +6,6 @@ import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSource
 import com.jg.childmomentsnap.core.data.mapper.toDomain
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.model.Diary
-import com.jg.childmomentsnap.core.model.GeminiAnalysis
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -20,9 +19,9 @@ class DiaryRepositoryImpl @Inject constructor(
 ) : DiaryRepository {
     override suspend fun generateDairy(
         prompt: String
-    ): DataResult<GeminiAnalysis>  {
+    ): DataResult<String>  {
         return when (val response = geminiApiRemoteDataSource.generateDiary(prompt)) {
-            is DataResult.Success -> DataResult.Success(response.data.toDomain())
+            is DataResult.Success -> DataResult.Success(response.data.analysisResult)
             is DataResult.Fail -> DataResult.Fail(
                 code = response.code,
                 message = response.message,

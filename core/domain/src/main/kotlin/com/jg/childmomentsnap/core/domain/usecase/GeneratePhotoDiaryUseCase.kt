@@ -31,8 +31,13 @@ class GeneratePhotoDiaryUseCaseImpl @Inject constructor(
         )
 
         return when (val result = diaryRepository.generateDairy(prompt)) {
-            is DataResult.Success -> DomainResult.Success(result.data)
-            is DataResult.Fail -> DomainResult.Fail(result.message ?: "") // TODO 에러 코드 대응 필요
+            is DataResult.Success -> DomainResult.Success(
+                GeminiAnalysis(
+                    content = result.data,
+                    visionAnalysis = visionResult
+                )
+            )
+            is DataResult.Fail -> DomainResult.Fail(result.message ?: "")
         }
     }
 }

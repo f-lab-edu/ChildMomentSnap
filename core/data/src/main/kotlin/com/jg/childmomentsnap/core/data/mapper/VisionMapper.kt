@@ -16,11 +16,11 @@ fun VisionResponseDto.toDomain(): VisionAnalysis {
 
     val labels = flattenedResponses
         .flatMap { it.labelAnnotations.orEmpty() }
-        .map { it.toDomainLabel() }
+        .mapNotNull { it.toDomainLabelOrNull() }
 
     val objects = flattenedResponses
         .flatMap { it.localizedObjectAnnotations.orEmpty() }
-        .map { it.toDomainObject() }
+        .mapNotNull { it.toDomainObjectOrNull() }
 
     val faces = flattenedResponses
         .flatMap { it.faceAnnotations.orEmpty() }
@@ -41,22 +41,26 @@ fun VisionResponseDto.toDomain(): VisionAnalysis {
     )
 }
 
-private fun VisionEntityAnnotationDto.toDomainLabel(): VisionLabel =
-    VisionLabel(
-        description = description,
-        score = score,
+private fun VisionEntityAnnotationDto.toDomainLabelOrNull(): VisionLabel? {
+    val desc = description ?: return null
+    return VisionLabel(
+        description = desc,
+        score = score ?: 0f,
         topicality = topicality
     )
+}
 
-private fun VisionLocalizedObjectAnnotationDto.toDomainObject(): VisionObject =
-    VisionObject(
-        name = name,
-        score = score
+private fun VisionLocalizedObjectAnnotationDto.toDomainObjectOrNull(): VisionObject? {
+    val objectName = name ?: return null
+    return VisionObject(
+        name = objectName,
+        score = score ?: 0f
     )
+}
 
 private fun VisionFaceAnnotationDto.toDomainFace(): VisionFaceEmotion =
     VisionFaceEmotion(
-        detectionConfidence = detectionConfidence,
+        detectionConfidence = detectionConfidence ?: 0f,
         joy = joyLikelihood.toDomain(),
         sorrow = sorrowLikelihood.toDomain(),
         anger = angerLikelihood.toDomain(),
@@ -71,3 +75,4 @@ private fun VisionLikelihoodDto?.toDomain(): VisionLikelihood = when (this) {
     VisionLikelihoodDto.LIKELY -> VisionLikelihood.LIKELY
     VisionLikelihoodDto.VERY_LIKELY -> VisionLikelihood.VERY_LIKELY
 }
+

@@ -4,12 +4,17 @@ import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
+import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCase
 import com.jg.childmomentsnap.feature.moment.CameraState
 import com.jg.childmomentsnap.feature.moment.CameraUiState
 import com.jg.childmomentsnap.feature.moment.PermissionState
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
+import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
+import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -26,7 +32,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
+    private val generatePhotoDiaryUseCase: GeneratePhotoDiaryUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CameraUiState())
@@ -244,30 +251,35 @@ class CameraViewModel @Inject constructor(
     }
 
     /**
-     * 선택된 이미지 사용을 확인하고 AI 처리를 시작
+     * AI 분석을 실행하고 성공 시 RecordingScreen으로 이동하는 이벤트 발생
      */
-    fun confirmSelectedImage(imageBytes: ByteArray) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isProcessingImage = true, visionAnalysis = null) }
-            try {
-                val analysis = photoRepository.analyzeImage(imageBytes)
+    fun generatePhotoDiary(imageBytes: ByteArray, imageUri: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isProcessingImage = true) }
 
-                // 성공 시, 결과 화면으로 이동하거나 상태를 업데이트 합니다.
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isProcessingImage = false,
-                        visionAnalysis = analysis
-                    )
+            when (val result = generatePhotoDiaryUseCase(imageBytes)) {
+                is DomainResult.Success -> {
+                    withContext(Dispatchers.Main) {
+                        _uiEffect.emit(
+                            CameraUiEffect.NavigateToRecording(
+                                imageUri = imageUri,
+                                visionAnalysisContent = result.data.content,
+                                visionAnalysis = result.data.visionAnalysis
+                            )
+                        )
+                    }
                 }
 
-            } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isProcessingImage = false
-                    )
+                is DomainResult.Fail -> {
+                    withContext(Dispatchers.Main) {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                isProcessingImage = false
+                            )
+                        }
+                        _uiEffect.emit(CameraUiEffect.ShowError("이미지를 분석하는 중 오류가 발생했습니다: ${result.error}"))
+                    }
                 }
-
-                _uiEffect.emit(CameraUiEffect.ShowError("이미지를 처리하는 중 오류가 발생했습니다: ${e.message}"))
             }
         }
     }

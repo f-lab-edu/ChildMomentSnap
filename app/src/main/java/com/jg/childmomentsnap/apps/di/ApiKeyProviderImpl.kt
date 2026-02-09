@@ -8,4 +8,8 @@ class ApiKeyProviderImpl @Inject constructor() : ApiKeyProvider {
     override fun getVisionApiKey(): String {
         return BuildConfig.GOOGLE_CLOUD_API_KEY
     }
+    
+    override fun getGeminiApiKey(): String {
+        return BuildConfig.GEMINI_AI_API_KEY
+    }
 }

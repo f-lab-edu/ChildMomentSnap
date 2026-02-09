@@ -1,12 +1,12 @@
 package com.jg.childmomentsnap.feature.moment
 
 import androidx.compose.runtime.Stable
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 /**
  * 음성 녹음 기능의 UI 상태
  * 
  * 순수하게 녹음 기능만 관리합니다.
- * 권한은 CameraViewModel에서 관리하므로 제외됩니다.
  */
 @Stable
 data class VoiceRecordingUiState(
@@ -19,6 +19,9 @@ data class VoiceRecordingUiState(
     val amplitudes: List<Float> = emptyList(),
     val isProcessing: Boolean = false,
     val visionAnalysisContent: String? = null,
+    val hasVoicePermission: Boolean = false,
+    val imageUri: String? = null,
+    val visionAnalysis: VisionAnalysis? = null,
 ) {
     /**
      * RecordingControlsState로 변환하는 편의 함수
@@ -27,3 +30,4 @@ data class VoiceRecordingUiState(
         return RecordingControlsState.fromRecordingState(recordingState)
     }
 }
+
