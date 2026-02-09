@@ -83,6 +83,7 @@ import kotlin.text.isEmpty
 @Composable
 fun RecordingScreen(
     capturedPhotoPath: String,
+    visionAnalysisContent: String,
     sttText: String,
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),

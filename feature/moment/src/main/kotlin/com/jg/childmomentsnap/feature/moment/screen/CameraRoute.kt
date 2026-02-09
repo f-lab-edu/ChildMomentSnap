@@ -25,7 +25,6 @@ import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.feature.moment.components.voice.RecordingScreen
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
 import com.jg.childmomentsnap.feature.moment.PermissionState
-import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
 import com.jg.childmomentsnap.feature.moment.viewmodel.VoiceRecordingViewModel
@@ -108,6 +107,10 @@ internal fun CameraRoute(
         } else {
             null
         }
+    }
+
+    LaunchedEffect(imageBytes) {
+        voiceViewModel.setImageBytes(imageBytes)
     }
 
     DisposableEffect(lifecycleOwner, activity) {
@@ -261,6 +264,7 @@ internal fun CameraRoute(
             ) {
                 RecordingScreen(
                     capturedPhotoPath = (uiState.selectedImageUri ?: uiState.capturedImageUri).toString(),
+                    visionAnalysisContent = voiceUiState.visionAnalysisContent ?: "",
                     sttText = "",
                     state = voiceUiState.toRecordingControlsState(),
                     amplitudes = voiceUiState.amplitudes,
@@ -314,5 +318,9 @@ private fun getVoiceRecordingErrorMessage(context: Context, errorType: VoiceReco
             context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_stop_failed)
         VoiceRecordingError.RESET_FAILED -> 
             context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_reset_failed)
+        VoiceRecordingError.IMAGE_FILE_PATH_NOT_SET ->
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_reset_failed)
+        VoiceRecordingError.PHOTO_DIARY_GENERATION_FAILED ->
+            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_photo_diary)
     }
 }

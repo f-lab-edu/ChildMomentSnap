@@ -66,6 +66,8 @@
     <string name="feature_moment_error_playback_error">재생 중 오류가 발생했습니다.</string>
     <string name="feature_moment_error_playback_stop_failed">재생 정지 중 오류가 발생했습니다.</string>
     <string name="feature_moment_error_reset_failed">리셋 중 오류가 발생했습니다.</string>
+    <string name="feature_moment_error_image_path_not_set">이미지 파일이 손상 되었습니다. 다시 촬영해주세요.</string>
+    <string name="feature_moment_error_photo_diary">AI 일기 생성에 실패 하였습니다.</string>
 
     <!-- Recording Screen -->
     <string name="feature_moment_recording_screen_photo_description">촬영된 사진</string>

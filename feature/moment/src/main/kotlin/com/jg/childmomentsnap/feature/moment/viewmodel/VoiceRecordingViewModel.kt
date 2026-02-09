@@ -2,6 +2,8 @@ package com.jg.childmomentsnap.feature.moment.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.common.result.DomainResult
+import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ProcessMomentUseCase
 import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.VoiceRecordingUiState
@@ -10,6 +12,7 @@ import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import com.jg.childmomentsnap.feature.moment.util.VoicePlayer
 import com.jg.childmomentsnap.feature.moment.util.VoiceRecorder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -37,6 +41,7 @@ private val MAX_MEDIA_RECORDER_AMPLITUDE = Short.MAX_VALUE.toFloat()
 @HiltViewModel
 class VoiceRecordingViewModel @Inject constructor(
     private val processMomentUseCase: ProcessMomentUseCase,
+    private val generatePhotoDiaryUseCase: GeneratePhotoDiaryUseCase,
     private val voiceRecorder: VoiceRecorder,
     private val voicePlayer: VoicePlayer
 ) : ViewModel() {
@@ -90,7 +95,7 @@ class VoiceRecordingViewModel @Inject constructor(
         }
     }
 
-    fun setImageBytes(bytes: ByteArray) {
+    fun setImageBytes(bytes: ByteArray?) {
         imageBytes = bytes
     }
 
@@ -297,9 +302,49 @@ class VoiceRecordingViewModel @Inject constructor(
         }
     }
 
+    fun generatePhotoDiary() {
+        viewModelScope.launch(Dispatchers.IO) {
+            imageBytes?.let { currentImageBytes ->
+                _uiState.update { it.copy(isProcessing = true) }
+
+                when (val result = generatePhotoDiaryUseCase(currentImageBytes)) {
+                    is DomainResult.Success -> {
+                        withContext(Dispatchers.Main) {
+                            _uiState.update { current ->
+                                current.copy(
+                                    visionAnalysisContent = result.data.content,
+                                    isProcessing = false
+                                )
+                            }
+                        }
+                    }
+
+                    is DomainResult.Fail -> {
+                        withContext(Dispatchers.Main) {
+                            _uiState.update { it.copy(isProcessing = false) }
+                            _uiEffect.emit(
+                                VoiceRecordingUiEffect.ShowErrorToast(
+                                    VoiceRecordingError.PHOTO_DIARY_GENERATION_FAILED
+                                )
+                            )
+                        }
+                    }
+                }
+            } ?: run {
+                _uiEffect.emit(
+                    VoiceRecordingUiEffect.ShowErrorToast(
+                        VoiceRecordingError.IMAGE_FILE_PATH_NOT_SET
+                    )
+                )
+                return@launch
+            }
+        }
+    }
+
 
     /**
      * 녹음 완료 및 AI 처리 시작
+     * TODO 녹음과 함꼐 처리 할 방안 추가 대응 필요
      */
     fun finishRecording() {
         viewModelScope.launch {
