@@ -22,27 +22,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
-import com.jg.childmomentsnap.feature.moment.components.voice.RecordingScreen
 import com.jg.childmomentsnap.feature.moment.model.CameraUiEffect
-import com.jg.childmomentsnap.feature.moment.PermissionState
-import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingNavigationEvent
-import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
-import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
-import com.jg.childmomentsnap.feature.moment.viewmodel.VoiceRecordingViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.graphics.Color.Companion.White
+import com.jg.childmomentsnap.core.model.VisionAnalysis
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -51,21 +36,21 @@ import androidx.compose.ui.graphics.Color.Companion.White
  * 이 컴포저블은 카메라 기능의 메인 진입점 역할을 하며,
  * ViewModel 통합과 UI 레이어에서의 권한 확인을 처리합니다.
  *
+ * @param onBackClick 뒤로 이동 콜백
  * @param onNavigateUp 뒤로 이동 콜백
+ * @param onNavigateToRecording 이미지 확정 후 RecordingScreen으로 이동하는 콜백 (imageUri, visionAnalysisContent)
  * @param modifier 스타일링을 위한 Modifier
  * @param viewModel 카메라 ViewModel 인스턴스
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CameraRoute(
     onBackClick: () -> Unit,
     onNavigateUp: () -> Unit,
+    onNavigateToRecording: (imageUri: String, visionAnalysisContent: String, visionAnalysis: VisionAnalysis) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CameraViewModel = hiltViewModel(),
-    voiceViewModel: VoiceRecordingViewModel = hiltViewModel()
+    viewModel: CameraViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val voiceUiState by voiceViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     // 뒤로가기 임시
@@ -80,19 +65,7 @@ internal fun CameraRoute(
         viewModel.updatePermissionState(hasAllCameraPermissions, hasAllVoicePermissions)
     }
 
-    // 앱이 포그라운드로 돌아올 때 권한 재확인
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val activity = context as? Activity
-    
-    // 음성 권한 요청 Launcher
-    val voicePermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            viewModel.onVoicePermissionResult(permissions)
-        }
-    )
-
-    var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
+    // 이미지 바이트 로드
     val imageBytes: ByteArray? by produceState<ByteArray?>(
         initialValue = null,
         key1 = uiState.capturedImageUri,
@@ -109,6 +82,12 @@ internal fun CameraRoute(
             null
         }
     }
+
+    // 앱이 포그라운드로 돌아올 때 권한 재확인
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val activity = context as? Activity
+
+    var lastPermissionState by remember { mutableStateOf<Boolean?>(null) }
 
     DisposableEffect(lifecycleOwner, activity) {
         val observer = LifecycleEventObserver { _, event ->
@@ -152,32 +131,8 @@ internal fun CameraRoute(
                     is CameraUiEffect.ShowError -> {
                         Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                     }
-                }
-            }
-    }
-
-    // VoiceRecording UI Effects 처리
-    LaunchedEffect(Unit) {
-        voiceViewModel.uiEffect
-            .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-            .collect { effect ->
-                when (effect) {
-                    is VoiceRecordingUiEffect.ShowErrorToast -> {
-                        val message = getVoiceRecordingErrorMessage(context, effect.errorType)
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    }
-                    is VoiceRecordingUiEffect.MomentAnalysisCompleted -> {
-                        // AI 분석 완료 처리
-                        // TODO: 결과 데이터를 가지고 다음 화면(글쓰기/확인)으로 이동
-                        // 우선은 이전 로직 유지하여 종료 처리
-                         imageBytes?.let { bytes ->
-                             viewModel.onVoiceRecordingCompleted(bytes, effect.momentData.transcription)
-                             onNavigateUp()
-                         }
-                    }
-                    is VoiceRecordingUiEffect.NotifyRecordingCompleted -> {
-                        // 이전 호환성을 위해 유지 (필요 없는 경우 제거 가능)
-                        onNavigateUp()
+                    is CameraUiEffect.NavigateToRecording -> {
+                        onNavigateToRecording(effect.imageUri, effect.visionAnalysisContent, effect.visionAnalysis)
                     }
                 }
             }
@@ -203,14 +158,10 @@ internal fun CameraRoute(
             onImageSelected = viewModel::onImageSelected,
             onDismissGalleryPicker = viewModel::dismissGalleryPicker,
             onConfirmImage = {
-                imageBytes?.let {
-                    viewModel.confirmSelectedImage(
-                        imageBytes = it
-                    )
-                    // 파일 경로 설정
-                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
-                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
-                    voiceViewModel.showVoiceRecordingBottomSheet()
+                // 갤러리에서 선택한 이미지 확정 -> AI 분석 시작
+                val imageUri = uiState.selectedImageUri?.toString()
+                if (imageUri != null && imageBytes != null) {
+                    viewModel.generatePhotoDiary(imageBytes!!, imageUri)
                 }
             },
             onCancelImage = viewModel::cancelSelectedImage,
@@ -219,100 +170,29 @@ internal fun CameraRoute(
             onPhotoCaptured = viewModel::onPhotoCaptured,
             onCaptureComplete = viewModel::onCaptureComplete,
             onConfirmCapturedImage = {
-                imageBytes?.let { bytes ->
-                    viewModel.startAnalysis(bytes)
-                    // 파일 경로 설정
-                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
-                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
-                    voiceViewModel.showVoiceRecordingBottomSheet()
+                // 촬영한 이미지 확정 -> AI 분석 시작
+                val imageUri = uiState.capturedImageUri?.toString()
+                if (imageUri != null && imageBytes != null) {
+                    viewModel.generatePhotoDiary(imageBytes!!, imageUri)
                 }
             },
             onRetakeCapturedPhoto = viewModel::retakeCapturedPhoto,
             onConfirmVoiceRecording = {
-                imageBytes?.let {
-                    viewModel.confirmVoiceRecording(it)
-                    // 파일 경로 설정
-                    val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
-                    voiceViewModel.setVoiceRecordingFilePath(recordingFilePath)
-                    // BottomSheet 표시
-                    voiceViewModel.showVoiceRecordingBottomSheet()
+                // VoiceRecording 확인 -> AI 분석 시작
+                val imageUri = (uiState.selectedImageUri ?: uiState.capturedImageUri)?.toString()
+                if (imageUri != null && imageBytes != null) {
+                    viewModel.generatePhotoDiary(imageBytes!!, imageUri)
                 }
             },
             onSkipVoiceRecording = {
-                imageBytes?.let {
-                    viewModel.skipVoiceRecording(it)
-                    onNavigateUp()
-                }
+                // 음성 녹음 스킵 -> 바로 완료
+                onNavigateUp()
             },
             onDismissVoiceRecordingDialog = viewModel::dismissVoiceRecordingDialog,
             onNavigateUp = onNavigateUp,
             modifier = Modifier.fillMaxSize()
         )
-
-        if (voiceUiState.showVoiceRecordingBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = voiceViewModel::dismissVoiceRecordingBottomSheet,
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                containerColor = White,
-                dragHandle = null,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(top = 80.dp)
-            ) {
-                RecordingScreen(
-                    capturedPhotoPath = (uiState.selectedImageUri ?: uiState.capturedImageUri).toString(),
-                    sttText = "",
-                    state = voiceUiState.toRecordingControlsState(),
-                    amplitudes = voiceUiState.amplitudes,
-                    onReset = voiceViewModel::resetRecording,
-                    onRecordingStart = voiceViewModel::startRecording,
-                    onRecordingPause = voiceViewModel::pauseRecording,
-                    onRecordingResume = voiceViewModel::resumeRecording,
-                    onRecordingStop = voiceViewModel::stopRecording,
-                    onPlaybackStart = voiceViewModel::playRecording,
-                    onPlaybackStop = voiceViewModel::stopPlayback,
-                    onCompleted = voiceViewModel::finishRecording,
-                    isProcessing = voiceUiState.isProcessing,
-                    visionAnalysis = uiState.visionAnalysis,
-                    hasVoicePermission = uiState.voicePermissionState == PermissionState.Granted,
-                    onRequestVoicePermission = {
-                        voicePermissionLauncher.launch(AppPermissions.Groups.getVoicePermissions().toTypedArray())
-                    },
-                    onBackClick = voiceViewModel::dismissVoiceRecordingBottomSheet
-                )
-            }
-        }
     }
 }
 
-private const val FILE_NAME = "recording.mp4"
 
-/**
- * VoiceRecordingError enum을 String Resource 기반 에러 메시지로 변환
- */
-private fun getVoiceRecordingErrorMessage(context: Context, errorType: VoiceRecordingError): String {
-    return when (errorType) {
-        VoiceRecordingError.RECORDING_FILE_PATH_NOT_SET -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_file_path_not_set)
-        VoiceRecordingError.RECORDING_START_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_start_failed)
-        VoiceRecordingError.RECORDING_PAUSE_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_pause_failed)
-        VoiceRecordingError.RECORDING_RESUME_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_resume_failed)
-        VoiceRecordingError.RECORDING_STOP_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_stop_failed)
-        VoiceRecordingError.NO_RECORDING_FILE_TO_PLAY -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_no_recording_file_to_play)
-        VoiceRecordingError.RECORDING_FILE_NOT_FOUND -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_recording_file_not_found)
-        VoiceRecordingError.PLAYBACK_START_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_start_failed)
-        VoiceRecordingError.PLAYBACK_ERROR -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_error)
-        VoiceRecordingError.PLAYBACK_STOP_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_playback_stop_failed)
-        VoiceRecordingError.RESET_FAILED -> 
-            context.getString(com.jg.childmomentsnap.feature.moment.R.string.feature_moment_error_reset_failed)
-    }
-}

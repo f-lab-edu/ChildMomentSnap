@@ -1,6 +1,4 @@
-package com.jg.childmomentsnap.feature.moment.components.voice
-
-import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
+package com.jg.childmomentsnap.feature.moment.screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -9,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,15 +16,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,17 +41,32 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.MomentsTheme
 import com.jg.childmomentsnap.core.ui.theme.Rose400
@@ -56,34 +77,19 @@ import com.jg.childmomentsnap.core.ui.theme.Stone400
 import com.jg.childmomentsnap.core.ui.theme.Stone50
 import com.jg.childmomentsnap.core.ui.theme.Stone800
 import com.jg.childmomentsnap.core.ui.theme.Stone900
-import com.jg.childmomentsnap.feature.moment.RecordingControlsState
-import kotlin.math.sin
-import coil.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.runtime.*
-import androidx.compose.ui.focus.FocusRequester
-import com.jg.childmomentsnap.core.model.VisionAnalysis
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import com.jg.childmomentsnap.feature.moment.R
-import kotlin.text.ifEmpty
-import kotlin.text.isEmpty
+import com.jg.childmomentsnap.feature.moment.RecordingControlsState
+import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
+import kotlin.math.sin
 
 /**
  * 1. 고도화된 음성 녹음 및 실시간 STT 화면
- * 기존 BottomSheet의 정밀한 제어 기능과 전체 화면의 감성적인 레이아웃을 결합했습니다.
  */
 @Composable
 fun RecordingScreen(
     capturedPhotoPath: String,
-    sttText: String,
+    content: String,
+    onContentChange: (String) -> Unit,
     state: RecordingControlsState,
     amplitudes: List<Float> = emptyList(),
     isProcessing: Boolean = false,
@@ -94,7 +100,7 @@ fun RecordingScreen(
     onRecordingStop: () -> Unit = {},
     onPlaybackStart: () -> Unit = {},
     onPlaybackStop: () -> Unit = {},
-    onPlaying: () -> Unit = {}, // Not used but compliant with previous? No wait, strict sig.
+    onPlaying: () -> Unit = {},
     visionAnalysis: VisionAnalysis? = null,
     hasVoicePermission: Boolean = false,
     onRequestVoicePermission: () -> Unit = {},
@@ -104,12 +110,10 @@ fun RecordingScreen(
 
     // 권한 요청 다이얼로그 상태
     var showPermissionRationale by remember { mutableStateOf(false) }
-    
+
     // 텍스트 필드 포커스 제어
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    val scrollState = rememberScrollState()
 
     // 초기 진입 시 권한 확인
     LaunchedEffect(Unit) {
@@ -120,8 +124,8 @@ fun RecordingScreen(
 
     if (showPermissionRationale) {
         AlertDialog(
-            onDismissRequest = { 
-                showPermissionRationale = false 
+            onDismissRequest = {
+                showPermissionRationale = false
                 // 거절 시 텍스트 포커스
                 focusRequester.requestFocus()
                 keyboardController?.show()
@@ -152,118 +156,121 @@ fun RecordingScreen(
             containerColor = Color.White
         )
     }
-    MomentsTheme {
-        Box(
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.White,
+        topBar = {
+            TopTitle(
+                onBackClick = onBackClick
+            )
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp)
+                    .weight(1f)
+                    .padding(top = 24.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
-                        .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    TopTitle(
-                        onBackClick = onBackClick
+                // 상단: 촬영된 사진 작은 프리뷰
+                CaptureThumbnail(
+                    capturedPhotoPath = capturedPhotoPath
+                )
+
+                StateGuideMessage(state = state)
+
+                // Moment Chips
+                if (visionAnalysis?.faces?.isNotEmpty() == true) {
+                    FaceMomentChip(visionAnalysis)
+                }
+
+                // 텍스트 편집 카드
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()) {
+                    TextEditorCard(
+                        content = content,
+                        onContentChange = onContentChange
                     )
+                }
+            }
 
-                    // 상단: 촬영된 사진 작은 프리뷰
-                    TopPreview(
-                        capturedPhotoPath = capturedPhotoPath
-                    )
-
-                    StateGuideMessage(state = state)
-
-                    // 중앙: 분석 결과 칩 & 텍스트 편집 영역
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Moment Chips
-                       if (visionAnalysis?.labels?.isNotEmpty() == true) {
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp)
-                            ) {
-                                items(visionAnalysis.labels) { label ->
-                                    MomentChip(
-                                        text = "#${label.description}",
-                                        modifier = Modifier.padding(end = 8.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        // 텍스트 편집 카드
-                        TextEditorCard(
-                            sttText = sttText,
-                            visionAnalysis = visionAnalysis
-                        )
-                    }
-
-                    // 하단: 음성 진폭 시각화 (Canvas 기반)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                // 하단: 음성 진폭 시각화 (Canvas 기반)
+                if (amplitudes.isNotEmpty()) {
                     VoiceAmplitudeVisualizer(
                         amplitudes = amplitudes,
                         isRecording = state.isRecording,
-                        modifier = Modifier.fillMaxWidth().height(80.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
                     )
+                }
 
-                    // 녹음 제어 버튼 영역 (권한 있을 때만 표시)
-                    if (hasVoicePermission) {
-                        RecordingControls(
-                            state = state,
-                            onReset = onReset,
-                            onRecordingStart = onRecordingStart,
-                            onRecordingPause = onRecordingPause,
-                            onRecordingResume = onRecordingResume,
-                            onRecordingStop = onRecordingStop,
-                            onPlaybackStart = onPlaybackStart,
-                            onPlaybackStop = onPlaybackStop
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                    } else {
-                        // 권한 없을 때는 빈 공간 확보 (또는 텍스트 입력 안내)
-                        Spacer(modifier = Modifier.height(80.dp))
-                    }
 
-                    // 최종 완료 버튼 (녹음 완료 또는 텍스트 모드일 때 표시)
-                    // 텍스트 모드일 때는 항상 표시, 녹음 모드일 때는 정지/재생 상태일 때 표시
-                    val showCompleteButton = if (hasVoicePermission) {
-                        state.isStopped || state.isPlaying
-                    } else {
-                        // 텍스트 모드면 항상 표시 (단, 처리중 아닐때)
-                        true
-                    }
+                // 녹음 제어 버튼 영역 (권한 있을 때만 표시)
+                if (hasVoicePermission) {
+                    RecordingControls(
+                        state = state,
+                        onReset = onReset,
+                        onRecordingStart = onRecordingStart,
+                        onRecordingPause = onRecordingPause,
+                        onRecordingResume = onRecordingResume,
+                        onRecordingStop = onRecordingStop,
+                        onPlaybackStart = onPlaybackStart,
+                        onPlaybackStop = onPlaybackStop
+                    )
+                } else {
+                    // 권한 없을 때는 빈 공간 확보 (또는 텍스트 입력 안내)
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
 
-                    AnimatedVisibility(
-                        visible = showCompleteButton,
-                        modifier = Modifier.fillMaxWidth().height(56.dp)
+                // 최종 완료 버튼 (녹음 완료 또는 텍스트 모드일 때 표시)
+                // 텍스트 모드일 때는 항상 표시, 녹음 모드일 때는 정지/재생 상태일 때 표시
+                val showCompleteButton = if (hasVoicePermission) {
+                    state.isStopped || state.isPlaying
+                } else {
+                    // 텍스트 모드면 항상 표시 (단, 처리중 아닐때)
+                    true
+                }
+
+                AnimatedVisibility(
+                    visible = showCompleteButton,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Button(
+                        onClick = onCompleted,
+                        modifier = Modifier.fillMaxSize(),
+                        enabled = !isProcessing,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Amber500)
                     ) {
-                        Button(
-                            onClick = onCompleted,
-                            modifier = Modifier.fillMaxSize(),
-                            enabled = !isProcessing,
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Amber500)
-                        ) {
-                            if (isProcessing) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text(stringResource(R.string.feature_moment_recording_screen_button_completed), fontWeight = FontWeight.Bold)
-                            }
+                        if (isProcessing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                stringResource(R.string.feature_moment_recording_screen_button_completed),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -277,9 +284,10 @@ fun RecordingScreen(
 private fun TopTitle(
     onBackClick: () -> Unit
 ) {
-    Row (
+    Row(
         modifier = Modifier
             .height(56.dp)
+            .padding(horizontal = 24.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -300,7 +308,7 @@ private fun TopTitle(
 }
 
 @Composable
-private fun TopPreview(
+private fun CaptureThumbnail(
     capturedPhotoPath: String
 ) {
     Box(
@@ -322,6 +330,26 @@ private fun TopPreview(
                 contentDescription = null,
                 modifier = Modifier.align(Alignment.Center),
                 tint = Stone200
+            )
+        }
+    }
+}
+
+@Composable
+fun FaceMomentChip(
+    visionAnalysis: VisionAnalysis
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        contentPadding = PaddingValues(horizontal = 24.dp)
+    ) {
+        items(visionAnalysis.faces) { face ->
+            MomentChip(
+                text = "#$face",
+                modifier = Modifier.padding(end = 8.dp)
             )
         }
     }
@@ -353,29 +381,45 @@ private fun StateGuideMessage(
 
 @Composable
 private fun TextEditorCard(
-    sttText: String,
-    visionAnalysis: VisionAnalysis?
+    content: String,
+    onContentChange: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 90.dp),
-        shape = RoundedCornerShape(32.dp),
+            .heightIn(min = 150.dp)
+            .padding(bottom = 8.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Stone50)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // STT 텍스트가 들어오면 그것을 보여주고, 아니면 분석된 텍스트나 힌트 표시
-            val displayText = sttText.ifEmpty { visionAnalysis?.detectedText ?: "" }
+        val scrollState = rememberScrollState()
 
-            Text(
-                text = if (displayText.isEmpty()) stringResource(R.string.feature_moment_recording_screen_stt_placeholder) else displayText,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = if (displayText.isEmpty()) Stone300 else Stone800,
-                lineHeight = 28.sp
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(scrollState),
+            contentAlignment = Alignment.TopStart
+        ) {
+            if (content.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.feature_moment_recording_screen_stt_placeholder),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Stone300,
+                    textAlign = TextAlign.Start
+                )
+            }
+
+            BasicTextField(
+                value = content,
+                onValueChange = onContentChange,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = Stone800,
+                    lineHeight = 24.sp,
+                    textAlign = TextAlign.Start
+                ),
+                modifier = Modifier.fillMaxSize(),
+                cursorBrush = SolidColor(Amber500)
             )
         }
     }
@@ -394,18 +438,20 @@ private fun VoiceAmplitudeVisualizer(
         val width = size.width
         val height = size.height
         val centerY = height / 2
-        
+
         // 데이터가 없을 때 기본 파형 생성
         val data = amplitudes.ifEmpty { List(30) { 0.1f } }
         val barWidth = width / data.size
-        
+
         data.forEachIndexed { index, amplitude ->
             val x = index * barWidth + barWidth / 2
             val barHeight = (amplitude * height * 0.9f).coerceAtLeast(4.dp.toPx())
-            
+
             // 녹음 중일 때 약간의 무작위 애니메이션 효과 가미
             val animatedHeight = if (isRecording) {
-                barHeight * (0.8f + 0.2f * sin(index * 0.5f + System.currentTimeMillis() * 0.01f).coerceAtLeast(0f))
+                barHeight * (0.8f + 0.2f * sin(index * 0.5f + System.currentTimeMillis() * 0.01f).coerceAtLeast(
+                    0f
+                ))
             } else barHeight
 
             drawLine(
@@ -440,9 +486,15 @@ private fun RecordingControls(
         IconButton(
             onClick = onReset,
             enabled = state.canResetRecording,
-            modifier = Modifier.size(48.dp).background(Stone100, CircleShape)
+            modifier = Modifier
+                .size(48.dp)
+                .background(Stone100, CircleShape)
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_reset), tint = if (state.canResetRecording) Stone800 else Stone200)
+            Icon(
+                Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.feature_moment_recording_screen_action_reset),
+                tint = if (state.canResetRecording) Stone800 else Stone200
+            )
         }
 
         // 메인 녹음/일시정지 버튼
@@ -467,7 +519,11 @@ private fun RecordingControls(
                 state.isRecording -> Icons.Default.Pause
                 else -> Icons.Default.Mic
             }
-            Icon(icon, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_main), modifier = Modifier.size(36.dp))
+            Icon(
+                icon,
+                contentDescription = stringResource(R.string.feature_moment_recording_screen_action_main),
+                modifier = Modifier.size(36.dp)
+            )
         }
 
         // 정지 버튼
@@ -477,9 +533,40 @@ private fun RecordingControls(
                 else if (state.canStopRecording) onRecordingStop()
             },
             enabled = state.canStopRecording || state.isPlaying,
-            modifier = Modifier.size(48.dp).background(Stone100, CircleShape)
+            modifier = Modifier
+                .size(48.dp)
+                .background(Stone100, CircleShape)
         ) {
-            Icon(Icons.Default.Stop, contentDescription = stringResource(R.string.feature_moment_recording_screen_action_stop), tint = if (state.canStopRecording || state.isPlaying) Stone800 else Stone200)
+            Icon(
+                Icons.Default.Stop,
+                contentDescription = stringResource(R.string.feature_moment_recording_screen_action_stop),
+                tint = if (state.canStopRecording || state.isPlaying) Stone800 else Stone200
+            )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RecordingScreenPreview() {
+    MomentsTheme {
+        RecordingScreen(
+            capturedPhotoPath = "",
+            content = "우리 아가 최고",
+            onContentChange = {},
+            state = RecordingControlsState(
+                isRecording = false,
+                isStopped = false,
+                isPlaying = false,
+                isPaused = false,
+                canStartRecording = true,
+                canPauseRecording = false,
+                canResumeRecording = false,
+                canStopRecording = false,
+                canResetRecording = false,
+                canPlayRecording = false,
+            ),
+            amplitudes = emptyList(),
+        )
     }
 }

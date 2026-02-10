@@ -5,10 +5,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.ui.component.home.HomeRoute
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
 import com.jg.childmomentsnap.feature.moment.screen.CameraRoute
+import com.jg.childmomentsnap.feature.moment.screen.RecordingRoute
 import kotlinx.serialization.Serializable
+import android.net.Uri
+import android.os.Bundle
+import androidx.navigation.NavType
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.reflect.typeOf
 
 
 @Serializable
@@ -17,6 +26,14 @@ data object MomentGraph
 
 @Serializable
 data object MomentScreenRoute
+
+
+@Serializable
+data class RecordingScreenRoute(
+    val visionAnalysisContent: String,
+    val imageUri: String,
+    val visionAnalysis: VisionAnalysis
+)
 
 
 const val MOMENT_GRAPH = "moment_graph"
@@ -34,6 +51,44 @@ fun NavHostController.navigateToMomentGraphXML(navOptions: NavOptions? = null) {
     this.navigate(MOMENT_GRAPH, navOptions)
 }
 
+
+private fun NavHostController.navigateToRecording(
+    imageUri: String,
+    visionAnalysisContent: String,
+    visionAnalysis: VisionAnalysis,
+    navOptions: NavOptions? = null
+) {
+    this.navigate(
+        RecordingScreenRoute(
+            imageUri = imageUri,
+            visionAnalysisContent = visionAnalysisContent,
+            visionAnalysis = visionAnalysis
+        ),
+        navOptions
+    )
+}
+
+
+//   TODO 이방식만 있는걸까? 고민 필요 (이슈(Type Error)로 인한 AI 도움 받았기에)
+val VisionAnalysisType = object : NavType<VisionAnalysis>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): VisionAnalysis? {
+        return bundle.getString(key)?.let { Json.decodeFromString(it) }
+    }
+
+    override fun parseValue(value: String): VisionAnalysis {
+        return Json.decodeFromString(Uri.decode(value))
+    }
+
+    override fun serializeAsValue(value: VisionAnalysis): String {
+        return Uri.encode(Json.encodeToString(value))
+    }
+
+    override fun put(bundle: Bundle, key: String, value: VisionAnalysis) {
+        bundle.putString(key, Json.encodeToString(value))
+    }
+}
+
+
 fun NavGraphBuilder.momentGraph(
     appState: CmsAppState,
     useCompose: Boolean = true
@@ -49,6 +104,30 @@ fun NavGraphBuilder.momentGraph(
                 },
                 onNavigateUp = {
                     navController.navigateUp()
+                },
+                onNavigateToRecording = { imageUri, visionAnalysisContent, visionAnalysis ->
+                    navController.navigateToRecording(
+                        imageUri = imageUri,
+                        visionAnalysisContent = visionAnalysisContent,
+                        visionAnalysis = visionAnalysis
+                    )
+                }
+            )
+        }
+
+        composable<RecordingScreenRoute>(
+            typeMap = mapOf(typeOf<VisionAnalysis>() to VisionAnalysisType)
+        ) { backStackEntry ->
+            val route = backStackEntry.toRoute<RecordingScreenRoute>()
+            RecordingRoute(
+                imageUri = route.imageUri,
+                visionAnalysisContent = route.visionAnalysisContent,
+                visionAnalysis = route.visionAnalysis,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onCompleted = {
+                    navController.popBackStack(HomeRoute.Moment, inclusive = true)
                 }
             )
         }
@@ -65,6 +144,9 @@ fun NavGraphBuilder.momentGraph(
                     },
                     onNavigateUp = {
                         navController.navigateUp()
+                    },
+                    onNavigateToRecording = { imageUri, visionAnalysisContent, visionAnalysis->
+                        navController.navigateToRecording(imageUri, visionAnalysisContent, visionAnalysis)
                     }
                 )
             }

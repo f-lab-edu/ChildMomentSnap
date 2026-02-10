@@ -25,6 +25,7 @@ data class CameraUiState(
     val showVoiceRecordingDialog: Boolean = false,
     val isProcessingImage: Boolean = false,
     val visionAnalysis: VisionAnalysis? = null,
+    val visionAnalysisContent: String? = null,
 )
 
 /**

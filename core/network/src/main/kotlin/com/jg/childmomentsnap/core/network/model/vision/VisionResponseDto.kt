@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VisionResponseDto(
-    val responses: List<VisionAnnotateImageResponseDto>
+    val responses: List<VisionAnnotateImageResponseDto> = emptyList()
 )
 
 @Serializable
@@ -18,29 +18,29 @@ data class VisionAnnotateImageResponseDto(
 
 @Serializable
 data class VisionFaceAnnotationDto(
-    val boundingPoly: VisionBoundingPolyDto,
-    val fdBoundingPoly: VisionBoundingPolyDto,
-    val landmarks: List<VisionLandmarkDto>,
-    val rollAngle: Float,
-    val panAngle: Float,
-    val tiltAngle: Float,
-    val detectionConfidence: Float,
-    val landmarkingConfidence: Float,
-    val joyLikelihood: VisionLikelihoodDto,
-    val sorrowLikelihood: VisionLikelihoodDto,
-    val angerLikelihood: VisionLikelihoodDto,
-    val surpriseLikelihood: VisionLikelihoodDto,
-    val underExposedLikelihood: VisionLikelihoodDto,
-    val blurredLikelihood: VisionLikelihoodDto,
-    val headwearLikelihood: VisionLikelihoodDto
+    val boundingPoly: VisionBoundingPolyDto? = null,
+    val fdBoundingPoly: VisionBoundingPolyDto? = null,
+    val landmarks: List<VisionLandmarkDto>? = null,
+    val rollAngle: Float? = null,
+    val panAngle: Float? = null,
+    val tiltAngle: Float? = null,
+    val detectionConfidence: Float? = null,
+    val landmarkingConfidence: Float? = null,
+    val joyLikelihood: VisionLikelihoodDto? = null,
+    val sorrowLikelihood: VisionLikelihoodDto? = null,
+    val angerLikelihood: VisionLikelihoodDto? = null,
+    val surpriseLikelihood: VisionLikelihoodDto? = null,
+    val underExposedLikelihood: VisionLikelihoodDto? = null,
+    val blurredLikelihood: VisionLikelihoodDto? = null,
+    val headwearLikelihood: VisionLikelihoodDto? = null
 )
 
 @Serializable
 data class VisionEntityAnnotationDto(
     val mid: String? = null,
     val locale: String? = null,
-    val description: String,
-    val score: Float,
+    val description: String? = null,
+    val score: Float? = null,
     val confidence: Float? = null,
     val topicality: Float? = null,
     val boundingPoly: VisionBoundingPolyDto? = null
@@ -48,42 +48,42 @@ data class VisionEntityAnnotationDto(
 
 @Serializable
 data class VisionLocalizedObjectAnnotationDto(
-    val mid: String,
+    val mid: String? = null,
     val languageCode: String? = null,
-    val name: String,
-    val score: Float,
-    val boundingPoly: VisionBoundingPolyDto
+    val name: String? = null,
+    val score: Float? = null,
+    val boundingPoly: VisionBoundingPolyDto? = null
 )
 
 @Serializable
 data class VisionBoundingPolyDto(
-    val vertices: List<VisionVertexDto>,
+    val vertices: List<VisionVertexDto>? = null,
     val normalizedVertices: List<VisionNormalizedVertexDto>? = null
 )
 
 @Serializable
 data class VisionVertexDto(
-    val x: Int,
-    val y: Int
+    val x: Int? = null,
+    val y: Int? = null
 )
 
 @Serializable
 data class VisionNormalizedVertexDto(
-    val x: Float,
-    val y: Float
+    val x: Float? = null,
+    val y: Float? = null
 )
 
 @Serializable
 data class VisionLandmarkDto(
-    val type: VisionLandmarkTypeDto,
-    val position: VisionPositionDto
+    val type: VisionLandmarkTypeDto? = null,
+    val position: VisionPositionDto? = null
 )
 
 @Serializable
 data class VisionPositionDto(
-    val x: Float,
-    val y: Float,
-    val z: Float
+    val x: Float? = null,
+    val y: Float? = null,
+    val z: Float? = null
 )
 
 @Serializable
@@ -122,7 +122,9 @@ enum class VisionLandmarkTypeDto {
     FOREHEAD_GLABELLA,
     CHIN_GNATHION,
     CHIN_LEFT_GONION,
-    CHIN_RIGHT_GONION
+    CHIN_RIGHT_GONION,
+    LEFT_CHEEK_CENTER,
+    RIGHT_CHEEK_CENTER
 }
 
 @Serializable
@@ -137,7 +139,8 @@ enum class VisionLikelihoodDto {
 
 @Serializable
 data class VisionStatusDto(
-    val code: Int,
-    val message: String,
+    val code: Int? = null,
+    val message: String? = null,
     val details: List<Map<String, String>>? = null
 )
+

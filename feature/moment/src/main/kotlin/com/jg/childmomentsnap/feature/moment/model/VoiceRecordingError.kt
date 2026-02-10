@@ -36,5 +36,11 @@ enum class VoiceRecordingError {
     PLAYBACK_STOP_FAILED,
     
     /** 리셋 중 오류 */
-    RESET_FAILED
+    RESET_FAILED,
+
+    /** 이미지 파일 생성되어 있지 않음 */
+    IMAGE_FILE_PATH_NOT_SET,
+
+    /** AI 일기 생성 실패 */
+    PHOTO_DIARY_GENERATION_FAILED
 }

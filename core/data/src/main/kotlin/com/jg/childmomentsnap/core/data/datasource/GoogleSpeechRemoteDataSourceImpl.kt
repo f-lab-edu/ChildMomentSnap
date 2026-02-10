@@ -10,7 +10,6 @@ class GoogleSpeechRemoteDataSourceImpl @Inject constructor(
     private val googleSpeechApiService: GoogleSpeechApiService,
     private val apiKeyProvider: ApiKeyProvider
 ) : GoogleSpeechRemoteDataSource {
-
     override suspend fun recognizeSpeech(request: SpeechRequestDto): SpeechResponseDto =
         googleSpeechApiService.recognizeSpeech(apiKeyProvider.getVisionApiKey(), request)
 }
