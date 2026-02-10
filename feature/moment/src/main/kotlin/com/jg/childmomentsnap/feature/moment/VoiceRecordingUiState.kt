@@ -18,7 +18,6 @@ data class VoiceRecordingUiState(
     val playbackPositionMs: Long = 0L,
     val amplitudes: List<Float> = emptyList(),
     val isProcessing: Boolean = false,
-    val hasVoicePermission: Boolean = false,
     val imageUri: String? = null,
     val visionAnalysis: VisionAnalysis? = null,
     val editedContent: String? = null

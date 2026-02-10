@@ -44,10 +44,7 @@ fun RecordingRoute(
     // 음성 권한 요청 Launcher
     val voicePermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            val hasAllVoicePermissions = permissions.values.all { it }
-            viewModel.updateVoicePermissionState(hasAllVoicePermissions)
-        }
+        onResult = { _ -> }
     )
 
     // 권한 상태 확인
@@ -62,7 +59,6 @@ fun RecordingRoute(
             visionAnalysisContent = visionAnalysisContent,
             visionAnalysis = visionAnalysis,
             uri = imageUri,
-            hasPermission = hasVoicePermission,
             filePath = recordingFilePath
         )
     }
@@ -104,7 +100,7 @@ fun RecordingRoute(
         onCompleted = viewModel::finishRecording,
         isProcessing = uiState.isProcessing,
         visionAnalysis = uiState.visionAnalysis,
-        hasVoicePermission = uiState.hasVoicePermission,
+        hasVoicePermission = hasVoicePermission,
         onRequestVoicePermission = {
             voicePermissionLauncher.launch(AppPermissions.Groups.getVoicePermissions().toTypedArray())
         },

@@ -89,7 +89,6 @@ class VoiceRecordingViewModel @Inject constructor(
         visionAnalysisContent: String?,
         visionAnalysis: VisionAnalysis,
         uri: String,
-        hasPermission: Boolean,
         filePath: String
     ) {
         _uiState.update {
@@ -97,14 +96,9 @@ class VoiceRecordingViewModel @Inject constructor(
                 editedContent = visionAnalysisContent,
                 visionAnalysis = visionAnalysis,
                 imageUri = uri,
-                hasVoicePermission = hasPermission,
                 recordingFilePath = filePath
             )
         }
-    }
-
-    fun updateVoicePermissionState(hasPermission: Boolean) {
-        _uiState.update { it.copy(hasVoicePermission = hasPermission) }
     }
 
     fun updateEditedContent(content: String) {
