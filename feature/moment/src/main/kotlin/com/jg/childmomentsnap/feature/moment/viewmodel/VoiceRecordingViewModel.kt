@@ -27,12 +27,12 @@ private val MAX_MEDIA_RECORDER_AMPLITUDE = Short.MAX_VALUE.toFloat()
 
 /**
  * 음성 녹음 기능 전용 ViewModel
- * 
+ *
  * 단일 책임 원칙에 따라 음성 녹음과 관련된 기능만을 담당합니다.
  * - 녹음 제어 (시작, 일시정지, 재개, 정지)
  * - 재생 제어
  * - 파일 관리
- * 
+ *
  * 주의: 권한 처리는 CameraViewModel에서 담당합니다.
  */
 @HiltViewModel
@@ -85,46 +85,30 @@ class VoiceRecordingViewModel @Inject constructor(
         }
     }
 
-    fun setVoiceRecordingFilePath(filePath: String) {
+    fun initialize(
+        visionAnalysisContent: String?,
+        visionAnalysis: VisionAnalysis,
+        uri: String,
+        hasPermission: Boolean,
+        filePath: String
+    ) {
         _uiState.update {
-            it.copy(recordingFilePath = filePath)
+            it.copy(
+                editedContent = visionAnalysisContent,
+                visionAnalysis = visionAnalysis,
+                imageUri = uri,
+                hasVoicePermission = hasPermission,
+                recordingFilePath = filePath
+            )
         }
-    }
-
-    fun setVisionAnalysisAndImageUri(visionAnalysisContent: String?, visionAnalysis: VisionAnalysis, uri: String) {
-        _uiState.update { it.copy(visionAnalysisContent = visionAnalysisContent, visionAnalysis = visionAnalysis, imageUri = uri) }
     }
 
     fun updateVoicePermissionState(hasPermission: Boolean) {
         _uiState.update { it.copy(hasVoicePermission = hasPermission) }
     }
 
-    /**
-     * 음성 녹음 버텀시트 표시
-     */
-    fun showVoiceRecordingBottomSheet() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(showVoiceRecordingBottomSheet = true) }
-        }
-    }
-
-    /**
-     * 음성 녹음 버텀시트 닫기
-     */
-    fun dismissVoiceRecordingBottomSheet() {
-        viewModelScope.launch {
-            _uiState.update { 
-                it.copy(
-                    showVoiceRecordingBottomSheet = false,
-                    recordingState = RecordingState.IDLE,
-                    recordingDurationMs = 0L,
-                    isPlayingRecording = false,
-                    playbackPositionMs = 0L,
-                    amplitudes = emptyList(),
-                    isProcessing = false
-                ) 
-            }
-        }
+    fun updateEditedContent(content: String) {
+        _uiState.update { it.copy(editedContent = content) }
     }
 
     /**
@@ -151,8 +135,8 @@ class VoiceRecordingViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(recordingState = RecordingState.IDLE) 
+                _uiState.update {
+                    it.copy(recordingState = RecordingState.IDLE)
                 }
                 _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.RECORDING_START_FAILED))
             }
@@ -198,7 +182,7 @@ class VoiceRecordingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 voiceRecorder.stopRecording()
-                
+
                 _uiState.update { currentState ->
                     currentState.copy(recordingState = RecordingState.STOPPED)
                 }
@@ -227,14 +211,14 @@ class VoiceRecordingViewModel @Inject constructor(
                     filePath = filePath,
                     scope = viewModelScope,
                     onCompletion = {
-                         viewModelScope.launch {
-                             stopPlayback()
-                         }
+                        viewModelScope.launch {
+                            stopPlayback()
+                        }
                     },
                     onError = {
                         viewModelScope.launch {
-                            _uiState.update { 
-                                it.copy(isPlayingRecording = false) 
+                            _uiState.update {
+                                it.copy(isPlayingRecording = false)
                             }
                             _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.PLAYBACK_ERROR))
                         }
@@ -264,7 +248,7 @@ class VoiceRecordingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 voicePlayer.stopPlayback()
-                
+
                 _uiState.update { currentState ->
                     currentState.copy(
                         isPlayingRecording = false,
@@ -313,10 +297,10 @@ class VoiceRecordingViewModel @Inject constructor(
             // 이미 녹음이 중지된 상태가 아니라면 먼저 중지 시도 (UI 흐름상 finishRecording은 완료 버튼 클릭 등에서 오므로)
             // 보통 stopRecording 후 사용자가 '완료' 버튼을 누름.
             // 여기서는 사용자가 '완료'를 눌렀을 때의 동작.
-            
+
             // 만약 녹음 중이라면 중지
             if (currentState.recordingState == RecordingState.RECODING || currentState.recordingState == RecordingState.PAUSED) {
-                 voiceRecorder.stopRecording()
+                voiceRecorder.stopRecording()
             }
             voicePlayer.stopPlayback()
 
@@ -329,22 +313,22 @@ class VoiceRecordingViewModel @Inject constructor(
                         VoiceRecordingError.RECORDING_FILE_PATH_NOT_SET
                     )
                 )
-                 // Clean up and reset
-                 cancelRecording()
+                // Clean up and reset
+                cancelRecording()
                 return@launch
             }
-            
+
             _uiState.update { it.copy(isProcessing = true) }
 
             val voiceFile = File(voiceFilePath)
-            
+
             val result = processMomentUseCase(currentImageBytes, voiceFile)
-            
+
             result.onSuccess { momentData ->
                 _uiEffect.emit(VoiceRecordingUiEffect.MomentAnalysisCompleted(momentData))
                 // 성공 후 상태 초기화 또는 닫기는 UI에서 이펙트 처리 후 호출 또는 여기서 호출
                 // 여기서는 처리 완료 후 상태만 업데이트하고, UI가 이펙트 받아 화면 이동 등을 수행하도록 함.
-                 _uiState.update {
+                _uiState.update {
                     it.copy(
                         showVoiceRecordingBottomSheet = false,
                         recordingState = RecordingState.IDLE,
@@ -357,19 +341,10 @@ class VoiceRecordingViewModel @Inject constructor(
                     )
                 }
             }.onFailure {
-                 _uiState.update { it.copy(isProcessing = false) }
-                 _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.RECORDING_STOP_FAILED)) // Or generic error
+                _uiState.update { it.copy(isProcessing = false) }
+                _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.RECORDING_STOP_FAILED)) // Or generic error
             }
         }
-    }
-
-    /**
-     * BottomSheet가 닫힐 때 호출
-     *  - 처리 중이거나 완료된 상태가 아니면 취소
-     */
-    fun onBottomSheetDismissed() {
-        // 처리 중이라면 dismiss 막거나 취소 처리. 여기서는 취소 처리
-        cancelRecording()
     }
 
     /**
@@ -380,7 +355,7 @@ class VoiceRecordingViewModel @Inject constructor(
             try {
                 voiceRecorder.stopRecording()
                 voicePlayer.stopPlayback()
-                
+
                 // 녹음 파일 삭제
                 _uiState.value.recordingFilePath?.let { filePath ->
                     val file = File(filePath)
@@ -388,7 +363,7 @@ class VoiceRecordingViewModel @Inject constructor(
                         file.delete()
                     }
                 }
-                
+
                 // UI 상태 초기화
                 _uiState.update {
                     it.copy(
@@ -425,7 +400,7 @@ class VoiceRecordingViewModel @Inject constructor(
             try {
                 voiceRecorder.stopRecording()
                 voicePlayer.stopPlayback()
-                
+
                 // 녹음 파일 삭제
                 _uiState.value.recordingFilePath?.let { filePath ->
                     val file = File(filePath)
@@ -436,8 +411,8 @@ class VoiceRecordingViewModel @Inject constructor(
             } catch (e: Exception) {
                 // 정리 중 오류는 무시하고 UI만 초기화
             }
-            
-            _uiState.update { 
+
+            _uiState.update {
                 it.copy(
                     showVoiceRecordingBottomSheet = false,
                     recordingState = RecordingState.IDLE,
@@ -447,7 +422,7 @@ class VoiceRecordingViewModel @Inject constructor(
                     playbackPositionMs = 0L,
                     amplitudes = emptyList(),
                     isProcessing = false
-                ) 
+                )
             }
         }
     }

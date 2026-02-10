@@ -58,13 +58,13 @@ fun RecordingRoute(
     LaunchedEffect(Unit) {
         // 녹음 파일 경로 설정
         val recordingFilePath = "${context.externalCacheDir?.absolutePath}/$FILE_NAME"
-        viewModel.setVisionAnalysisAndImageUri(
+        viewModel.initialize(
             visionAnalysisContent = visionAnalysisContent,
             visionAnalysis = visionAnalysis,
-            uri = imageUri
+            uri = imageUri,
+            hasPermission = hasVoicePermission,
+            filePath = recordingFilePath
         )
-        viewModel.setVoiceRecordingFilePath(recordingFilePath)
-        viewModel.updateVoicePermissionState(hasVoicePermission)
     }
 
     // UI Effects 처리
@@ -90,8 +90,8 @@ fun RecordingRoute(
 
     RecordingScreen(
         capturedPhotoPath = imageUri,
-        visionAnalysisContent = uiState.visionAnalysisContent,
-        sttText = "",
+        content = uiState.editedContent ?: "",
+        onContentChange = viewModel::updateEditedContent,
         state = uiState.toRecordingControlsState(),
         amplitudes = uiState.amplitudes,
         onReset = viewModel::resetRecording,
