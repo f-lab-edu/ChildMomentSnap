@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jg.childmomentsnap.core.model.VisionAnalysis
+import com.jg.childmomentsnap.core.model.VisionLikelihood
 import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.MomentsTheme
 import com.jg.childmomentsnap.core.ui.theme.Rose400
@@ -325,6 +326,21 @@ private fun CaptureThumbnail(
 fun FaceMomentChip(
     visionAnalysis: VisionAnalysis
 ) {
+    val joyText = stringResource(R.string.feature_moment_emotion_joy)
+    val sorrowText = stringResource(R.string.feature_moment_emotion_sorrow)
+    val angerText = stringResource(R.string.feature_moment_emotion_anger)
+    val surpriseText = stringResource(R.string.feature_moment_emotion_surprise)
+    val calmText = stringResource(R.string.feature_moment_emotion_calm)
+
+    val emotionChips = visionAnalysis.faces.flatMap { face ->
+        buildList {
+            if (face.joy.isPositive()) add(joyText)
+            if (face.sorrow.isPositive()) add(sorrowText)
+            if (face.anger.isPositive()) add(angerText)
+            if (face.surprise.isPositive()) add(surpriseText)
+        }
+    }.distinct().ifEmpty { listOf(calmText) }
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -332,14 +348,17 @@ fun FaceMomentChip(
         horizontalArrangement = Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        items(visionAnalysis.faces) { face ->
+        items(emotionChips) { emotion ->
             MomentChip(
-                text = "#$face",
+                text = emotion,
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
     }
 }
+
+private fun VisionLikelihood.isPositive(): Boolean =
+    this == VisionLikelihood.LIKELY || this == VisionLikelihood.VERY_LIKELY || this == VisionLikelihood.POSSIBLE
 
 @Composable
 private fun StateGuideMessage(
@@ -490,7 +509,7 @@ private fun RecordingControls(
                 when {
                     state.isPlaying -> onPlaybackStop()
 //                    state.canPlayRecording -> onPlaybackStart()
-//                    state.canStartRecording -> onRecordingStart()
+                    state.canStartRecording -> onRecordingStart()
                     state.canPauseRecording -> onRecordingPause()
                     state.canResumeRecording -> onRecordingResume()
                 }
