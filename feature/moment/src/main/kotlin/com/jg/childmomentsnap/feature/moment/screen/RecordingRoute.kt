@@ -17,6 +17,7 @@ import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.ui.permissions.AppPermissions
 import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.feature.moment.R
+import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import com.jg.childmomentsnap.feature.moment.util.rememberSpeechToTextManager
@@ -70,9 +71,21 @@ fun RecordingRoute(
     LaunchedEffect(sttState.spokenText, sttState.error) {
         if (sttState.spokenText.isNotBlank()) {
             viewModel.appendSttResult(sttState.spokenText)
+
+            if (uiState.recordingState == RecordingState.RECODING) {
+                speechToTextManager.startListening()
+            }
         }
         if (sttState.error?.isNotBlank() == true) {
             Toast.makeText(context, sttState.error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(sttState.isSpeaking) {
+        if (sttState.isSpeaking) {
+            speechToTextManager.amplitude.collect { normalizedRms ->
+                viewModel.updateSttAmplitude(normalizedRms)
+            }
         }
     }
 
@@ -105,22 +118,25 @@ fun RecordingRoute(
         onContentChange = viewModel::updateEditedContent,
         state = uiState.toRecordingControlsState(),
         amplitudes = uiState.amplitudes,
-        onReset = viewModel::resetRecording,
+        // onReset = {  // 리셋 버튼 제거
+        //     speechToTextManager.stopListening()
+        //     viewModel.resetRecording()
+        // },
         onRecordingStart = {
-            viewModel.startRecording()
             speechToTextManager.startListening()
+            viewModel.startSttListeningState()
         },
         onRecordingPause = {
-            viewModel.pauseRecording()
             speechToTextManager.stopListening()
+            viewModel.pauseSttListeningState()
         },
         onRecordingResume = {
-            viewModel.resumeRecording()
             speechToTextManager.startListening()
+            viewModel.resumeSttListeningState()
         },
         onRecordingStop = {
-            viewModel.stopRecording()
             speechToTextManager.stopListening()
+            viewModel.stopSttListeningState()
         },
         onPlaybackStart = viewModel::playRecording,
         onPlaybackStop = viewModel::stopPlayback,

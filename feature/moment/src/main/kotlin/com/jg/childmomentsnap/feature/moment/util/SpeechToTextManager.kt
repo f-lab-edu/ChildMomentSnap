@@ -8,6 +8,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import com.jg.childmomentsnap.feature.moment.R
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.Locale
@@ -16,6 +17,7 @@ import java.util.Locale
 data class VoiceToTextParserState(
     val spokenText: String = "",
     val isSpeaking: Boolean = false,
+    val isStoping: Boolean = false,
     val error: String? = null
 )
 
@@ -24,6 +26,9 @@ class SpeechToTextManager(private val context: Context) {
 
     private val _state = MutableStateFlow(VoiceToTextParserState())
     val state = _state.asStateFlow()
+
+    private val _amplitude = MutableStateFlow(0f)
+    val amplitude: StateFlow<Float> = _amplitude.asStateFlow()
 
     private var speechRecognizer : SpeechRecognizer? = null
 
@@ -43,7 +48,9 @@ class SpeechToTextManager(private val context: Context) {
             when (error) {
                 SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
                     //   해당 에러는 다시 시작
-                    startListening()
+                    if (!_state.value.isStoping) {
+                        startListening()
+                    }
                 }
                 else -> {
                     _state.update { current ->
@@ -71,20 +78,22 @@ class SpeechToTextManager(private val context: Context) {
         override fun onResults(results: Bundle?) {
             val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
 
-            if (!matches.isNullOrEmpty()) { // 결과가 null 혹은 empty가 아니라면
+            if (!matches.isNullOrEmpty()) {
                 val recognizedText = matches[0]
-                if (recognizedText.isNotBlank()) { // 결과가 blank가 아니면, 결과 출력
+                if (recognizedText.isNotBlank()) {
                     _state.update { current ->
                         current.copy(
-                            spokenText = recognizedText
+                            spokenText = recognizedText,
+                            isSpeaking = false
                         )
                     }
                 }
             }
+            _amplitude.value = 0f
         }
 
-        override fun onRmsChanged(p0: Float) {
-
+        override fun onRmsChanged(rmsdB: Float) {
+            _amplitude.value = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f)
         }
     }
 
@@ -140,7 +149,7 @@ class SpeechToTextManager(private val context: Context) {
         speechRecognizer?.startListening(createSpeechRecognitionIntent())
 
         _state.update { current ->
-            current.copy(isSpeaking = true, spokenText = "")
+            current.copy(isSpeaking = true, spokenText = "", isStoping = false)
         }
     }
 
@@ -148,11 +157,12 @@ class SpeechToTextManager(private val context: Context) {
         try {
             speechRecognizer?.stopListening()
         } catch (e: Exception) {
-
+            // 이미 중지된 경우 무시
         }
         _state.update { current ->
-            current.copy(isSpeaking = false)
+            current.copy(isSpeaking = false, isStoping = true)
         }
+        _amplitude.value = 0f
     }
 
     fun destroy() {
