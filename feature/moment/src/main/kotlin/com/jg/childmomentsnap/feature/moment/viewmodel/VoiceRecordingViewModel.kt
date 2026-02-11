@@ -11,6 +11,8 @@ import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import com.jg.childmomentsnap.feature.moment.util.VoicePlayer
 import com.jg.childmomentsnap.feature.moment.util.VoiceRecorder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -49,6 +52,7 @@ class VoiceRecordingViewModel @Inject constructor(
     val uiEffect = _uiEffect.asSharedFlow()
 
     private var imageBytes: ByteArray? = null
+    private var sttTimerJob: Job? = null
 
     init {
         observeRecordingData()
@@ -103,6 +107,78 @@ class VoiceRecordingViewModel @Inject constructor(
 
     fun updateEditedContent(content: String) {
         _uiState.update { it.copy(editedContent = content) }
+    }
+
+    /**
+     * STT 인식 결과를 기존 텍스트 뒤에 이어붙임
+     */
+    fun appendSttResult(recognizedText: String) {
+        if (recognizedText.isBlank()) return
+        _uiState.update { currentState ->
+            val currentContent = currentState.editedContent.orEmpty()
+            val newContent = if (currentContent.isEmpty()) {
+                recognizedText
+            } else {
+                "$currentContent$recognizedText"
+            }
+            currentState.copy(editedContent = newContent)
+        }
+    }
+
+    // ── STT 비주얼 상태 관리 ──
+
+    fun startSttListeningState() {
+        sttTimerJob?.cancel()
+        _uiState.update {
+            it.copy(
+                recordingState = RecordingState.RECODING,
+                recordingDurationMs = 0L,
+                amplitudes = emptyList()
+            )
+        }
+        startSttTimer()
+    }
+
+    fun pauseSttListeningState() {
+        sttTimerJob?.cancel()
+        _uiState.update {
+            it.copy(recordingState = RecordingState.PAUSED)
+        }
+    }
+
+    fun resumeSttListeningState() {
+        _uiState.update {
+            it.copy(recordingState = RecordingState.RECODING)
+        }
+        startSttTimer()
+    }
+
+    fun stopSttListeningState() {
+        sttTimerJob?.cancel()
+        sttTimerJob = null
+        _uiState.update {
+            it.copy(recordingState = RecordingState.STOPPED)
+        }
+    }
+
+    fun updateSttAmplitude(normalizedAmplitude: Float) {
+        if (_uiState.value.recordingState == RecordingState.RECODING) {
+            _uiState.update { currentState ->
+                val updatedAmplitudes = appendAmplitude(currentState.amplitudes, normalizedAmplitude)
+                currentState.copy(amplitudes = updatedAmplitudes)
+            }
+        }
+    }
+
+    private fun startSttTimer() {
+        sttTimerJob = viewModelScope.launch {
+            while (isActive) {
+                delay(100)
+                _uiState.update {
+                    it.copy(recordingDurationMs = it.recordingDurationMs + 100)
+                }
+            }
+        }
     }
 
     /**

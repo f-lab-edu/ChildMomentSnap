@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jg.childmomentsnap.core.model.VisionAnalysis
+import com.jg.childmomentsnap.core.model.VisionLikelihood
 import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.MomentsTheme
 import com.jg.childmomentsnap.core.ui.theme.Rose400
@@ -225,7 +226,7 @@ fun RecordingScreen(
                 if (hasVoicePermission) {
                     RecordingControls(
                         state = state,
-                        onReset = onReset,
+                        // onReset = onReset,  // 리셋 버튼 제거
                         onRecordingStart = onRecordingStart,
                         onRecordingPause = onRecordingPause,
                         onRecordingResume = onRecordingResume,
@@ -238,40 +239,26 @@ fun RecordingScreen(
                     Spacer(modifier = Modifier.height(80.dp))
                 }
 
-                // 최종 완료 버튼 (녹음 완료 또는 텍스트 모드일 때 표시)
-                // 텍스트 모드일 때는 항상 표시, 녹음 모드일 때는 정지/재생 상태일 때 표시
-                val showCompleteButton = if (hasVoicePermission) {
-                    state.isStopped || state.isPlaying
-                } else {
-                    // 텍스트 모드면 항상 표시 (단, 처리중 아닐때)
-                    true
-                }
-
-                AnimatedVisibility(
-                    visible = showCompleteButton,
+                Button(
+                    onClick = onCompleted,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(56.dp),
+                    enabled = !isProcessing,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Amber500)
                 ) {
-                    Button(
-                        onClick = onCompleted,
-                        modifier = Modifier.fillMaxSize(),
-                        enabled = !isProcessing,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Amber500)
-                    ) {
-                        if (isProcessing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(
-                                stringResource(R.string.feature_moment_recording_screen_button_completed),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    if (isProcessing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            stringResource(R.string.feature_moment_recording_screen_button_completed),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -339,6 +326,21 @@ private fun CaptureThumbnail(
 fun FaceMomentChip(
     visionAnalysis: VisionAnalysis
 ) {
+    val joyText = stringResource(R.string.feature_moment_emotion_joy)
+    val sorrowText = stringResource(R.string.feature_moment_emotion_sorrow)
+    val angerText = stringResource(R.string.feature_moment_emotion_anger)
+    val surpriseText = stringResource(R.string.feature_moment_emotion_surprise)
+    val calmText = stringResource(R.string.feature_moment_emotion_calm)
+
+    val emotionChips = visionAnalysis.faces.flatMap { face ->
+        buildList {
+            if (face.joy.isPositive()) add(joyText)
+            if (face.sorrow.isPositive()) add(sorrowText)
+            if (face.anger.isPositive()) add(angerText)
+            if (face.surprise.isPositive()) add(surpriseText)
+        }
+    }.distinct().ifEmpty { listOf(calmText) }
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,14 +348,17 @@ fun FaceMomentChip(
         horizontalArrangement = Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        items(visionAnalysis.faces) { face ->
+        items(emotionChips) { emotion ->
             MomentChip(
-                text = "#$face",
+                text = emotion,
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
     }
 }
+
+private fun VisionLikelihood.isPositive(): Boolean =
+    this == VisionLikelihood.LIKELY || this == VisionLikelihood.VERY_LIKELY || this == VisionLikelihood.POSSIBLE
 
 @Composable
 private fun StateGuideMessage(
@@ -470,7 +475,7 @@ private fun VoiceAmplitudeVisualizer(
 @Composable
 private fun RecordingControls(
     state: RecordingControlsState,
-    onReset: () -> Unit,
+    // onReset: () -> Unit,  // 리셋 버튼 제거 (추후 녹음 기능 동작 여부로 인해 임시 주석)
     onRecordingStart: () -> Unit,
     onRecordingPause: () -> Unit,
     onRecordingResume: () -> Unit,
@@ -482,27 +487,28 @@ private fun RecordingControls(
         horizontalArrangement = Arrangement.spacedBy(40.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 리셋 버튼
+        // 리셋 버튼 주석 처리 (공간 설정)
         IconButton(
-            onClick = onReset,
+            onClick = {  },
             enabled = state.canResetRecording,
             modifier = Modifier
                 .size(48.dp)
-                .background(Stone100, CircleShape)
+//                .background(Stone100, CircleShape)
         ) {
-            Icon(
-                Icons.Default.Refresh,
-                contentDescription = stringResource(R.string.feature_moment_recording_screen_action_reset),
-                tint = if (state.canResetRecording) Stone800 else Stone200
-            )
+//            Icon(
+//                Icons.Default.Refresh,
+//                contentDescription = stringResource(R.string.feature_moment_recording_screen_action_reset),
+//                tint = if (state.canResetRecording) Stone800 else Stone200
+//            )
         }
 
         // 메인 녹음/일시정지 버튼
+        //  (26.02.11 녹음기능은 임시 중단 되고 STT 기능만 사용하기에 플레이 기능은 임시 주석)
         FloatingActionButton(
             onClick = {
                 when {
                     state.isPlaying -> onPlaybackStop()
-                    state.canPlayRecording -> onPlaybackStart()
+//                    state.canPlayRecording -> onPlaybackStart()
                     state.canStartRecording -> onRecordingStart()
                     state.canPauseRecording -> onRecordingPause()
                     state.canResumeRecording -> onRecordingResume()
@@ -515,7 +521,7 @@ private fun RecordingControls(
         ) {
             val icon = when {
                 state.isPlaying -> Icons.Default.Pause
-                state.canPlayRecording -> Icons.Default.PlayArrow
+//                state.canPlayRecording -> Icons.Default.PlayArrow
                 state.isRecording -> Icons.Default.Pause
                 else -> Icons.Default.Mic
             }
