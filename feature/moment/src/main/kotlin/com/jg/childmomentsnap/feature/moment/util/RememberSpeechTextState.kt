@@ -1,19 +1,20 @@
 package com.jg.childmomentsnap.feature.moment.util
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 // 생성과 제거를 관리
 @Composable
 internal fun rememberSpeechToTextManager(
-    context: Context,
-    lifecycleOwner: LifecycleOwner
 ): SpeechToTextManager {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val speechToTextManager = remember {
         SpeechToTextManager(context)
     }

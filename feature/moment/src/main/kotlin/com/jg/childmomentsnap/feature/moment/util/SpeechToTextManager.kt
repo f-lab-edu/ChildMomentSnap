@@ -89,7 +89,7 @@ class SpeechToTextManager(private val context: Context) {
     }
 
 
-    fun createSpeechRecognitionIntent() = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+    private fun createSpeechRecognitionIntent() = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(
             RecognizerIntent.EXTRA_LANGUAGE_MODEL,
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
@@ -131,15 +131,16 @@ class SpeechToTextManager(private val context: Context) {
             return
         }
 
-        destroyRecognizer()
-
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-            setRecognitionListener(recognitionListener)
-            startListening(createSpeechRecognitionIntent())
+        if (speechRecognizer == null) {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+                setRecognitionListener(recognitionListener)
+            }
         }
 
+        speechRecognizer?.startListening(createSpeechRecognitionIntent())
+
         _state.update { current ->
-            current.copy(isSpeaking = true)
+            current.copy(isSpeaking = true, spokenText = "")
         }
     }
 

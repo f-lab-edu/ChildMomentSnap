@@ -106,6 +106,22 @@ class VoiceRecordingViewModel @Inject constructor(
     }
 
     /**
+     * STT 인식 결과를 기존 텍스트 뒤에 이어붙임
+     */
+    fun appendSttResult(recognizedText: String) {
+        if (recognizedText.isBlank()) return
+        _uiState.update { currentState ->
+            val currentContent = currentState.editedContent.orEmpty()
+            val newContent = if (currentContent.isEmpty()) {
+                recognizedText
+            } else {
+                "$currentContent $recognizedText"
+            }
+            currentState.copy(editedContent = newContent)
+        }
+    }
+
+    /**
      * 녹음 시작
      */
     fun startRecording() {
