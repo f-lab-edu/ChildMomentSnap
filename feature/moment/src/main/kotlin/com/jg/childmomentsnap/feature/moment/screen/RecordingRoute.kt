@@ -19,6 +19,7 @@ import com.jg.childmomentsnap.core.ui.permissions.hasAllPermissions
 import com.jg.childmomentsnap.feature.moment.R
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
+import com.jg.childmomentsnap.feature.moment.util.rememberSpeechToTextManager
 import com.jg.childmomentsnap.feature.moment.viewmodel.VoiceRecordingViewModel
 
 private const val FILE_NAME = "recording.mp4"
@@ -40,6 +41,8 @@ fun RecordingRoute(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val speechToTextManager = rememberSpeechToTextManager(context, lifecycleOwner)
 
     // 음성 권한 요청 Launcher
     val voicePermissionLauncher = rememberLauncherForActivityResult(
