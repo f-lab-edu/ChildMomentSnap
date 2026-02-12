@@ -8,16 +8,12 @@ internal fun DiaryEntity.toDomain(): Diary {
     return Diary(
         id = id,
         date = date,
-        time = time,
         content = content,
         imagePath = imagePath,
-        mood = mood,
         bgType = bgType,
         bgValue = bgValue,
         isFavorite = isFavorite,
-        location = location,
-        isMilestone = isMilestone,
-        emotion = emotion?.let { runCatching { ChildEmotion.valueOf(it) }.getOrNull() }
+        emotion = emotion
     )
 }
 
@@ -25,15 +21,11 @@ internal fun Diary.toEntity(): DiaryEntity {
     return DiaryEntity(
         id = id,
         date = date,
-        time = time,
         content = content,
         imagePath = imagePath,
-        mood = mood,
         bgType = bgType,
         bgValue = bgValue,
         isFavorite = isFavorite,
-        location = location,
-        isMilestone = isMilestone,
-        emotion = emotion?.name
+        emotion = emotion
     )
 }
