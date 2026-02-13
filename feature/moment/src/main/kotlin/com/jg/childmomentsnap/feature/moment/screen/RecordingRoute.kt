@@ -108,6 +108,10 @@ fun RecordingRoute(
                     is VoiceRecordingUiEffect.NotifyRecordingCompleted -> {
                         onCompleted()
                     }
+
+                    is VoiceRecordingUiEffect.DiarySaved -> {
+                        onCompleted()
+                    }
                 }
             }
     }
@@ -143,6 +147,7 @@ fun RecordingRoute(
         onCompleted = viewModel::finishRecording,
         isProcessing = uiState.isProcessing,
         visionAnalysis = uiState.visionAnalysis,
+        emotionChips = uiState.emotionChips,
         hasVoicePermission = hasVoicePermission,
         onRequestVoicePermission = {
             voicePermissionLauncher.launch(
@@ -195,9 +200,12 @@ private fun getVoiceRecordingErrorMessage(
             context.getString(R.string.feature_moment_error_reset_failed)
 
         VoiceRecordingError.IMAGE_FILE_PATH_NOT_SET ->
-            context.getString(R.string.feature_moment_error_reset_failed)
+            context.getString(R.string.feature_moment_error_image_path_not_set)
 
         VoiceRecordingError.PHOTO_DIARY_GENERATION_FAILED ->
             context.getString(R.string.feature_moment_error_photo_diary)
+
+        VoiceRecordingError.DIARY_SAVE_FAILED ->
+            context.getString(R.string.feature_moment_error_diary_save_failed)
     }
 }

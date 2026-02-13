@@ -46,8 +46,17 @@ class FeedViewModel @Inject constructor(
             diaryRepository.getDiariesByMonth(yearMonth)
                 .catch { /* Handle error */ }
                 .collect { diaries ->
-                    val diariesMap = diaries.groupBy { LocalDate.parse(it.date) }
-                    val sortedList = diaries.sortedByDescending { "${it.date} ${it.time}" }
+                    // date format: "yyyy-MM-dd HH:mm:ss"
+                    val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val diariesMap = diaries.groupBy { 
+                        try {
+                            java.time.LocalDateTime.parse(it.date, formatter).toLocalDate()
+                        } catch (e: Exception) {
+                            // Fallback for old data or errors
+                            LocalDate.now() 
+                        }
+                    }
+                    val sortedList = diaries.sortedByDescending { it.date }
                     _uiState.update { it.copy(
                         diaries = diariesMap,
                         feedList = sortedList

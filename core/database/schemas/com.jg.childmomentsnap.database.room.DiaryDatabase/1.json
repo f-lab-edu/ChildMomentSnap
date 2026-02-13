@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d0a62660919032e600c9d9b6781b7e7e",
+    "identityHash": "a125400f00870ff6924a2a1bc265b61d",
     "entities": [
       {
         "tableName": "diary_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `time` TEXT NOT NULL, `content` TEXT NOT NULL, `image_path` TEXT, `mood` TEXT NOT NULL, `bgType` TEXT NOT NULL, `bgValue` TEXT NOT NULL, `is_favorite` INTEGER NOT NULL, `location` TEXT NOT NULL, `is_milestone` INTEGER NOT NULL, `emotion` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `image_path` TEXT NOT NULL, `bgType` TEXT, `bgValue` TEXT, `is_favorite` INTEGER NOT NULL, `location` TEXT, `emotion` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -21,12 +21,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "time",
-            "columnName": "time",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
             "fieldPath": "content",
             "columnName": "content",
             "affinity": "TEXT",
@@ -35,25 +29,18 @@
           {
             "fieldPath": "imagePath",
             "columnName": "image_path",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "mood",
-            "columnName": "mood",
             "affinity": "TEXT",
             "notNull": true
           },
           {
             "fieldPath": "bgType",
             "columnName": "bgType",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "bgValue",
             "columnName": "bgValue",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "isFavorite",
@@ -64,14 +51,7 @@
           {
             "fieldPath": "location",
             "columnName": "location",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isMilestone",
-            "columnName": "is_milestone",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "emotion",
@@ -89,7 +69,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd0a62660919032e600c9d9b6781b7e7e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a125400f00870ff6924a2a1bc265b61d')"
     ]
   }
 }

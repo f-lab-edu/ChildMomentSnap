@@ -4,6 +4,7 @@ import com.jg.childmomentsnap.core.common.result.DataResult
 import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSource
 import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSource
 import com.jg.childmomentsnap.core.data.mapper.toDomain
+import com.jg.childmomentsnap.core.data.mapper.toEntity
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.model.Diary
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,7 @@ class DiaryRepositoryImpl @Inject constructor(
     private val diaryLocalDataSource: DiaryLocalDataSource,
     private val geminiApiRemoteDataSource: GeminiApiRemoteDataSource
 ) : DiaryRepository {
-    override suspend fun generateDairy(
+    override suspend fun generateGeminiDairy(
         prompt: String
     ): DataResult<String>  {
         return when (val response = geminiApiRemoteDataSource.generateDiary(prompt)) {
@@ -27,6 +28,16 @@ class DiaryRepositoryImpl @Inject constructor(
                 message = response.message,
                 throwable = response.throwable
             )
+        }
+    }
+
+    override suspend fun setDiary(diary: Diary): DataResult<Boolean> {
+        return try {
+            diaryLocalDataSource.insertDiary(diary.toEntity())
+            DataResult.Success(true)
+        } catch (e: Exception) {
+            //  TODO Error Code 정의 필요
+            DataResult.Fail(-1, e.message, e)
         }
     }
 

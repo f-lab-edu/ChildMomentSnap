@@ -42,5 +42,8 @@ enum class VoiceRecordingError {
     IMAGE_FILE_PATH_NOT_SET,
 
     /** AI 일기 생성 실패 */
-    PHOTO_DIARY_GENERATION_FAILED
+    PHOTO_DIARY_GENERATION_FAILED,
+
+    /** 다이어리 저장 실패 */
+    DIARY_SAVE_FAILED
 }

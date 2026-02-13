@@ -103,6 +103,7 @@ fun RecordingScreen(
     onPlaybackStop: () -> Unit = {},
     onPlaying: () -> Unit = {},
     visionAnalysis: VisionAnalysis? = null,
+    emotionChips: List<Int> = emptyList(),
     hasVoicePermission: Boolean = false,
     onRequestVoicePermission: () -> Unit = {},
     onCompleted: () -> Unit = {},
@@ -190,8 +191,8 @@ fun RecordingScreen(
                 StateGuideMessage(state = state)
 
                 // Moment Chips
-                if (visionAnalysis?.faces?.isNotEmpty() == true) {
-                    FaceMomentChip(visionAnalysis)
+                if (emotionChips.isNotEmpty()) {
+                    FaceMomentChip(emotionChips)
                 }
 
                 // 텍스트 편집 카드
@@ -324,23 +325,8 @@ private fun CaptureThumbnail(
 
 @Composable
 fun FaceMomentChip(
-    visionAnalysis: VisionAnalysis
+    emotionChips: List<Int>
 ) {
-    val joyText = stringResource(R.string.feature_moment_emotion_joy)
-    val sorrowText = stringResource(R.string.feature_moment_emotion_sorrow)
-    val angerText = stringResource(R.string.feature_moment_emotion_anger)
-    val surpriseText = stringResource(R.string.feature_moment_emotion_surprise)
-    val calmText = stringResource(R.string.feature_moment_emotion_calm)
-
-    val emotionChips = visionAnalysis.faces.flatMap { face ->
-        buildList {
-            if (face.joy.isPositive()) add(joyText)
-            if (face.sorrow.isPositive()) add(sorrowText)
-            if (face.anger.isPositive()) add(angerText)
-            if (face.surprise.isPositive()) add(surpriseText)
-        }
-    }.distinct().ifEmpty { listOf(calmText) }
-
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -348,17 +334,14 @@ fun FaceMomentChip(
         horizontalArrangement = Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        items(emotionChips) { emotion ->
+        items(emotionChips) { resId ->
             MomentChip(
-                text = emotion,
+                text = stringResource(resId),
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
     }
 }
-
-private fun VisionLikelihood.isPositive(): Boolean =
-    this == VisionLikelihood.LIKELY || this == VisionLikelihood.VERY_LIKELY || this == VisionLikelihood.POSSIBLE
 
 @Composable
 private fun StateGuideMessage(
@@ -573,6 +556,10 @@ private fun RecordingScreenPreview() {
                 canPlayRecording = false,
             ),
             amplitudes = emptyList(),
+            emotionChips = listOf(
+                R.string.feature_moment_emotion_joy,
+                R.string.feature_moment_emotion_surprise
+            )
         )
     }
 }

@@ -69,7 +69,8 @@ private fun NavHostController.navigateToRecording(
 }
 
 
-//   TODO 이방식만 있는걸까? 고민 필요 (이슈(Type Error)로 인한 AI 도움 받았기에)
+//   Custom NavType 정의
+//  Data Class 안에 Data Class를 전달할때 Bundle 보다는 Json 형태로 전달하여 직렬화 과정에 안정성 확보 위함
 val VisionAnalysisType = object : NavType<VisionAnalysis>(isNullableAllowed = false) {
     override fun get(bundle: Bundle, key: String): VisionAnalysis? {
         return bundle.getString(key)?.let { Json.decodeFromString(it) }

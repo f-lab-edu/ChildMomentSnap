@@ -7,7 +7,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 interface DiaryRepository {
-    suspend fun generateDairy(prompt: String): DataResult<String>
+    suspend fun generateGeminiDairy(prompt: String): DataResult<String>
+    suspend fun setDiary(diary: Diary): DataResult<Boolean>
     fun getDiariesByDate(date: LocalDate): Flow<List<Diary>>
     fun getDiariesByMonth(yearMonth: YearMonth): Flow<List<Diary>>
 }

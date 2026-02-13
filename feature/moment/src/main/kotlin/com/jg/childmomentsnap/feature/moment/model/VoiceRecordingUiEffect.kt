@@ -20,4 +20,6 @@ sealed interface VoiceRecordingUiEffect {
     data class NotifyRecordingCompleted(val voiceFilePath: String?) : VoiceRecordingUiEffect
 
     data class MomentAnalysisCompleted(val momentData: MomentData) : VoiceRecordingUiEffect
+
+    object DiarySaved : VoiceRecordingUiEffect
 }

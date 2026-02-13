@@ -27,7 +27,7 @@ interface DiaryDao {
     @Query("SELECT * FROM diary_table WHERE date LIKE :yearMonth || '%'")
     fun getDiaryList(yearMonth: String): Flow<List<DiaryEntity>>
 
-    @Query("SELECT * FROM diary_table WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC, time DESC")
+    @Query("SELECT * FROM diary_table WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     fun getDiaryListByDate(startDate: String, endDate: String): Flow<List<DiaryEntity>>
 
     @Query("SELECT * FROM diary_table WHERE is_favorite = 1")
