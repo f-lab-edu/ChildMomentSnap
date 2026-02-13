@@ -147,6 +147,7 @@ fun RecordingRoute(
         onCompleted = viewModel::finishRecording,
         isProcessing = uiState.isProcessing,
         visionAnalysis = uiState.visionAnalysis,
+        emotionChips = uiState.emotionChips,
         hasVoicePermission = hasVoicePermission,
         onRequestVoicePermission = {
             voicePermissionLauncher.launch(
