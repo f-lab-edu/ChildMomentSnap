@@ -95,7 +95,9 @@ internal fun FeedRoute(
                 is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
                 is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
                 is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
-                is FeedSideEffect.ShowWriteSelectionDialog -> TODO()
+                is FeedSideEffect.ShowWriteSelectionDialog -> {
+
+                }
             }
         }
     }
