@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.core.data.datasource
 
+import com.jg.childmomentsnap.core.common.result.DataResult
 import com.jg.childmomentsnap.database.dao.DiaryDao
 import com.jg.childmomentsnap.database.entity.DiaryEntity
 import kotlinx.coroutines.flow.Flow
@@ -25,11 +26,11 @@ class DiaryLocalDataSourceImpl @Inject constructor(
         diaryDao.updateFavoriteStatus(id, isFavorite)
     }
 
-    override fun getDiaryList(yearMonth: String): Flow<List<DiaryEntity>> {
+    override suspend fun getDiaryList(yearMonth: String): List<DiaryEntity> {
         return diaryDao.getDiaryList(yearMonth)
     }
 
-    override fun getDiaryListByDate(startDate: String, endDate: String): Flow<List<DiaryEntity>> {
+    override suspend fun getDiaryListByDate(startDate: String, endDate: String): List<DiaryEntity> {
         return diaryDao.getDiaryListByDate(startDate, endDate)
     }
 

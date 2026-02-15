@@ -9,7 +9,7 @@ import java.time.YearMonth
 interface DiaryRepository {
     suspend fun generateGeminiDairy(prompt: String): DataResult<String>
     suspend fun setDiary(diary: Diary): DataResult<Boolean>
-    fun getDiariesByDate(date: LocalDate): Flow<List<Diary>>
-    fun getDiariesByMonth(yearMonth: YearMonth): Flow<List<Diary>>
+    suspend fun getDiariesByDate(date: LocalDate): DataResult<List<Diary>>
+    suspend fun getDiariesByMonth(yearMonth: YearMonth): DataResult<List<Diary>>
 }
 
