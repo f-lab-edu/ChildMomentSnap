@@ -144,9 +144,8 @@ fun RecordingRoute(
         },
         onPlaybackStart = viewModel::playRecording,
         onPlaybackStop = viewModel::stopPlayback,
-        onCompleted = viewModel::finishRecording,
+        onCompleted = viewModel::finishWriteDiary,
         isProcessing = uiState.isProcessing,
-        visionAnalysis = uiState.visionAnalysis,
         emotionChips = uiState.emotionChips,
         hasVoicePermission = hasVoicePermission,
         onRequestVoicePermission = {

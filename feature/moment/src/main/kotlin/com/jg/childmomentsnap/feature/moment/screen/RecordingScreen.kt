@@ -102,7 +102,6 @@ fun RecordingScreen(
     onPlaybackStart: () -> Unit = {},
     onPlaybackStop: () -> Unit = {},
     onPlaying: () -> Unit = {},
-    visionAnalysis: VisionAnalysis? = null,
     emotionChips: List<Int> = emptyList(),
     hasVoicePermission: Boolean = false,
     onRequestVoicePermission: () -> Unit = {},

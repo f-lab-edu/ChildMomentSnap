@@ -384,6 +384,17 @@ class VoiceRecordingViewModel @Inject constructor(
 
     fun finishWriteDiary() {
         viewModelScope.launch(Dispatchers.IO) {
+
+            val currentImageBytes = imageBytes
+
+            if (currentImageBytes == null) {
+                _uiEffect.emit(
+                    VoiceRecordingUiEffect.ShowErrorToast(
+                        VoiceRecordingError.IMAGE_FILE_PATH_NOT_SET
+                    )
+                )
+            }
+
             val currentState = _uiState.value
 
             val diary = Diary(
@@ -407,9 +418,10 @@ class VoiceRecordingViewModel @Inject constructor(
 
     /**
      * 녹음 완료 및 AI 처리 시작
+     * 2026.02.15 녹음기능은 따로 현재 쓰지 않기에 추후 사용으로 임시 사용 하지 않음
      * TODO 녹음과 함꼐 처리 할 방안 추가 대응 필요
      */
-    fun finishRecording() {
+    fun beforeFinishRecording() {
         viewModelScope.launch {
             val currentState = _uiState.value
             // 이미 녹음이 중지된 상태가 아니라면 먼저 중지 시도 (UI 흐름상 finishRecording은 완료 버튼 클릭 등에서 오므로)
