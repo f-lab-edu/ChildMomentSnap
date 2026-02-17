@@ -9,7 +9,7 @@ import com.jg.childmomentsnap.database.entity.DiaryEntity
 
 @Database(
     entities = [DiaryEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class DiaryDatabase : RoomDatabase() {
@@ -28,7 +28,9 @@ abstract class DiaryDatabase : RoomDatabase() {
                     context = context,
                     klass = DiaryDatabase::class.java,
                     name = DATABASE_NAME
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                     .also { Instance = it }
             }
         }

@@ -6,14 +6,10 @@ import kotlinx.serialization.Serializable
 data class Diary(
     val id: Long = 0,
     val date: String,
-    val time: String,
     val content: String,
-    val imagePath: String?,
-    val mood: String,
-    val bgType: String,
-    val bgValue: String,
+    val imagePath: String,
+    val bgType: String? = null,
+    val bgValue: String? = null,
     val isFavorite: Boolean,
-    val location: String = "",
-    val isMilestone: Boolean = false,
-    val emotion: ChildEmotion? = null
+    val emotion: List<EmotionKey> = emptyList()
 )

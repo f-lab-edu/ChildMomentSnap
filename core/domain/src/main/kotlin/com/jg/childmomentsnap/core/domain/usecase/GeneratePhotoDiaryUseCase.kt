@@ -30,7 +30,7 @@ class GeneratePhotoDiaryUseCaseImpl @Inject constructor(
             emotions = emotions
         )
 
-        return when (val result = diaryRepository.generateDairy(prompt)) {
+        return when (val result = diaryRepository.generateGeminiDairy(prompt)) {
             is DataResult.Success -> DomainResult.Success(
                 GeminiAnalysis(
                     content = result.data,

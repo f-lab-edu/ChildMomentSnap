@@ -25,10 +25,10 @@ interface DiaryDao {
     suspend fun updateFavoriteStatus(id: Long, isFavorite: Boolean)
 
     @Query("SELECT * FROM diary_table WHERE date LIKE :yearMonth || '%'")
-    fun getDiaryList(yearMonth: String): Flow<List<DiaryEntity>>
+    suspend fun getDiaryList(yearMonth: String): List<DiaryEntity>
 
-    @Query("SELECT * FROM diary_table WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC, time DESC")
-    fun getDiaryListByDate(startDate: String, endDate: String): Flow<List<DiaryEntity>>
+    @Query("SELECT * FROM diary_table WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    suspend fun getDiaryListByDate(startDate: String, endDate: String): List<DiaryEntity>
 
     @Query("SELECT * FROM diary_table WHERE is_favorite = 1")
     fun getFavoriteDiaryList(): Flow<List<DiaryEntity>>

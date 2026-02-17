@@ -66,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.model.VisionLikelihood
 import com.jg.childmomentsnap.core.ui.theme.Amber500
@@ -78,6 +79,7 @@ import com.jg.childmomentsnap.core.ui.theme.Stone400
 import com.jg.childmomentsnap.core.ui.theme.Stone50
 import com.jg.childmomentsnap.core.ui.theme.Stone800
 import com.jg.childmomentsnap.core.ui.theme.Stone900
+import com.jg.childmomentsnap.core.ui.util.EmotionChipResources
 import com.jg.childmomentsnap.feature.moment.R
 import com.jg.childmomentsnap.feature.moment.RecordingControlsState
 import com.jg.childmomentsnap.feature.moment.components.common.MomentChip
@@ -102,7 +104,7 @@ fun RecordingScreen(
     onPlaybackStart: () -> Unit = {},
     onPlaybackStop: () -> Unit = {},
     onPlaying: () -> Unit = {},
-    visionAnalysis: VisionAnalysis? = null,
+    emotionChips: List<EmotionKey> = emptyList(),
     hasVoicePermission: Boolean = false,
     onRequestVoicePermission: () -> Unit = {},
     onCompleted: () -> Unit = {},
@@ -190,8 +192,8 @@ fun RecordingScreen(
                 StateGuideMessage(state = state)
 
                 // Moment Chips
-                if (visionAnalysis?.faces?.isNotEmpty() == true) {
-                    FaceMomentChip(visionAnalysis)
+                if (emotionChips.isNotEmpty()) {
+                    FaceMomentChip(emotionChips)
                 }
 
                 // 텍스트 편집 카드
@@ -324,23 +326,9 @@ private fun CaptureThumbnail(
 
 @Composable
 fun FaceMomentChip(
-    visionAnalysis: VisionAnalysis
+    emotionChips: List<EmotionKey>
 ) {
-    val joyText = stringResource(R.string.feature_moment_emotion_joy)
-    val sorrowText = stringResource(R.string.feature_moment_emotion_sorrow)
-    val angerText = stringResource(R.string.feature_moment_emotion_anger)
-    val surpriseText = stringResource(R.string.feature_moment_emotion_surprise)
-    val calmText = stringResource(R.string.feature_moment_emotion_calm)
-
-    val emotionChips = visionAnalysis.faces.flatMap { face ->
-        buildList {
-            if (face.joy.isPositive()) add(joyText)
-            if (face.sorrow.isPositive()) add(sorrowText)
-            if (face.anger.isPositive()) add(angerText)
-            if (face.surprise.isPositive()) add(surpriseText)
-        }
-    }.distinct().ifEmpty { listOf(calmText) }
-
+    val resIds = EmotionChipResources.getEmotionChipResIds(emotionChips)
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -348,17 +336,14 @@ fun FaceMomentChip(
         horizontalArrangement = Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        items(emotionChips) { emotion ->
+        items(resIds) { resId ->
             MomentChip(
-                text = emotion,
+                text = stringResource(resId),
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
     }
 }
-
-private fun VisionLikelihood.isPositive(): Boolean =
-    this == VisionLikelihood.LIKELY || this == VisionLikelihood.VERY_LIKELY || this == VisionLikelihood.POSSIBLE
 
 @Composable
 private fun StateGuideMessage(
@@ -573,6 +558,10 @@ private fun RecordingScreenPreview() {
                 canPlayRecording = false,
             ),
             amplitudes = emptyList(),
+            emotionChips = listOf(
+                EmotionKey.JOY,
+                EmotionKey.SURPRISE
+            )
         )
     }
 }

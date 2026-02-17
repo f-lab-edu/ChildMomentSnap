@@ -2,15 +2,23 @@ package com.jg.childmomentsnap.feature.moment.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.domain.usecase.ProcessMomentUseCase
+import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCase
+import com.jg.childmomentsnap.core.model.Diary
 import com.jg.childmomentsnap.core.model.VisionAnalysis
+import com.jg.childmomentsnap.core.model.VisionLikelihood
+import com.jg.childmomentsnap.core.common.util.DateUtils
+import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.VoiceRecordingUiState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingUiEffect
 import com.jg.childmomentsnap.feature.moment.util.VoicePlayer
 import com.jg.childmomentsnap.feature.moment.util.VoiceRecorder
+import com.jg.childmomentsnap.feature.moment.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,6 +31,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 private const val MAX_AMPLITUDE_HISTORY = 40
@@ -41,6 +51,7 @@ private val MAX_MEDIA_RECORDER_AMPLITUDE = Short.MAX_VALUE.toFloat()
 @HiltViewModel
 class VoiceRecordingViewModel @Inject constructor(
     private val processMomentUseCase: ProcessMomentUseCase,
+    private val writeDiaryUseCase: WriteDiaryUseCase,
     private val voiceRecorder: VoiceRecorder,
     private val voicePlayer: VoicePlayer
 ) : ViewModel() {
@@ -95,15 +106,31 @@ class VoiceRecordingViewModel @Inject constructor(
         uri: String,
         filePath: String
     ) {
+        val emotionChips = getEmotionChips(visionAnalysis)
         _uiState.update {
             it.copy(
                 editedContent = visionAnalysisContent,
                 visionAnalysis = visionAnalysis,
                 imageUri = uri,
-                recordingFilePath = filePath
+                recordingFilePath = filePath,
+                emotionChips = emotionChips
             )
         }
     }
+    
+    private fun getEmotionChips(visionAnalysis: VisionAnalysis): List<EmotionKey> {
+        return visionAnalysis.faces.flatMap { face ->
+            buildList {
+                if (face.joy.isPositive()) add(EmotionKey.JOY)
+                if (face.sorrow.isPositive()) add(EmotionKey.SORROW)
+                if (face.anger.isPositive()) add(EmotionKey.ANGER)
+                if (face.surprise.isPositive()) add(EmotionKey.SURPRISE)
+            }
+        }.distinct()
+    }
+
+    private fun VisionLikelihood.isPositive(): Boolean =
+        this == VisionLikelihood.LIKELY || this == VisionLikelihood.VERY_LIKELY || this == VisionLikelihood.POSSIBLE
 
     fun updateEditedContent(content: String) {
         _uiState.update { it.copy(editedContent = content) }
@@ -356,12 +383,44 @@ class VoiceRecordingViewModel @Inject constructor(
         }
     }
 
+    fun finishWriteDiary() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentState = _uiState.value
+            val currentImageBytes = currentState.imageUri
+
+            if (currentImageBytes == null) {
+                _uiEffect.emit(
+                    VoiceRecordingUiEffect.ShowErrorToast(
+                        VoiceRecordingError.IMAGE_FILE_PATH_NOT_SET
+                    )
+                )
+            }
+
+            val diary = Diary(
+                date = DateUtils.createDiaryDateAndTime(),
+                content = currentState.editedContent.orEmpty(),
+                imagePath = currentState.imageUri.orEmpty(),
+                isFavorite = false,
+                emotion = currentState.emotionChips
+            )
+
+            when (writeDiaryUseCase(diary)) {
+                is DomainResult.Success -> {
+                    _uiEffect.emit(VoiceRecordingUiEffect.DiarySaved)
+                }
+                is DomainResult.Fail -> {
+                    _uiEffect.emit(VoiceRecordingUiEffect.ShowErrorToast(VoiceRecordingError.DIARY_SAVE_FAILED))
+                }
+            }
+        }
+    }
 
     /**
      * 녹음 완료 및 AI 처리 시작
+     * 2026.02.15 녹음기능은 따로 현재 쓰지 않기에 추후 사용으로 임시 사용 하지 않음
      * TODO 녹음과 함꼐 처리 할 방안 추가 대응 필요
      */
-    fun finishRecording() {
+    fun beforeFinishRecording() {
         viewModelScope.launch {
             val currentState = _uiState.value
             // 이미 녹음이 중지된 상태가 아니라면 먼저 중지 시도 (UI 흐름상 finishRecording은 완료 버튼 클릭 등에서 오므로)

@@ -70,6 +70,7 @@ import com.jg.childmomentsnap.core.ui.theme.Stone400
 import com.jg.childmomentsnap.core.ui.theme.Stone800
 import com.jg.childmomentsnap.core.ui.theme.Rose400
 import com.jg.childmomentsnap.core.ui.theme.Stone900
+import com.jg.childmomentsnap.core.ui.util.EmotionChipResources
 import com.jg.childmomentsnap.core.ui.util.modifier.scrollbar
 import com.jg.childmomentsnap.feature.feed.viewmodel.FeedSideEffect
 import com.jg.childmomentsnap.feature.feed.viewmodel.FeedUiState
@@ -95,7 +96,9 @@ internal fun FeedRoute(
                 is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
                 is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
                 is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
-                is FeedSideEffect.ShowWriteSelectionDialog -> TODO()
+                is FeedSideEffect.ShowWriteSelectionDialog -> {
+
+                }
             }
         }
     }
@@ -504,12 +507,11 @@ fun MomentFeedItem(
             // 1. 헤더 영역 (날짜, 장소, 더보기)
             MomentItemHeader(
                 date = moment.date,
-                location = moment.location.ifEmpty { stringResource(FeedR.string.location_unknown) },
+                // location = moment.location.ifEmpty { stringResource(FeedR.string.location_unknown) },
                 onMoreClick = onMoreClick
             )
 
             // 2. 이미지 영역
-            // 실제 환경에서는 Coil의 AsyncImage 등을 사용하여 moment.imageUrl을 로드합니다.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -530,15 +532,16 @@ fun MomentFeedItem(
             // 3. 액션 바 영역 (좋아요, 마일스톤 별)
             MomentItemActionBar(
                 isFavorite = moment.isFavorite,
-                isMilestone = moment.isMilestone,
+                isMilestone = false,
                 onLikeClick = onLikeClick,
                 onStarClick = onStarClick
             )
 
             // 4. 콘텐츠 영역 (태그, 일기 본문)
+            val emotionResIds = EmotionChipResources.getEmotionChipResIds(moment.emotion)
             MomentItemContent(
-                tag = moment.mood,
-                emotion = moment.emotion,
+                tag = moment.bgValue ?: "",
+                emotionResIds = emotionResIds,
                 content = moment.content
             )
         }
@@ -548,7 +551,7 @@ fun MomentFeedItem(
 @Composable
 private fun MomentItemHeader(
     date: String,
-    location: String,
+//    location: String,
     onMoreClick: () -> Unit
 ) {
     Row(
@@ -580,20 +583,6 @@ private fun MomentItemHeader(
                     color = Stone800,
                     fontWeight = FontWeight.Bold
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = Stone300
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = location,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Stone400
-                    )
-                }
             }
         }
         IconButton(onClick = onMoreClick) {
@@ -642,7 +631,7 @@ private fun MomentItemActionBar(
 @Composable
 private fun MomentItemContent(
     tag: String,
-    emotion: ChildEmotion?,
+    emotionResIds: List<Int>,
     content: String
 ) {
     Column(
@@ -651,7 +640,7 @@ private fun MomentItemContent(
             .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
     ) {
         // 태그 영역 (감정 칩 + 일반 태그)
-        MomentTagArea(tag = tag, emotion = emotion)
+        MomentTagArea(tag = tag, emotionResIds = emotionResIds)
         
         Spacer(modifier = Modifier.height(12.dp))
         
@@ -667,7 +656,7 @@ private fun MomentItemContent(
 @Composable
 fun MomentTagArea(
     tag: String,
-    emotion: ChildEmotion?,
+    emotionResIds: List<Int>,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -675,12 +664,14 @@ fun MomentTagArea(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // AI 감정 분석 칩 (우선순위 높음)
-        if (emotion != null) {
-            MomentsEmotionChip(emotion = emotion)
+        // AI 감정 분석 칩들
+        emotionResIds.forEach { resId ->
+            MomentsTagChip(text = stringResource(resId))
         }
-        
+
         // 일반 장소/상황 태그
-        MomentsTagChip(text = tag)
+        if (tag.isNotBlank()) {
+            MomentsTagChip(text = tag)
+        }
     }
 }

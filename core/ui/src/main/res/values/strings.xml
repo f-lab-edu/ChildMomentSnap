@@ -35,4 +35,11 @@
     <string name="emotion_surprised">놀람</string>
     <string name="emotion_sad">서운</string>
     <string name="emotion_cringe">찡긋</string>
+
+    <!-- Emotion Chip Labels (Vision Analysis) -->
+    <string name="emotion_chip_joy">😊 기쁨</string>
+    <string name="emotion_chip_sorrow">😢 슬픔</string>
+    <string name="emotion_chip_anger">😠 화남</string>
+    <string name="emotion_chip_surprise">😲 놀라움</string>
+    <string name="emotion_chip_calm">😊 평온</string>
 </resources>

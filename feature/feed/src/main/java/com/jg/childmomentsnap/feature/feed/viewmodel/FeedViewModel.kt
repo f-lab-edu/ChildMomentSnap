@@ -2,6 +2,8 @@ package com.jg.childmomentsnap.feature.feed.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.common.result.DataResult
+import com.jg.childmomentsnap.core.common.util.DateUtils
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -13,7 +15,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,27 +43,33 @@ class FeedViewModel @Inject constructor(
             monthlyDays = calculatedMonthlyDays
         ) }
         
-        // Ensure weekly days are also updated if base date changes or just initial load
         updateWeeklyDays(_uiState.value.selectedDate ?: LocalDate.now())
 
         viewModelScope.launch {
-            diaryRepository.getDiariesByMonth(yearMonth)
-                .catch { /* Handle error */ }
-                .collect { diaries ->
-                    val diariesMap = diaries.groupBy { LocalDate.parse(it.date) }
-                    val sortedList = diaries.sortedByDescending { "${it.date} ${it.time}" }
+            when (val result = diaryRepository.getDiariesByMonth(yearMonth)) {
+                is DataResult.Success -> {
+                    val diaries = result.data
+
+                    val diariesMap = diaries.groupBy {
+                        DateUtils.parseDateOrNull(it.date)?.toLocalDate() ?: LocalDate.now()
+                    }
+                    val sortedList = diaries.sortedByDescending { it.date }
                     _uiState.update { it.copy(
                         diaries = diariesMap,
                         feedList = sortedList
                     ) }
                 }
+                is DataResult.Fail -> {
+                    // Handle error
+                }
+            }
         }
     }
 
     private fun calculateMonthlyDays(currentMonth: YearMonth): List<LocalDate?> {
         val daysInMonth = currentMonth.lengthOfMonth()
         val firstDayOfMonth = currentMonth.atDay(1)
-        val startOffset = firstDayOfMonth.dayOfWeek.value % 7 // Sun=0, Mon=1...Sat=6 (if Sunday start)
+        val startOffset = firstDayOfMonth.dayOfWeek.value % 7
         
         val totalCells = daysInMonth + startOffset
         val rows = (totalCells + 6) / 7
@@ -80,7 +90,6 @@ class FeedViewModel @Inject constructor(
     }
 
     fun onDateClick(date: LocalDate) {
-        // Update weekly view to center around selected date or just ensure selected date is visible (standard behavior)
         updateWeeklyDays(date)
 
         val diaries = uiState.value.diaries[date] ?: emptyList()
