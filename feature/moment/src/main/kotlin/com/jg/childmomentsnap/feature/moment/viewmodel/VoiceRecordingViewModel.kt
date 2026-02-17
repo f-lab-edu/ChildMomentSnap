@@ -8,7 +8,7 @@ import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCase
 import com.jg.childmomentsnap.core.model.Diary
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.model.VisionLikelihood
-import com.jg.childmomentsnap.core.ui.util.DateUtils
+import com.jg.childmomentsnap.core.common.util.DateUtils
 import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.VoiceRecordingUiState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
@@ -384,8 +384,8 @@ class VoiceRecordingViewModel @Inject constructor(
 
     fun finishWriteDiary() {
         viewModelScope.launch(Dispatchers.IO) {
-
-            val currentImageBytes = imageBytes
+            val currentState = _uiState.value
+            val currentImageBytes = currentState.imageUri
 
             if (currentImageBytes == null) {
                 _uiEffect.emit(
@@ -394,8 +394,6 @@ class VoiceRecordingViewModel @Inject constructor(
                     )
                 )
             }
-
-            val currentState = _uiState.value
 
             val diary = Diary(
                 date = DateUtils.createDiaryDateAndTime(),
