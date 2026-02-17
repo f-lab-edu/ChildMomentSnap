@@ -11,5 +11,5 @@ data class Diary(
     val bgType: String? = null,
     val bgValue: String? = null,
     val isFavorite: Boolean,
-    val emotion: String? = null
+    val emotion: List<EmotionKey> = emptyList()
 )

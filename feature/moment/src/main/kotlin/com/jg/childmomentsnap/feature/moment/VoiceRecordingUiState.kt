@@ -1,6 +1,7 @@
 package com.jg.childmomentsnap.feature.moment
 
 import androidx.compose.runtime.Stable
+import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 
 /**
@@ -21,7 +22,7 @@ data class VoiceRecordingUiState(
     val imageUri: String? = null,
     val visionAnalysis: VisionAnalysis? = null,
     val editedContent: String? = null,
-    val emotionChips: List<Int> = emptyList()
+    val emotionChips: List<EmotionKey> = emptyList()
 ) {
     /**
      * RecordingControlsState로 변환하는 편의 함수

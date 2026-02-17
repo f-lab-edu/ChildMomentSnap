@@ -9,6 +9,7 @@ import com.jg.childmomentsnap.core.model.Diary
 import com.jg.childmomentsnap.core.model.VisionAnalysis
 import com.jg.childmomentsnap.core.model.VisionLikelihood
 import com.jg.childmomentsnap.core.common.util.DateUtils
+import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.feature.moment.RecordingState
 import com.jg.childmomentsnap.feature.moment.VoiceRecordingUiState
 import com.jg.childmomentsnap.feature.moment.model.VoiceRecordingError
@@ -117,13 +118,13 @@ class VoiceRecordingViewModel @Inject constructor(
         }
     }
     
-    private fun getEmotionChips(visionAnalysis: VisionAnalysis): List<Int> {
+    private fun getEmotionChips(visionAnalysis: VisionAnalysis): List<EmotionKey> {
         return visionAnalysis.faces.flatMap { face ->
             buildList {
-                if (face.joy.isPositive() == true) add(R.string.feature_moment_emotion_joy)
-                if (face.sorrow.isPositive()) add(R.string.feature_moment_emotion_sorrow)
-                if (face.anger.isPositive()) add(R.string.feature_moment_emotion_anger)
-                if (face.surprise.isPositive()) add(R.string.feature_moment_emotion_surprise)
+                if (face.joy.isPositive()) add(EmotionKey.JOY)
+                if (face.sorrow.isPositive()) add(EmotionKey.SORROW)
+                if (face.anger.isPositive()) add(EmotionKey.ANGER)
+                if (face.surprise.isPositive()) add(EmotionKey.SURPRISE)
             }
         }.distinct()
     }
@@ -400,7 +401,7 @@ class VoiceRecordingViewModel @Inject constructor(
                 content = currentState.editedContent.orEmpty(),
                 imagePath = currentState.imageUri.orEmpty(),
                 isFavorite = false,
-                emotion = null
+                emotion = currentState.emotionChips
             )
 
             when (writeDiaryUseCase(diary)) {
