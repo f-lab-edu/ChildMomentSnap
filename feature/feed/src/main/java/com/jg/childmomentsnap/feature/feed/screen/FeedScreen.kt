@@ -1,7 +1,9 @@
 package com.jg.childmomentsnap.feature.feed.screen
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +21,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -30,11 +35,14 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +54,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -57,10 +66,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jg.childmomentsnap.core.model.ChildEmotion
 import com.jg.childmomentsnap.core.model.Diary
-import com.jg.childmomentsnap.core.ui.component.MomentsEmotionChip
+import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.core.ui.component.MomentsTagChip
+import com.jg.childmomentsnap.core.ui.theme.Amber50
 import com.jg.childmomentsnap.core.ui.theme.Amber100
 import com.jg.childmomentsnap.core.ui.theme.Amber500
+import com.jg.childmomentsnap.core.ui.theme.Amber800
+import com.jg.childmomentsnap.core.ui.theme.Indigo50
+import com.jg.childmomentsnap.core.ui.theme.Indigo400
+import com.jg.childmomentsnap.core.ui.theme.Indigo800
+import com.jg.childmomentsnap.core.ui.theme.Purple50
+import com.jg.childmomentsnap.core.ui.theme.Rose500
 import com.jg.childmomentsnap.core.ui.theme.MomentsShapes
 import com.jg.childmomentsnap.core.ui.theme.MomentsTheme
 import com.jg.childmomentsnap.core.ui.theme.Stone100
@@ -68,7 +84,6 @@ import com.jg.childmomentsnap.core.ui.theme.Stone200
 import com.jg.childmomentsnap.core.ui.theme.Stone300
 import com.jg.childmomentsnap.core.ui.theme.Stone400
 import com.jg.childmomentsnap.core.ui.theme.Stone800
-import com.jg.childmomentsnap.core.ui.theme.Rose400
 import com.jg.childmomentsnap.core.ui.theme.Stone900
 import com.jg.childmomentsnap.core.ui.util.EmotionChipResources
 import com.jg.childmomentsnap.core.ui.util.modifier.scrollbar
@@ -78,6 +93,10 @@ import com.jg.childmomentsnap.feature.feed.viewmodel.FeedViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.jg.childmomentsnap.core.ui.theme.Rose400
 import com.jg.childmomentsnap.feature.feed.R as FeedR
 
 
@@ -417,7 +436,7 @@ private fun MomentFeed(
     if (moments.isEmpty()) {
         EmptyFeedView(modifier = Modifier.padding(contentPadding))
     } else {
-        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val listState = rememberLazyListState()
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -431,7 +450,6 @@ private fun MomentFeed(
                 MomentFeedItem(
                     moment = moment,
                     onLikeClick = { /* TODO */ },
-                    onStarClick = { /* TODO */ },
                     onMoreClick = { /* TODO */ }
                 )
             }
@@ -444,11 +462,10 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(top = 60.dp), // Adjust vertical placement
+            .padding(top = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Placeholder Image/Icon
         Box(
             modifier = Modifier
                 .size(160.dp) // Large size
@@ -492,7 +509,6 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
 fun MomentFeedItem(
     moment: Diary,
     onLikeClick: () -> Unit = {},
-    onStarClick: () -> Unit = {},
     onMoreClick: () -> Unit = {}
 ) {
     Card(
@@ -505,9 +521,12 @@ fun MomentFeedItem(
     ) {
         Column {
             // 1. 헤더 영역 (날짜, 장소, 더보기)
-            MomentItemHeader(
-                date = moment.date,
-                // location = moment.location.ifEmpty { stringResource(FeedR.string.location_unknown) },
+            //  TODO UserInfo 데이터 필요 (로그인 사용자 역할, 아이 이름, 생년월일로 개월수 표기)
+            MomentHeader(
+                role = "",
+                babyInfo = "",
+                timestamp = moment.date,
+                onLikeClick = onLikeClick,
                 onMoreClick = onMoreClick
             )
 
@@ -529,68 +548,120 @@ fun MomentFeedItem(
                 )
             }
 
-            // 3. 액션 바 영역 (좋아요, 마일스톤 별)
-            MomentItemActionBar(
-                isFavorite = moment.isFavorite,
-                isMilestone = false,
-                onLikeClick = onLikeClick,
-                onStarClick = onStarClick
-            )
-
-            // 4. 콘텐츠 영역 (태그, 일기 본문)
+            // 3. 콘텐츠 영역 (태그, 일기 본문)
             val emotionResIds = EmotionChipResources.getEmotionChipResIds(moment.emotion)
             MomentItemContent(
                 tag = moment.bgValue ?: "",
                 emotionResIds = emotionResIds,
                 content = moment.content
             )
+
+            // 4. 액션 바 영역 (좋아요, 마일스톤 별)
+            MomentItemActionBar(
+                isFavorite = moment.isFavorite,
+                isMilestone = false,
+                onLikeClick = onLikeClick,
+            )
         }
     }
 }
 
+
+
 @Composable
-private fun MomentItemHeader(
-    date: String,
-//    location: String,
-    onMoreClick: () -> Unit
+private fun MomentHeader(
+    role: String,
+    babyInfo: String,
+    timestamp: String,
+    onLikeClick: () -> Unit = {},
+    onMoreClick: () -> Unit = {}
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // 아바타 대용 아이콘
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape,
-                color = Amber100
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = null,
-                    modifier = Modifier.padding(8.dp),
-                    tint = Amber500
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = date,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Stone800,
-                    fontWeight = FontWeight.Bold
-                )
+        // 프로필 이미지 및 역할 뱃지
+        Box(modifier = Modifier.size(48.dp)) {
+            // 프로필 이미지 (실제 앱에서는 AsyncImage 사용)
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Stone200)
+                    .border(2.dp, Amber50, CircleShape)
+                    .align(Alignment.TopStart)
+            )
+
+            // 역할 뱃지
+            if (role.isNotEmpty()) {
+                Surface(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    color = Amber100,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.White)
+                ) {
+                    Text(
+                        text = role,
+                        color = Amber800,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
             }
         }
-        IconButton(onClick = onMoreClick) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(FeedR.string.desc_more_options),
-                tint = Stone200
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 아기 정보 및 시간
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = babyInfo,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(
+                text = timestamp,
+                fontSize = 12.sp,
+                color = Color.Gray
             )
+        }
+
+        // 더보기 메뉴
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "더보기",
+                    tint = Color.Gray
+                )
+            }
+
+            // 드롭다운 메뉴
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                modifier = Modifier.background(Color.White)
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(FeedR.string.shared_with_family)) },
+                    onClick = { showMenu = false },
+                    leadingIcon = { Icon(Icons.Default.Share, "공유") }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(FeedR.string.feed_item_delete), color = Color.Red) },
+                    onClick = { showMenu = false },
+                    leadingIcon = { Icon(Icons.Default.Delete, "삭제", tint = Color.Red) }
+                )
+            }
         }
     }
 }
@@ -600,12 +671,11 @@ private fun MomentItemActionBar(
     isFavorite: Boolean,
     isMilestone: Boolean,
     onLikeClick: () -> Unit,
-    onStarClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -614,14 +684,6 @@ private fun MomentItemActionBar(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = stringResource(FeedR.string.desc_like),
                 tint = Rose400,
-                modifier = Modifier.size(26.dp)
-            )
-        }
-        IconButton(onClick = onStarClick) {
-            Icon(
-                imageVector = if (isMilestone) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                contentDescription = stringResource(FeedR.string.desc_milestone),
-                tint = Amber500,
                 modifier = Modifier.size(26.dp)
             )
         }
@@ -637,19 +699,18 @@ private fun MomentItemContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
+            .padding(top = 8.dp, start = 24.dp, end = 24.dp, bottom = 6.dp)
     ) {
-        // 태그 영역 (감정 칩 + 일반 태그)
-        MomentTagArea(tag = tag, emotionResIds = emotionResIds)
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
         Text(
             text = "\"$content\"",
             style = MaterialTheme.typography.bodyLarge,
             color = Stone800,
             lineHeight = 26.sp
         )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 태그 영역 (감정 칩 + 일반 태그)
+        MomentTagArea(tag = tag, emotionResIds = emotionResIds)
     }
 }
 
@@ -675,3 +736,43 @@ fun MomentTagArea(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun FeedScreenLoadedPreview() {
+    val sampleDiaries = listOf(
+        Diary(
+            id = 1,
+            date = "2026-02-24 14:30:00",
+            content = "오늘은 놀이터에서 신나게 미끄럼틀을 탔다. 아이가 너무 즐거워했다.",
+            imagePath = "",
+            bgValue = "놀이터",
+            isFavorite = true,
+            emotion = listOf(EmotionKey.JOY, EmotionKey.SURPRISE)
+        ),
+        Diary(
+            id = 2,
+            date = "2026-02-23 10:00:00",
+            content = "아침에 일어나서 밥을 맛있게 먹고 그림책을 읽었다.",
+            imagePath = "",
+            bgValue = "집",
+            isFavorite = false,
+            emotion = listOf(EmotionKey.CALM)
+        )
+    )
+
+    MomentsTheme {
+        FeedScreen(
+            uiState = FeedUiState(
+                currentMonth = YearMonth.now(),
+                selectedDate = LocalDate.now(),
+                feedList = sampleDiaries,
+                weeklyDays = (0..6).map { LocalDate.now().minusDays(3).plusDays(it.toLong()) },
+                isCalendarExpanded = false
+            ),
+            onDateClick = {},
+            onToggleCalendar = {}
+        )
+    }
+}
+

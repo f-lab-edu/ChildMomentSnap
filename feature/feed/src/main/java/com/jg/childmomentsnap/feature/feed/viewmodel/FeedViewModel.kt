@@ -122,31 +122,8 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    fun dismissBottomSheet() {
-        _uiState.update { it.copy(
-            selectedDate = null,
-            isBottomSheetVisible = false,
-            bottomSheetDiaries = emptyList()
-        ) }
-    }
-
-    fun onWriteTypeSelected(isPhoto: Boolean, date: LocalDate) {
-        viewModelScope.launch {
-            if (isPhoto) {
-                _sideEffect.send(FeedSideEffect.NavigateToCamera)
-            } else {
-                _sideEffect.send(FeedSideEffect.NavigateToWrite(date))
-            }
-        }
-    }
-
     fun toggleCalendarExpansion() {
         _uiState.update { it.copy(isCalendarExpanded = !it.isCalendarExpanded) }
     }
 
-    fun onFabClick(date: LocalDate) {
-        viewModelScope.launch {
-            _sideEffect.send(FeedSideEffect.ShowWriteSelectionDialog(date))
-        }
-    }
 }

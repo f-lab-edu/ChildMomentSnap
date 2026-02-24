@@ -31,10 +31,10 @@
     <string name="desc_face_icon">얼굴 아이콘</string>
     <string name="desc_image_placeholder">이미지 없음</string>
     <string name="location_unknown">장소 정보 없음</string>
+    <string name="shared_with_family">가족에게 공유</string>
+    <string name="feed_item_delete">삭제하기</string>
 
     <string name="desc_like">좋아요</string>
-    <string name="desc_milestone">성장 마일스톤</string>
-    <string name="desc_play_voice">음성 기록 재생</string>
     
     <!-- Empty Feed State -->
     <string name="empty_feed_title">지우와의 첫 순간을\n기록해볼까요?</string>
@@ -42,4 +42,6 @@
     
     <!-- Calendar Format -->
     <string name="calendar_header_format">yyyy년 MM월</string>
+
+
 </resources>
