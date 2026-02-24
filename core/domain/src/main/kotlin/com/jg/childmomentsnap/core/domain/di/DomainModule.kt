@@ -2,6 +2,8 @@ package com.jg.childmomentsnap.core.domain.di
 
 import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCaseImpl
+import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
+import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCaseImpl
 import dagger.Binds
@@ -23,5 +25,10 @@ abstract class DomainModule {
     abstract fun bindWriteDiaryUseCase(
         writeDiaryUseCase: WriteDiaryUseCaseImpl
     ): WriteDiaryUseCase
+
+    @Binds
+    abstract fun bindGetDiariesByDateUseCase(
+        getDiariesByDateUseCase: GetDiariesByDateUseCaseImpl
+    ): GetDiariesByDateUseCase
 
 }

@@ -41,10 +41,7 @@ class DiaryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getDiariesByDate(date: LocalDate): DataResult<List<Diary>> {
-        val startDate = DateUtils.getStartOfDay(date)
-        val endDate = DateUtils.getEndOfDay(date)
-        
+    override suspend fun getDiariesByDate(startDate: String, endDate: String): DataResult<List<Diary>> {
         return try {
             val diaries = diaryLocalDataSource.getDiaryListByDate(startDate, endDate)
             DataResult.Success(data = diaries.map { it.toDomain() })
