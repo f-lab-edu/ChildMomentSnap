@@ -3,26 +3,26 @@ package com.jg.childmomentsnap.feature.feed.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.common.result.DataResult
+import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.common.util.DateUtils
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
+import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val diaryRepository: DiaryRepository
+    private val diaryRepository: DiaryRepository,
+    private val getDiariesByDateUseCase: GetDiariesByDateUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -37,12 +37,14 @@ class FeedViewModel @Inject constructor(
 
     fun loadDiariesForMonth(yearMonth: YearMonth) {
         val calculatedMonthlyDays = calculateMonthlyDays(yearMonth)
-        
-        _uiState.update { it.copy(
-            currentMonth = yearMonth,
-            monthlyDays = calculatedMonthlyDays
-        ) }
-        
+
+        _uiState.update {
+            it.copy(
+                currentMonth = yearMonth,
+                monthlyDays = calculatedMonthlyDays
+            )
+        }
+
         updateWeeklyDays(_uiState.value.selectedDate ?: LocalDate.now())
 
         viewModelScope.launch {
@@ -54,12 +56,36 @@ class FeedViewModel @Inject constructor(
                         DateUtils.parseDateOrNull(it.date)?.toLocalDate() ?: LocalDate.now()
                     }
                     val sortedList = diaries.sortedByDescending { it.date }
-                    _uiState.update { it.copy(
-                        diaries = diariesMap,
-                        feedList = sortedList
-                    ) }
+                    _uiState.update {
+                        it.copy(
+                            diaries = diariesMap,
+                            feedList = sortedList
+                        )
+                    }
                 }
+
                 is DataResult.Fail -> {
+                    // Handle error
+                }
+            }
+        }
+    }
+
+    private fun loadDiaryForToday() {
+        viewModelScope.launch {
+            val today = LocalDate.now()
+
+            when (val result = getDiariesByDateUseCase.invoke(today)) {
+                is DomainResult.Success -> {
+                    _uiState.update { current ->
+                        val updatedDiariesMap = current.diaries.toMutableMap()
+                        updatedDiariesMap[today] = result.data
+                        current.copy(
+                            diaries = updatedDiariesMap
+                        )
+                    }
+                }
+                is DomainResult.Fail -> {
                     // Handle error
                 }
             }
@@ -70,13 +96,13 @@ class FeedViewModel @Inject constructor(
         val daysInMonth = currentMonth.lengthOfMonth()
         val firstDayOfMonth = currentMonth.atDay(1)
         val startOffset = firstDayOfMonth.dayOfWeek.value % 7
-        
+
         val totalCells = daysInMonth + startOffset
         val rows = (totalCells + 6) / 7
         val totalGridSize = rows * 7
-        
+
         val days = MutableList<LocalDate?>(totalGridSize) { null }
-        
+
         for (day in 1..daysInMonth) {
             days[startOffset + day - 1] = currentMonth.atDay(day)
         }
@@ -96,27 +122,35 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             when (diaries.size) {
                 0 -> {
-                    _uiState.update { it.copy(
-                        selectedDate = null,
-                        isBottomSheetVisible = false,
-                        bottomSheetDiaries = emptyList()
-                    ) }
+                    _uiState.update {
+                        it.copy(
+                            selectedDate = null,
+                            isBottomSheetVisible = false,
+                            bottomSheetDiaries = emptyList()
+                        )
+                    }
                     _sideEffect.send(FeedSideEffect.ShowWriteSelectionDialog(date))
                 }
+
                 1 -> {
-                    _uiState.update { it.copy(
-                        selectedDate = null,
-                        isBottomSheetVisible = false,
-                        bottomSheetDiaries = emptyList()
-                    ) }
+                    _uiState.update {
+                        it.copy(
+                            selectedDate = null,
+                            isBottomSheetVisible = false,
+                            bottomSheetDiaries = emptyList()
+                        )
+                    }
                     _sideEffect.send(FeedSideEffect.NavigateToDetail(diaries.first().id))
                 }
+
                 else -> { // N >= 2
-                    _uiState.update { it.copy(
-                        selectedDate = date,
-                        isBottomSheetVisible = true,
-                        bottomSheetDiaries = diaries
-                    ) }
+                    _uiState.update {
+                        it.copy(
+                            selectedDate = date,
+                            isBottomSheetVisible = true,
+                            bottomSheetDiaries = diaries
+                        )
+                    }
                 }
             }
         }
