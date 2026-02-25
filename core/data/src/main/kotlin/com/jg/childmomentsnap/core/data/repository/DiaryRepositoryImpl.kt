@@ -65,4 +65,17 @@ class DiaryRepositoryImpl @Inject constructor(
             DataResult.Fail(-1, e.message, e)
         }
     }
+
+    override suspend fun setFavorite(
+        id: Long,
+        isFavorite: Boolean
+    ): DataResult<Boolean> {
+        return try {
+            diaryLocalDataSource.updateFavoriteStatus(id, isFavorite)
+            DataResult.Success(true)
+        } catch (e: Exception) {
+            //  TODO Error Code 정의 필요
+            DataResult.Fail(-1, e.message, e)
+        }
+    }
 }

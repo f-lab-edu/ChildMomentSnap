@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
+import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val diaryRepository: DiaryRepository,
-    private val getDiariesByDateUseCase: GetDiariesByDateUseCase
+    private val getDiariesByDateUseCase: GetDiariesByDateUseCase,
+    private val toggleDiaryFavoriteUseCase: ToggleDiaryFavoriteUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -102,6 +103,30 @@ class FeedViewModel @Inject constructor(
 
     fun toggleCalendarExpansion() {
         _uiState.update { it.copy(isCalendarExpanded = !it.isCalendarExpanded) }
+    }
+
+    fun toggleFavorite(id: Long, isFavorite: Boolean) {
+        viewModelScope.launch {
+            when (toggleDiaryFavoriteUseCase.invoke(id, !isFavorite)) {
+                is DomainResult.Success -> {
+                    _uiState.update { current ->
+                        val updatedFeedList = current.feedList.map { diary ->
+                            if (diary.id == id) {
+                                diary.copy(isFavorite = !isFavorite)
+                            } else {
+                                diary
+                            }
+                        }
+                        current.copy(
+                            feedList = updatedFeedList
+                        )
+                    }
+                }
+                is DomainResult.Fail -> {
+                    // Handle error
+                }
+            }
+        }
     }
 
 }

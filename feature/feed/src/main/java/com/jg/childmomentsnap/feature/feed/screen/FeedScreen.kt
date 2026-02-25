@@ -124,7 +124,8 @@ internal fun FeedRoute(
     FeedScreen(
         uiState = uiState,
         onDateClick = viewModel::onDateClick,
-        onToggleCalendar = viewModel::toggleCalendarExpansion
+        onToggleCalendar = viewModel::toggleCalendarExpansion,
+        onToggleFavorite = viewModel::toggleFavorite
     )
 }
 
@@ -132,7 +133,8 @@ internal fun FeedRoute(
 private fun FeedScreen(
     uiState: FeedUiState,
     onDateClick: (LocalDate) -> Unit,
-    onToggleCalendar: () -> Unit
+    onToggleCalendar: () -> Unit,
+    onToggleFavorite: (id: Long, isFavorite: Boolean) -> Unit
 ) {
 
     MomentsTheme {
@@ -163,7 +165,8 @@ private fun FeedScreen(
                     contentPadding = PaddingValues(
                         top = 16.dp,
                         bottom = globalBottomBarHeight + 16.dp
-                    )
+                    ),
+                    onLikeClick = onToggleFavorite
                 )
             }
         }
@@ -325,7 +328,10 @@ fun WeeklyCalendarView(
                         fontSize = 14.sp,
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
                     ),
-                    color = if (isSelected) Color.White else if (isToday) Stone900 else Stone400
+                    color = if (isSelected) Color.White else if (isToday) Stone900 else Stone400,
+                    maxLines = 1,
+                    softWrap = false,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -405,10 +411,13 @@ fun MonthlyCalendarGridView(
                                     Text(
                                         text = day.toString(),
                                         style = MaterialTheme.typography.labelMedium.copy(
-                                            fontSize = 12.sp,
+                                            fontSize = 14.sp, // 글씨를 깔끔하게 보이도록 살짝 키웠습니다
                                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
                                         ),
-                                        color = if (isSelected) Color.White else if (isToday) Stone900 else Stone400
+                                        color = if (isSelected) Color.White else if (isToday) Stone900 else Stone400,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
@@ -424,7 +433,10 @@ fun MonthlyCalendarGridView(
 @Composable
 private fun MomentFeed(
     moments: List<Diary>,
-    contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 16.dp)
+    contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 16.dp),
+    onFeedDeletedClick: (Long) -> Unit = {},
+    onFeedSharedClick: (Long) -> Unit = {},
+    onLikeClick: (Long, Boolean) -> Unit
 ) {
     if (moments.isEmpty()) {
         EmptyFeedView(modifier = Modifier.padding(contentPadding))
@@ -444,7 +456,7 @@ private fun MomentFeed(
                     moment = moment,
                     onFeedDeletedClick = { },
                     onFeedSharedClick = { },
-                    onLikeClick = { /* TODO */ }
+                    onLikeClick = onLikeClick
                 )
             }
         }
@@ -504,7 +516,7 @@ fun MomentFeedItem(
     moment: Diary,
     onFeedSharedClick: () -> Unit = {},
     onFeedDeletedClick: () -> Unit = {},
-    onLikeClick: () -> Unit = {},
+    onLikeClick: (Long, Boolean) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -538,7 +550,9 @@ fun MomentFeedItem(
                 Icon(
                     imageVector = Icons.Default.Image,
                     contentDescription = null,
-                    modifier = Modifier.align(Alignment.Center).size(48.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(48.dp),
                     tint = Stone200
                 )
             }
@@ -551,10 +565,10 @@ fun MomentFeedItem(
                 content = moment.content
             )
 
-            // 4. 액션 바 영역 (좋아요, 마일스톤 별)
+            // 4. 액션 바 영역 (좋아요)
             MomentItemActionBar(
+                id = moment.id,
                 isFavorite = moment.isFavorite,
-                isMilestone = false,
                 onLikeClick = onLikeClick,
             )
         }
@@ -669,9 +683,9 @@ private fun MomentHeader(
 
 @Composable
 private fun MomentItemActionBar(
+    id: Long,
     isFavorite: Boolean,
-    isMilestone: Boolean,
-    onLikeClick: () -> Unit,
+    onLikeClick: (Long, Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -680,7 +694,7 @@ private fun MomentItemActionBar(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onLikeClick) {
+        IconButton(onClick = { onLikeClick(id, isFavorite) }) {
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = stringResource(FeedR.string.desc_like),
@@ -772,7 +786,8 @@ private fun FeedScreenLoadedPreview() {
                 isCalendarExpanded = false
             ),
             onDateClick = {},
-            onToggleCalendar = {}
+            onToggleCalendar = {},
+            onToggleFavorite = {_ , _ ->}
         )
     }
 }

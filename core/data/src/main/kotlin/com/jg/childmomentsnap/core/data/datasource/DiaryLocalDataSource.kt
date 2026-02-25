@@ -11,6 +11,6 @@ interface DiaryLocalDataSource {
     suspend fun updateFavoriteStatus(id: Long, isFavorite: Boolean)
     suspend fun getDiaryList(yearMonth: String): List<DiaryEntity>
     suspend fun getDiaryListByDate(startDate: String, endDate: String): List<DiaryEntity>
-    fun getFavoriteDiaryList(): Flow<List<DiaryEntity>>
+    suspend fun getFavoriteDiaryList(): List<DiaryEntity>
     fun searchDiary(query: String): Flow<List<DiaryEntity>>
 }

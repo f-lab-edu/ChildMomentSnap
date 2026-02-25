@@ -98,4 +98,23 @@ class DiaryDaoTest {
         assertTrue("해당 날짜에 데이터가 없으므로 리스트는 비어있어야 합니다.", emptyResult.isEmpty())
 
     }
+
+    @Test
+    fun `선택한_피드에_좋아요_클릭하여_상태_확인한다` () = runTest {
+        val existingDiary = DiaryEntity(
+            id = 1,
+            date = "2026-02-24 14:30:00",
+            content = "오늘 일기",
+            imagePath = "",
+            bgType = "",
+            bgValue = "",
+            isFavorite = false,
+            emotion = EmotionKey.JOY.name
+        )
+        diaryDao.insertDiary(diary = existingDiary)
+
+        diaryDao.updateFavoriteStatus(1, true)
+        val updatedDiary = diaryDao.getFavoriteDiaryList()
+        assertEquals(true, updatedDiary.size == 1)
+    }
 }
