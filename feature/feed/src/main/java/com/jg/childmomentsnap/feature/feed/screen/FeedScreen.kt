@@ -449,8 +449,9 @@ private fun MomentFeed(
             items(moments) { moment ->
                 MomentFeedItem(
                     moment = moment,
-                    onLikeClick = { /* TODO */ },
-                    onMoreClick = { /* TODO */ }
+                    onFeedDeletedClick = { },
+                    onFeedSharedClick = { },
+                    onLikeClick = { /* TODO */ }
                 )
             }
         }
@@ -508,8 +509,9 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
 @Composable
 fun MomentFeedItem(
     moment: Diary,
+    onFeedSharedClick: () -> Unit = {},
+    onFeedDeletedClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
-    onMoreClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -526,8 +528,8 @@ fun MomentFeedItem(
                 role = "",
                 babyInfo = "",
                 timestamp = moment.date,
-                onLikeClick = onLikeClick,
-                onMoreClick = onMoreClick
+                onFeedSharedClick = onFeedSharedClick,
+                onFeedDeletedClick = onFeedDeletedClick
             )
 
             // 2. 이미지 영역
@@ -573,8 +575,8 @@ private fun MomentHeader(
     role: String,
     babyInfo: String,
     timestamp: String,
-    onLikeClick: () -> Unit = {},
-    onMoreClick: () -> Unit = {}
+    onFeedSharedClick: () -> Unit = {},
+    onFeedDeletedClick: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -653,12 +655,18 @@ private fun MomentHeader(
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(FeedR.string.shared_with_family)) },
-                    onClick = { showMenu = false },
+                    onClick = {
+                        showMenu = false
+                        onFeedSharedClick()
+                    },
                     leadingIcon = { Icon(Icons.Default.Share, "공유") }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(FeedR.string.feed_item_delete), color = Color.Red) },
-                    onClick = { showMenu = false },
+                    onClick = {
+                        showMenu = false
+                        onFeedDeletedClick()
+                    },
                     leadingIcon = { Icon(Icons.Default.Delete, "삭제", tint = Color.Red) }
                 )
             }

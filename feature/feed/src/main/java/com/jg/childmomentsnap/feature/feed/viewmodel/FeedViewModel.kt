@@ -2,9 +2,7 @@ package com.jg.childmomentsnap.feature.feed.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jg.childmomentsnap.core.common.result.DataResult
 import com.jg.childmomentsnap.core.common.result.DomainResult
-import com.jg.childmomentsnap.core.common.util.DateUtils
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,10 +30,11 @@ class FeedViewModel @Inject constructor(
     val sideEffect = _sideEffect.receiveAsFlow()
 
     init {
-        loadDiariesForMonth(YearMonth.now())
+        loadDiariesForMonthCalendar(YearMonth.now())
+        loadDiaryForToday()
     }
 
-    fun loadDiariesForMonth(yearMonth: YearMonth) {
+    fun loadDiariesForMonthCalendar(yearMonth: YearMonth) {
         val calculatedMonthlyDays = calculateMonthlyDays(yearMonth)
 
         _uiState.update {
@@ -46,29 +45,6 @@ class FeedViewModel @Inject constructor(
         }
 
         updateWeeklyDays(_uiState.value.selectedDate ?: LocalDate.now())
-
-        viewModelScope.launch {
-            when (val result = diaryRepository.getDiariesByMonth(yearMonth)) {
-                is DataResult.Success -> {
-                    val diaries = result.data
-
-                    val diariesMap = diaries.groupBy {
-                        DateUtils.parseDateOrNull(it.date)?.toLocalDate() ?: LocalDate.now()
-                    }
-                    val sortedList = diaries.sortedByDescending { it.date }
-                    _uiState.update {
-                        it.copy(
-                            diaries = diariesMap,
-                            feedList = sortedList
-                        )
-                    }
-                }
-
-                is DataResult.Fail -> {
-                    // Handle error
-                }
-            }
-        }
     }
 
     private fun loadDiaryForToday() {
@@ -78,10 +54,8 @@ class FeedViewModel @Inject constructor(
             when (val result = getDiariesByDateUseCase.invoke(today)) {
                 is DomainResult.Success -> {
                     _uiState.update { current ->
-                        val updatedDiariesMap = current.diaries.toMutableMap()
-                        updatedDiariesMap[today] = result.data
                         current.copy(
-                            diaries = updatedDiariesMap
+                            feedList = result.data
                         )
                     }
                 }
