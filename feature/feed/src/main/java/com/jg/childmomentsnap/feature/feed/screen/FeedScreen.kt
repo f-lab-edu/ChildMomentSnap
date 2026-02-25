@@ -115,9 +115,6 @@ internal fun FeedRoute(
                 is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
                 is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
                 is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
-                is FeedSideEffect.ShowWriteSelectionDialog -> {
-
-                }
             }
         }
     }
@@ -141,10 +138,7 @@ private fun FeedScreen(
     MomentsTheme {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
-            topBar = { MomentsTopAppBar() },
-            bottomBar = {
-                // Global CmsBottomBar handles this now.
-            }
+            topBar = { MomentsTopAppBar() }
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -163,7 +157,6 @@ private fun FeedScreen(
                 )
 
                 // 3. 피드 영역
-                // Add extra bottom padding for floating CmsBottomBar (~100.dp)
                 val globalBottomBarHeight = 100.dp
                 MomentFeed(
                     moments = uiState.feedList,

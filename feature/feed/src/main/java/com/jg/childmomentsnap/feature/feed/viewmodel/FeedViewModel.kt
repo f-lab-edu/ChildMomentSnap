@@ -31,7 +31,7 @@ class FeedViewModel @Inject constructor(
 
     init {
         loadDiariesForMonthCalendar(YearMonth.now())
-        loadDiaryForToday()
+        loadDiaryForDay(LocalDate.now())
     }
 
     fun loadDiariesForMonthCalendar(yearMonth: YearMonth) {
@@ -47,11 +47,9 @@ class FeedViewModel @Inject constructor(
         updateWeeklyDays(_uiState.value.selectedDate ?: LocalDate.now())
     }
 
-    private fun loadDiaryForToday() {
+    private fun loadDiaryForDay(date: LocalDate) {
         viewModelScope.launch {
-            val today = LocalDate.now()
-
-            when (val result = getDiariesByDateUseCase.invoke(today)) {
+            when (val result = getDiariesByDateUseCase.invoke(date = date)) {
                 is DomainResult.Success -> {
                     _uiState.update { current ->
                         current.copy(
@@ -92,42 +90,14 @@ class FeedViewModel @Inject constructor(
     fun onDateClick(date: LocalDate) {
         updateWeeklyDays(date)
 
-        val diaries = uiState.value.diaries[date] ?: emptyList()
-        viewModelScope.launch {
-            when (diaries.size) {
-                0 -> {
-                    _uiState.update {
-                        it.copy(
-                            selectedDate = null,
-                            isBottomSheetVisible = false,
-                            bottomSheetDiaries = emptyList()
-                        )
-                    }
-                    _sideEffect.send(FeedSideEffect.ShowWriteSelectionDialog(date))
-                }
+        loadDiaryForDay(date)
 
-                1 -> {
-                    _uiState.update {
-                        it.copy(
-                            selectedDate = null,
-                            isBottomSheetVisible = false,
-                            bottomSheetDiaries = emptyList()
-                        )
-                    }
-                    _sideEffect.send(FeedSideEffect.NavigateToDetail(diaries.first().id))
-                }
-
-                else -> { // N >= 2
-                    _uiState.update {
-                        it.copy(
-                            selectedDate = date,
-                            isBottomSheetVisible = true,
-                            bottomSheetDiaries = diaries
-                        )
-                    }
-                }
-            }
+        _uiState.update {
+            it.copy(
+                selectedDate = date
+            )
         }
+
     }
 
     fun toggleCalendarExpansion() {

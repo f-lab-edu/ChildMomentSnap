@@ -19,8 +19,6 @@ data class FeedUiState(
     val isCalendarExpanded: Boolean = false,
     // Flattened list of diaries for the feed
     val feedList: List<Diary> = emptyList(),
-    val isBottomSheetVisible: Boolean = false,
-    val bottomSheetDiaries: List<Diary> = emptyList(),
     // Calendar Data (Pre-calculated in ViewModel)
     val weeklyDays: List<LocalDate> = emptyList(),
     val monthlyDays: List<LocalDate?> = emptyList() // Null represents empty grid cells if any, or just Logic handle
@@ -40,7 +38,6 @@ data class FeedDay(
     val content: String? = null
 )
 sealed interface FeedSideEffect {
-    data class ShowWriteSelectionDialog(val date: LocalDate) : FeedSideEffect
     data class NavigateToDetail(val diaryId: Long) : FeedSideEffect
     data object NavigateToCamera : FeedSideEffect
     data class NavigateToWrite(val date: LocalDate) : FeedSideEffect
