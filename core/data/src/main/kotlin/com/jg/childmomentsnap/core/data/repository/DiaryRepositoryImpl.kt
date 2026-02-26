@@ -83,4 +83,13 @@ class DiaryRepositoryImpl @Inject constructor(
                 DataResult.Fail(-1, e.message, e) }
         )
     }
+
+    override suspend fun deleteDiary(diary: Diary): DataResult<Boolean> {
+        return runCatching {
+            diaryLocalDataSource.deleteDiary(diary.toEntity())
+        }.fold(
+            onSuccess = { DataResult.Success(true)},
+            onFailure = { DataResult.Fail(-1, it.message, it) }
+        )
+    }
 }

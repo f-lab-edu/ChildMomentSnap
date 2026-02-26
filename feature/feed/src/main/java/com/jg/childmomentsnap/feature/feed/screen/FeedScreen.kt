@@ -33,12 +33,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -64,19 +61,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jg.childmomentsnap.core.model.ChildEmotion
 import com.jg.childmomentsnap.core.model.Diary
 import com.jg.childmomentsnap.core.model.EmotionKey
 import com.jg.childmomentsnap.core.ui.component.MomentsTagChip
 import com.jg.childmomentsnap.core.ui.theme.Amber50
 import com.jg.childmomentsnap.core.ui.theme.Amber100
-import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.Amber800
-import com.jg.childmomentsnap.core.ui.theme.Indigo50
-import com.jg.childmomentsnap.core.ui.theme.Indigo400
-import com.jg.childmomentsnap.core.ui.theme.Indigo800
-import com.jg.childmomentsnap.core.ui.theme.Purple50
-import com.jg.childmomentsnap.core.ui.theme.Rose500
 import com.jg.childmomentsnap.core.ui.theme.MomentsShapes
 import com.jg.childmomentsnap.core.ui.theme.MomentsTheme
 import com.jg.childmomentsnap.core.ui.theme.Stone100
@@ -125,7 +115,8 @@ internal fun FeedRoute(
         uiState = uiState,
         onDateClick = viewModel::onDateClick,
         onToggleCalendar = viewModel::toggleCalendarExpansion,
-        onToggleFavorite = viewModel::toggleFavorite
+        onToggleFavorite = viewModel::toggleFavorite,
+        onFeedDeletedClick = viewModel::onDeleteDiary
     )
 }
 
@@ -134,7 +125,8 @@ private fun FeedScreen(
     uiState: FeedUiState,
     onDateClick: (LocalDate) -> Unit,
     onToggleCalendar: () -> Unit,
-    onToggleFavorite: (id: Long, isFavorite: Boolean) -> Unit
+    onToggleFavorite: (id: Long, isFavorite: Boolean) -> Unit,
+    onFeedDeletedClick: (id: Long) -> Unit
 ) {
 
     MomentsTheme {
@@ -166,7 +158,8 @@ private fun FeedScreen(
                         top = 16.dp,
                         bottom = globalBottomBarHeight + 16.dp
                     ),
-                    onLikeClick = onToggleFavorite
+                    onLikeClick = onToggleFavorite,
+                    onFeedDeletedClick = onFeedDeletedClick
                 )
             }
         }
@@ -454,7 +447,7 @@ private fun MomentFeed(
             items(moments) { moment ->
                 MomentFeedItem(
                     moment = moment,
-                    onFeedDeletedClick = { },
+                    onFeedDeletedClick = onFeedDeletedClick,
                     onFeedSharedClick = { },
                     onLikeClick = onLikeClick
                 )
@@ -514,8 +507,8 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
 @Composable
 fun MomentFeedItem(
     moment: Diary,
-    onFeedSharedClick: () -> Unit = {},
-    onFeedDeletedClick: () -> Unit = {},
+    onFeedSharedClick: (id: Long) -> Unit = {},
+    onFeedDeletedClick: (id: Long) -> Unit = {},
     onLikeClick: (Long, Boolean) -> Unit,
 ) {
     Card(
@@ -530,6 +523,7 @@ fun MomentFeedItem(
             // 1. 헤더 영역 (날짜, 장소, 더보기)
             //  TODO UserInfo 데이터 필요 (로그인 사용자 역할, 아이 이름, 생년월일로 개월수 표기)
             MomentHeader(
+                diaryId = moment.id,
                 role = "",
                 babyInfo = "",
                 timestamp = moment.date,
@@ -579,11 +573,12 @@ fun MomentFeedItem(
 
 @Composable
 private fun MomentHeader(
+    diaryId: Long,
     role: String,
     babyInfo: String,
     timestamp: String,
-    onFeedSharedClick: () -> Unit = {},
-    onFeedDeletedClick: () -> Unit = {}
+    onFeedSharedClick: (id: Long) -> Unit = {},
+    onFeedDeletedClick: (id: Long) -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -664,7 +659,7 @@ private fun MomentHeader(
                     text = { Text(stringResource(FeedR.string.shared_with_family)) },
                     onClick = {
                         showMenu = false
-                        onFeedSharedClick()
+                        onFeedSharedClick(diaryId)
                     },
                     leadingIcon = { Icon(Icons.Default.Share, "공유") }
                 )
@@ -672,7 +667,7 @@ private fun MomentHeader(
                     text = { Text(stringResource(FeedR.string.feed_item_delete), color = Color.Red) },
                     onClick = {
                         showMenu = false
-                        onFeedDeletedClick()
+                        onFeedDeletedClick(diaryId)
                     },
                     leadingIcon = { Icon(Icons.Default.Delete, "삭제", tint = Color.Red) }
                 )
@@ -787,7 +782,8 @@ private fun FeedScreenLoadedPreview() {
             ),
             onDateClick = {},
             onToggleCalendar = {},
-            onToggleFavorite = {_ , _ ->}
+            onToggleFavorite = {_ , _ ->},
+            onFeedDeletedClick = {}
         )
     }
 }

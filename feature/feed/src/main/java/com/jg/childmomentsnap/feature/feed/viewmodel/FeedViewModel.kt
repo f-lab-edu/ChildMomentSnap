@@ -3,9 +3,10 @@ package com.jg.childmomentsnap.feature.feed.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.common.result.DomainResult
-import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
+import com.jg.childmomentsnap.core.domain.usecase.DeleteDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
+import com.jg.childmomentsnap.core.model.Diary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val getDiariesByDateUseCase: GetDiariesByDateUseCase,
-    private val toggleDiaryFavoriteUseCase: ToggleDiaryFavoriteUseCase
+    private val toggleDiaryFavoriteUseCase: ToggleDiaryFavoriteUseCase,
+    private val deleteDiaryUseCase: DeleteDiaryUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -58,6 +60,7 @@ class FeedViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is DomainResult.Fail -> {
                     // Handle error
                 }
@@ -98,7 +101,6 @@ class FeedViewModel @Inject constructor(
                 selectedDate = date
             )
         }
-
     }
 
     fun toggleCalendarExpansion() {
@@ -117,6 +119,27 @@ class FeedViewModel @Inject constructor(
                                 diary
                             }
                         }
+                        current.copy(
+                            feedList = updatedFeedList
+                        )
+                    }
+                }
+
+                is DomainResult.Fail -> {
+                    // Handle error
+                }
+            }
+        }
+    }
+
+    fun onDeleteDiary(diaryId: Long) {
+        viewModelScope.launch {
+            val diary = _uiState.value.feedList.find { it.id == diaryId } ?: return@launch
+
+            when (deleteDiaryUseCase.invoke(diary)) {
+                is DomainResult.Success -> {
+                    _uiState.update { current ->
+                        val updatedFeedList = current.feedList.filter { it.id != diaryId }
                         current.copy(
                             feedList = updatedFeedList
                         )
