@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.data.datasource
+package com.jg.childmomentsnap.core.data.datasource.local
 
 import com.jg.childmomentsnap.database.dao.DiaryDao
 import com.jg.childmomentsnap.database.entity.DiaryEntity

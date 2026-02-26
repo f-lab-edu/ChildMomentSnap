@@ -1,14 +1,14 @@
 package com.jg.childmomentsnap.core.data.di
 
 import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
-import com.jg.childmomentsnap.core.data.datasource.GoogleSpeechRemoteDataSource
-import com.jg.childmomentsnap.core.data.datasource.GoogleSpeechRemoteDataSourceImpl
-import com.jg.childmomentsnap.core.data.datasource.GoogleVisionRemoteDataSource
-import com.jg.childmomentsnap.core.data.datasource.GoogleVisionRemoteDataSourceImpl
-import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSource
-import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSourceImpl
-import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSource
-import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.remote.GoogleSpeechRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.remote.GoogleSpeechRemoteDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.remote.GoogleVisionRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.remote.GoogleVisionRemoteDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.local.DiaryLocalDataSource
+import com.jg.childmomentsnap.core.data.datasource.local.DiaryLocalDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.remote.GeminiApiRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.remote.GeminiApiRemoteDataSourceImpl
 import com.jg.childmomentsnap.core.data.repository.DiaryRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.PhotoRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.VoiceRepositoryImpl
@@ -18,7 +18,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)

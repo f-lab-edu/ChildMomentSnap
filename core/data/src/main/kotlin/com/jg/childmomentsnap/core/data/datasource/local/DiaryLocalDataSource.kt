@@ -1,6 +1,5 @@
-package com.jg.childmomentsnap.core.data.datasource
+package com.jg.childmomentsnap.core.data.datasource.local
 
-import com.jg.childmomentsnap.core.common.result.DataResult
 import com.jg.childmomentsnap.database.entity.DiaryEntity
 import kotlinx.coroutines.flow.Flow
 
