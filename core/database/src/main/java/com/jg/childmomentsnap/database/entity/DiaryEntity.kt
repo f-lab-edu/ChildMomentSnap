@@ -19,7 +19,7 @@ data class DiaryEntity(
     @ColumnInfo(name = "bgValue") // 배경 리소스 ID 또는 파일 경로 (추후)
     val bgValue: String? = null,
     @ColumnInfo(name = "is_favorite")
-    val isFavorite: Boolean,
+    val isFavorite: Boolean = false,
     @ColumnInfo(name = "location") // 장소
     val location: String? = null,
     @ColumnInfo(name = "emotion") // 감정

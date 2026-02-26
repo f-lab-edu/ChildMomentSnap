@@ -40,6 +40,47 @@ class DiaryDaoTest {
     }
 
     @Test
+    fun `일기를_저장한_일기가_삭제가_되는지_점검한다`() = runTest {
+        val targetDate = "2026-02-26"
+
+        val todayDiary = DiaryEntity(
+            id = 1,
+            date = "$targetDate 14:30:00",
+            content = "오늘 놀이터에 다녀옴",
+            imagePath = "",
+            emotion = EmotionKey.JOY.name
+        )
+
+        val today2Diary = DiaryEntity(
+            id = 2,
+            date = "$targetDate 14:30:00",
+            content = "오늘 놀이터에 다녀옴",
+            imagePath = "",
+            emotion = EmotionKey.JOY.name
+        )
+
+        diaryDao.insertDiary(todayDiary)
+        diaryDao.insertDiary(today2Diary)
+
+        // When (실행)
+        val startDate = "$targetDate 00:00:00"
+        val endDate = "$targetDate 23:59:59"
+        diaryDao.deleteDiary(todayDiary)
+        val result = diaryDao.getDiaryListByDate(startDate, endDate)
+
+        // Then (검증)
+        // 조회된 리스트의 크기가 1개여야 한다 (오늘 날짜 1개만)
+        assertEquals(1, result.size)
+
+        diaryDao.deleteDiary(today2Diary)
+        val result2 = diaryDao.getDiaryListByDate(startDate, endDate)
+
+        // Then (검증)
+        // 조회된 리스트의 크기가 1개여야 한다 (오늘 날짜 1개만)
+        assertEquals(0, result2.size)
+    }
+
+    @Test
     fun `선택한_날짜_일기가_있으면_리스트를_반환한다`() = runTest {
         val targetDate = "2026-02-24"
         val todayDiary = DiaryEntity(
