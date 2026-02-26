@@ -19,28 +19,12 @@ data class FeedUiState(
     val isCalendarExpanded: Boolean = false,
     // Flattened list of diaries for the feed
     val feedList: List<Diary> = emptyList(),
-    val isBottomSheetVisible: Boolean = false,
-    val bottomSheetDiaries: List<Diary> = emptyList(),
     // Calendar Data (Pre-calculated in ViewModel)
     val weeklyDays: List<LocalDate> = emptyList(),
     val monthlyDays: List<LocalDate?> = emptyList() // Null represents empty grid cells if any, or just Logic handle
 )
 
-/**
- * 달력 그리드의 개별 날짜 아이템 정보
- *
- * @property date 해당 날짜
- * @property isCurrentMonth 현재 표시 중인 월에 속하는지 여부 (이전/다음 달 날짜 구분용)
- * @property isToday 오늘 날짜인지 여부
- */
-data class FeedDay(
-    val date: LocalDate,
-    val isCurrentMonth: Boolean,
-    val isToday: Boolean,
-    val content: String? = null
-)
 sealed interface FeedSideEffect {
-    data class ShowWriteSelectionDialog(val date: LocalDate) : FeedSideEffect
     data class NavigateToDetail(val diaryId: Long) : FeedSideEffect
     data object NavigateToCamera : FeedSideEffect
     data class NavigateToWrite(val date: LocalDate) : FeedSideEffect

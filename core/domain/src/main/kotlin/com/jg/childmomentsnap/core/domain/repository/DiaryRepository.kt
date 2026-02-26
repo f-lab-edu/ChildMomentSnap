@@ -9,7 +9,9 @@ import java.time.YearMonth
 interface DiaryRepository {
     suspend fun generateGeminiDairy(prompt: String): DataResult<String>
     suspend fun setDiary(diary: Diary): DataResult<Boolean>
-    suspend fun getDiariesByDate(date: LocalDate): DataResult<List<Diary>>
+    suspend fun getDiariesByDate(startDate: String, endDate: String): DataResult<List<Diary>>
     suspend fun getDiariesByMonth(yearMonth: YearMonth): DataResult<List<Diary>>
+    suspend fun setFavorite(id: Long, isFavorite: Boolean): DataResult<Boolean>
+    suspend fun deleteDiary(diary: Diary): DataResult<Boolean>
 }
 

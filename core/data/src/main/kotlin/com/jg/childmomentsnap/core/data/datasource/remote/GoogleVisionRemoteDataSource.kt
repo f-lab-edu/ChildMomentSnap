@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.data.datasource
+package com.jg.childmomentsnap.core.data.datasource.remote
 
 import com.jg.childmomentsnap.core.network.model.vision.VisionRequestDto
 import com.jg.childmomentsnap.core.network.model.vision.VisionResponseDto

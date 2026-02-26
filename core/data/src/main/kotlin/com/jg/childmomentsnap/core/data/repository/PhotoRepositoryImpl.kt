@@ -4,7 +4,7 @@ import com.jg.childmomentsnap.core.common.util.ImageEncoder
 import com.jg.childmomentsnap.core.data.mapper.toDomain
 import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
 import com.jg.childmomentsnap.core.model.VisionAnalysis
-import com.jg.childmomentsnap.core.data.datasource.GoogleVisionRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.remote.GoogleVisionRemoteDataSource
 import com.jg.childmomentsnap.core.network.model.vision.VisionAnnotateImageRequestDto
 import com.jg.childmomentsnap.core.network.model.vision.VisionFeatureDto
 import com.jg.childmomentsnap.core.network.model.vision.VisionFeatureTypeDto

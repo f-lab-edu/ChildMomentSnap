@@ -1,17 +1,15 @@
 package com.jg.childmomentsnap.core.data.repository
 
 import com.jg.childmomentsnap.core.common.result.DataResult
+import com.jg.childmomentsnap.core.common.result.safeRunCatching
 import com.jg.childmomentsnap.core.common.util.DateUtils
-import com.jg.childmomentsnap.core.data.datasource.DiaryLocalDataSource
-import com.jg.childmomentsnap.core.data.datasource.GeminiApiRemoteDataSource
+import com.jg.childmomentsnap.core.data.datasource.local.DiaryLocalDataSource
+import com.jg.childmomentsnap.core.data.datasource.remote.GeminiApiRemoteDataSource
 import com.jg.childmomentsnap.core.data.mapper.toDomain
 import com.jg.childmomentsnap.core.data.mapper.toEntity
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.model.Diary
-import kotlinx.coroutines.flow.map
-import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class DiaryRepositoryImpl @Inject constructor(
@@ -32,40 +30,66 @@ class DiaryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setDiary(diary: Diary): DataResult<Boolean> {
-        return try {
+        return safeRunCatching {
             diaryLocalDataSource.insertDiary(diary.toEntity())
-            DataResult.Success(true)
-        } catch (e: Exception) {
-            //  TODO Error Code 정의 필요
-            DataResult.Fail(-1, e.message, e)
-        }
+        }.fold(
+            onSuccess = { DataResult.Success(true) },
+            onFailure = { e -> DataResult.Fail(-1, e.message ?: "Unknown error", e) } //  TODO Error Code 정의 필요
+        )
     }
 
-    override suspend fun getDiariesByDate(date: LocalDate): DataResult<List<Diary>> {
-        val startDate = DateUtils.getStartOfDay(date)
-        val endDate = DateUtils.getEndOfDay(date)
-        
-        return try {
-            val diaries = diaryLocalDataSource.getDiaryListByDate(startDate, endDate)
-            DataResult.Success(data = diaries.map { it.toDomain() })
-        } catch (e: Exception) {
-            //  TODO Error Code 정의 필요
-            DataResult.Fail(
-                code = -1,
-                message = e.message ?: "Unknown error",
-                throwable = e
-            )
-        }
+    override suspend fun getDiariesByDate(startDate: String, endDate: String): DataResult<List<Diary>> {
+        return safeRunCatching {
+            diaryLocalDataSource.getDiaryListByDate(startDate, endDate)
+        }.fold(
+            onSuccess = { diary -> DataResult.Success(diary.map { it.toDomain() }) },
+            onFailure = { e ->
+                //  TODO Error Code 정의 필요
+                DataResult.Fail(
+                    code = -1,
+                    message = e.message ?: "Unknown error",
+                    throwable = e
+                )
+            }
+        )
     }
 
     override suspend fun getDiariesByMonth(yearMonth: YearMonth): DataResult<List<Diary>> {
         val yearMonthString = DateUtils.formatYearMonth(yearMonth)
-        return try {
-            val diaries = diaryLocalDataSource.getDiaryList(yearMonthString)
-            DataResult.Success(diaries.map { it.toDomain() })
-        } catch (e: Exception) {
-            //  TODO Error Code 정의 필요
-            DataResult.Fail(-1, e.message, e)
-        }
+
+        return safeRunCatching {
+            diaryLocalDataSource.getDiaryList(yearMonthString)
+        }.fold(
+            onSuccess = { diaries ->
+                DataResult.Success(diaries.map { it.toDomain() })
+            },
+            onFailure = { e ->
+                //  TODO Error Code 정의 필요
+                DataResult.Fail(-1, e.message, e)
+            }
+        )
+    }
+
+    override suspend fun setFavorite(
+        id: Long,
+        isFavorite: Boolean
+    ): DataResult<Boolean> {
+        return safeRunCatching {
+            diaryLocalDataSource.updateFavoriteStatus(id, isFavorite)
+        }.fold(
+            onSuccess = { DataResult.Success(true)},
+            onFailure = { e ->
+                //  TODO Error Code 정의 필요
+                DataResult.Fail(-1, e.message, e) }
+        )
+    }
+
+    override suspend fun deleteDiary(diary: Diary): DataResult<Boolean> {
+        return runCatching {
+            diaryLocalDataSource.deleteDiary(diary.toEntity())
+        }.fold(
+            onSuccess = { DataResult.Success(true)},
+            onFailure = { DataResult.Fail(-1, it.message, it) }
+        )
     }
 }

@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.data.datasource
+package com.jg.childmomentsnap.core.data.datasource.remote
 
 import com.jg.childmomentsnap.core.network.model.speech.SpeechRequestDto
 import com.jg.childmomentsnap.core.network.model.speech.SpeechResponseDto
