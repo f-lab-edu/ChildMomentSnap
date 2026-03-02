@@ -168,7 +168,8 @@ private fun FeedScreen(
 
 // --- 1. TopAppBar 영역 ---
 @Composable
-fun MomentsTopAppBar() {
+fun MomentsTopAppBar(
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

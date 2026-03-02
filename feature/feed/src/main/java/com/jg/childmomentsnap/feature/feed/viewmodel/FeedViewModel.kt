@@ -5,13 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.domain.usecase.DeleteDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
+import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
-import com.jg.childmomentsnap.core.model.Diary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,7 +27,8 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     private val getDiariesByDateUseCase: GetDiariesByDateUseCase,
     private val toggleDiaryFavoriteUseCase: ToggleDiaryFavoriteUseCase,
-    private val deleteDiaryUseCase: DeleteDiaryUseCase
+    private val deleteDiaryUseCase: DeleteDiaryUseCase,
+    private val searchDiaryContentUseCase: SearchDiaryContentUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -32,9 +37,12 @@ class FeedViewModel @Inject constructor(
     private val _sideEffect = Channel<FeedSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+
     init {
         loadDiariesForMonthCalendar(YearMonth.now())
         loadDiaryForDay(LocalDate.now())
+        observerSearchQuery()
     }
 
     fun loadDiariesForMonthCalendar(yearMonth: YearMonth) {
@@ -149,6 +157,34 @@ class FeedViewModel @Inject constructor(
                     // Handle error
                 }
             }
+        }
+    }
+
+    fun searchDiaryContent(query: String) {
+        _searchQuery.value = query
+    }
+
+    private fun observerSearchQuery() {
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300L)
+                .distinctUntilChanged()
+                .filter { it.isNotBlank() }
+                .flatMapLatest { query ->
+                    searchDiaryContentUseCase.invoke(query)
+                }
+                .collect { result ->
+                    when(result) {
+                        is DomainResult.Success -> {
+                            _uiState.update { current ->
+                                current.copy(feedList = result.data)
+                            }
+                        }
+                        is DomainResult.Fail -> {
+                            // Handle error
+                        }
+                    }
+                }
         }
     }
 

@@ -6,6 +6,8 @@ import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCaseImpl
+import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCase
+import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCase
@@ -44,4 +46,9 @@ abstract class DomainModule {
     abstract fun bindDeleteDiaryUseCase(
         deleteDiaryUseCase: DeleteDiaryUseCaseImpl
     ): DeleteDiaryUseCase
+
+    @Binds
+    abstract fun bindSearchDiaryContentUseCase(
+        searchDiaryContentUseCase: SearchDiaryContentUseCaseImpl
+    ): SearchDiaryContentUseCase
 }

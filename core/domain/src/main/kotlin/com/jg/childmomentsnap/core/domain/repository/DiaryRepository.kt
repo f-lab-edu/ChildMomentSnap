@@ -13,5 +13,6 @@ interface DiaryRepository {
     suspend fun getDiariesByMonth(yearMonth: YearMonth): DataResult<List<Diary>>
     suspend fun setFavorite(id: Long, isFavorite: Boolean): DataResult<Boolean>
     suspend fun deleteDiary(diary: Diary): DataResult<Boolean>
+    fun searchDiary(query: String): Flow<DataResult<List<Diary>>>
 }
 

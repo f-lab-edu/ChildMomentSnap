@@ -9,6 +9,9 @@ import com.jg.childmomentsnap.core.data.mapper.toDomain
 import com.jg.childmomentsnap.core.data.mapper.toEntity
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
 import com.jg.childmomentsnap.core.model.Diary
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import java.time.YearMonth
 import javax.inject.Inject
 
@@ -85,11 +88,19 @@ class DiaryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteDiary(diary: Diary): DataResult<Boolean> {
-        return runCatching {
+        return safeRunCatching {
             diaryLocalDataSource.deleteDiary(diary.toEntity())
         }.fold(
             onSuccess = { DataResult.Success(true)},
             onFailure = { DataResult.Fail(-1, it.message, it) }
         )
+    }
+
+    override fun searchDiary(query: String): Flow<DataResult<List<Diary>>> {
+        return diaryLocalDataSource.searchDiary(query).map { entities ->
+            DataResult.Success(entities.map { it.toDomain() }) as DataResult<List<Diary>>
+        }.catch { e ->
+            emit(DataResult.Fail(-1, e.message, e))
+        }
     }
 }
