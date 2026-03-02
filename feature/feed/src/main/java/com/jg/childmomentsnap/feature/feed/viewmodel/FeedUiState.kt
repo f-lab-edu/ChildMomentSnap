@@ -21,7 +21,10 @@ data class FeedUiState(
     val feedList: List<Diary> = emptyList(),
     // Calendar Data (Pre-calculated in ViewModel)
     val weeklyDays: List<LocalDate> = emptyList(),
-    val monthlyDays: List<LocalDate?> = emptyList() // Null represents empty grid cells if any, or just Logic handle
+    val monthlyDays: List<LocalDate?> = emptyList(), // Null represents empty grid cells if any, or just Logic handle
+
+    val isSearchMode: Boolean = false,
+    val searchQuery: String = ""
 )
 
 sealed interface FeedSideEffect {

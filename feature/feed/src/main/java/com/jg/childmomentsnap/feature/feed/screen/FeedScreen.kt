@@ -1,5 +1,11 @@
 package com.jg.childmomentsnap.feature.feed.screen
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,7 +30,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
@@ -116,7 +125,9 @@ internal fun FeedRoute(
         onDateClick = viewModel::onDateClick,
         onToggleCalendar = viewModel::toggleCalendarExpansion,
         onToggleFavorite = viewModel::toggleFavorite,
-        onFeedDeletedClick = viewModel::onDeleteDiary
+        onFeedDeletedClick = viewModel::onDeleteDiary,
+        onToggleSearchMode = viewModel::toggleSearchMode,
+        onSearchQueryChange = viewModel::searchDiaryContent
     )
 }
 
@@ -126,13 +137,22 @@ private fun FeedScreen(
     onDateClick: (LocalDate) -> Unit,
     onToggleCalendar: () -> Unit,
     onToggleFavorite: (id: Long, isFavorite: Boolean) -> Unit,
-    onFeedDeletedClick: (id: Long) -> Unit
+    onFeedDeletedClick: (id: Long) -> Unit,
+    onToggleSearchMode: (Boolean) -> Unit,
+    onSearchQueryChange: (String) -> Unit
 ) {
 
     MomentsTheme {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
-            topBar = { MomentsTopAppBar() }
+            topBar = { 
+                MomentsTopAppBar(
+                    isSearchMode = uiState.isSearchMode,
+                    onSearchModeChange = onToggleSearchMode,
+                    searchQuery = uiState.searchQuery,
+                    onSearchQueryChange = onSearchQueryChange
+                ) 
+            }
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -169,43 +189,97 @@ private fun FeedScreen(
 // --- 1. TopAppBar 영역 ---
 @Composable
 fun MomentsTopAppBar(
+    isSearchMode: Boolean,
+    onSearchModeChange: (Boolean) -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 로고 (MomentsDesignSystem의 displayLarge 스타일 적용)
-        Text(
-            text = stringResource(FeedR.string.app_name_moments),
-            style = MaterialTheme.typography.displayLarge,
-            color = Stone900
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { /* 검색 모달 열기 */ }) {
-                Icon(
-                    Icons.Filled.Search,
-                    contentDescription = stringResource(FeedR.string.desc_search),
-                    tint = Stone300
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            // 프로필 버튼
-            Box(
+    AnimatedContent(
+        targetState = isSearchMode,
+        transitionSpec = {
+            fadeIn(animationSpec = tween(150)) togetherWith fadeOut(animationSpec = tween(150))
+        },
+        label = "TopAppBarSearchAnimation"
+    ) { isSearch ->
+        if (isSearch) {
+            // [검색 모드 UI]
+            Row(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Stone200)
-                    .clickable { /* 프로필/설정 이동 */ }
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Filled.Person,
-                    contentDescription = stringResource(FeedR.string.desc_profile),
-                    modifier = Modifier.align(Alignment.Center),
-                    tint = Color.White
+                IconButton(onClick = { onSearchModeChange(false) }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "닫기", tint = Stone800)
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Stone100, CircleShape)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Stone900),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (searchQuery.isEmpty()) {
+                                Text("일기 내용 검색...", color = Stone400, style = MaterialTheme.typography.bodyMedium)
+                            }
+                            innerTextField()
+                        }
+                    }
                 )
+                Spacer(modifier = Modifier.width(4.dp))
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "지우기", tint = Stone400)
+                    }
+                } else {
+                    Spacer(modifier = Modifier.size(48.dp)) // To keep layout consistent when empty
+                }
+            }
+        } else {
+            // [기본 모드 UI]
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 로고 (MomentsDesignSystem의 displayLarge 스타일 적용)
+                Text(
+                    text = stringResource(FeedR.string.app_name_moments),
+                    style = MaterialTheme.typography.displayLarge,
+                    color = Stone900
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { onSearchModeChange(true) }) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = stringResource(FeedR.string.desc_search),
+                            tint = Stone300
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    // 프로필 버튼
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Stone200)
+                            .clickable { /* 프로필/설정 이동 */ }
+                    ) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = stringResource(FeedR.string.desc_profile),
+                            modifier = Modifier.align(Alignment.Center),
+                            tint = Color.White
+                        )
+                    }
+                }
             }
         }
     }
@@ -784,7 +858,9 @@ private fun FeedScreenLoadedPreview() {
             onDateClick = {},
             onToggleCalendar = {},
             onToggleFavorite = {_ , _ ->},
-            onFeedDeletedClick = {}
+            onFeedDeletedClick = {},
+            onToggleSearchMode = {},
+            onSearchQueryChange = {}
         )
     }
 }

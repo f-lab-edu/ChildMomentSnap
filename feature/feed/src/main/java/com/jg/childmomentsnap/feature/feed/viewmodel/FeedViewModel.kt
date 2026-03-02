@@ -162,6 +162,20 @@ class FeedViewModel @Inject constructor(
 
     fun searchDiaryContent(query: String) {
         _searchQuery.value = query
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    fun toggleSearchMode(isActive: Boolean) {
+        _uiState.update { 
+            it.copy(
+                isSearchMode = isActive,
+                searchQuery = if (!isActive) "" else it.searchQuery
+            ) 
+        }
+        if (!isActive) {
+            _searchQuery.value = ""
+            loadDiaryForDay(_uiState.value.selectedDate ?: LocalDate.now())
+        }
     }
 
     private fun observerSearchQuery() {
