@@ -9,8 +9,10 @@ import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -34,8 +36,8 @@ class FeedViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FeedUiState())
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
-    private val _sideEffect = Channel<FeedSideEffect>()
-    val sideEffect = _sideEffect.receiveAsFlow()
+    private val _sideEffect = MutableSharedFlow<FeedSideEffect>()
+    val sideEffect = _sideEffect.asSharedFlow()
 
     private val _searchQuery = MutableStateFlow("")
 
