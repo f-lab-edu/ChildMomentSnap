@@ -165,19 +165,70 @@ class FeedViewModel @Inject constructor(
     fun searchDiaryContent(query: String) {
         _searchQuery.value = query
         _uiState.update { it.copy(searchQuery = query) }
+        // 빈 검색어일 때 검색 결과 비우기
+        if (query.isBlank()) {
+            _uiState.update { it.copy(searchResults = emptyList()) }
+        }
     }
 
     fun toggleSearchMode(isActive: Boolean) {
         _uiState.update { 
             it.copy(
                 isSearchMode = isActive,
-                searchQuery = if (!isActive) "" else it.searchQuery
+                searchQuery = if (!isActive) "" else it.searchQuery,
+                searchResults = if (!isActive) emptyList() else it.searchResults
             ) 
         }
         if (!isActive) {
             _searchQuery.value = ""
-            loadDiaryForDay(_uiState.value.selectedDate ?: LocalDate.now())
         }
+    }
+
+    // --- 달력 네비게이션 ---
+
+    /**
+     * 주간 뷰에서 ◀▶ 버튼으로 1주일씩 이동
+     * @param direction -1 이면 이전 주, +1 이면 다음 주
+     */
+    fun navigateWeek(direction: Int) {
+        val currentBase = _uiState.value.selectedDate ?: LocalDate.now()
+        val newDate = currentBase.plusWeeks(direction.toLong())
+        onDateClick(newDate)
+
+        // 월이 바뀌었으면 캘린더도 갱신
+        val newMonth = YearMonth.from(newDate)
+        if (newMonth != _uiState.value.currentMonth) {
+            loadDiariesForMonthCalendar(newMonth)
+        }
+    }
+
+    /**
+     * 월간 뷰에서 ◀▶ 버튼으로 1개월씩 이동
+     * @param direction -1 이면 이전 달, +1 이면 다음 달
+     */
+    fun navigateMonth(direction: Int) {
+        val newMonth = _uiState.value.currentMonth.plusMonths(direction.toLong())
+        loadDiariesForMonthCalendar(newMonth)
+        // 해당 달의 1일을 선택하고 피드 로드
+        val firstDay = newMonth.atDay(1)
+        onDateClick(firstDay)
+    }
+
+    // --- 년/월 선택 다이얼로그 ---
+
+    fun showYearMonthPicker() {
+        _uiState.update { it.copy(isYearMonthPickerVisible = true) }
+    }
+
+    fun hideYearMonthPicker() {
+        _uiState.update { it.copy(isYearMonthPickerVisible = false) }
+    }
+
+    fun onYearMonthSelected(yearMonth: YearMonth) {
+        hideYearMonthPicker()
+        loadDiariesForMonthCalendar(yearMonth)
+        val firstDay = yearMonth.atDay(1)
+        onDateClick(firstDay)
     }
 
     private fun observerSearchQuery() {
@@ -193,11 +244,13 @@ class FeedViewModel @Inject constructor(
                     when(result) {
                         is DomainResult.Success -> {
                             _uiState.update { current ->
-                                current.copy(feedList = result.data)
+                                current.copy(searchResults = result.data)
                             }
                         }
                         is DomainResult.Fail -> {
-                            // Handle error
+                            _uiState.update { current ->
+                                current.copy(searchResults = emptyList())
+                            }
                         }
                     }
                 }

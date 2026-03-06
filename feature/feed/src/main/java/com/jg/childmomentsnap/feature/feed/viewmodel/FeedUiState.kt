@@ -24,7 +24,9 @@ data class FeedUiState(
     val monthlyDays: List<LocalDate?> = emptyList(), // Null represents empty grid cells if any, or just Logic handle
 
     val isSearchMode: Boolean = false,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val searchResults: List<Diary> = emptyList(),
+    val isYearMonthPickerVisible: Boolean = false
 )
 
 sealed interface FeedSideEffect {

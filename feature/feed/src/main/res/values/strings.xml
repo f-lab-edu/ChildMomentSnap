@@ -33,6 +33,10 @@
     <string name="location_unknown">장소 정보 없음</string>
     <string name="shared_with_family">가족에게 공유</string>
     <string name="feed_item_delete">삭제하기</string>
+    <string name="feed_screen_hash_tag_title">추천 해시태그</string>
+    <string name="feed_screen_search_hint">내용이나 해시태그 검색</string>
+    <string name="feed_screen_not_search_content">검색 결과가 없어요</string>
+    <string name="feed_screen_search_other_keyword">다른 해시태그나 단어로 검색해보세요.</string>
 
     <string name="desc_like">좋아요</string>
     

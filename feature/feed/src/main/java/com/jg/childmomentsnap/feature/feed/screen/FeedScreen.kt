@@ -1,12 +1,15 @@
 package com.jg.childmomentsnap.feature.feed.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,7 +35,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
@@ -45,6 +50,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -55,6 +61,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -92,12 +99,13 @@ import com.jg.childmomentsnap.feature.feed.viewmodel.FeedViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.Rose400
 import com.jg.childmomentsnap.feature.feed.R as FeedR
-
 
 @Composable
 internal fun FeedRoute(
@@ -118,8 +126,6 @@ internal fun FeedRoute(
         }
     }
 
-
-
     FeedScreen(
         uiState = uiState,
         onDateClick = viewModel::onDateClick,
@@ -127,7 +133,12 @@ internal fun FeedRoute(
         onToggleFavorite = viewModel::toggleFavorite,
         onFeedDeletedClick = viewModel::onDeleteDiary,
         onToggleSearchMode = viewModel::toggleSearchMode,
-        onSearchQueryChange = viewModel::searchDiaryContent
+        onSearchQueryChange = viewModel::searchDiaryContent,
+        onNavigateWeek = viewModel::navigateWeek,
+        onNavigateMonth = viewModel::navigateMonth,
+        onHeaderClick = { viewModel.showYearMonthPicker() },
+        onYearMonthSelected = viewModel::onYearMonthSelected,
+        onDismissYearMonthPicker = { viewModel.hideYearMonthPicker() }
     )
 }
 
@@ -139,19 +150,23 @@ private fun FeedScreen(
     onToggleFavorite: (id: Long, isFavorite: Boolean) -> Unit,
     onFeedDeletedClick: (id: Long) -> Unit,
     onToggleSearchMode: (Boolean) -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    onSearchQueryChange: (String) -> Unit,
+    onNavigateWeek: (Int) -> Unit,
+    onNavigateMonth: (Int) -> Unit,
+    onHeaderClick: () -> Unit,
+    onYearMonthSelected: (YearMonth) -> Unit,
+    onDismissYearMonthPicker: () -> Unit
 ) {
-
     MomentsTheme {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
-            topBar = { 
+            topBar = {
                 MomentsTopAppBar(
                     isSearchMode = uiState.isSearchMode,
                     onSearchModeChange = onToggleSearchMode,
                     searchQuery = uiState.searchQuery,
                     onSearchQueryChange = onSearchQueryChange
-                ) 
+                )
             }
         ) { innerPadding ->
             Column(
@@ -159,27 +174,62 @@ private fun FeedScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                // 2. 캘린더 영역
-                ExpandableCalendar(
-                    isExpanded = uiState.isCalendarExpanded,
-                    onToggle = onToggleCalendar,
-                    currentMonth = uiState.currentMonth,
-                    selectedDate = uiState.selectedDate,
-                    onDateClick = onDateClick,
-                    weeklyDays = uiState.weeklyDays,
-                    monthlyDays = uiState.monthlyDays
-                )
+                // 1. 캘린더 영역 (검색 모드일 때는 위로 스르륵 사라짐)
+                AnimatedVisibility(
+                    visible = !uiState.isSearchMode,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    ExpandableCalendar(
+                        isExpanded = uiState.isCalendarExpanded,
+                        onToggle = onToggleCalendar,
+                        currentMonth = uiState.currentMonth,
+                        selectedDate = uiState.selectedDate,
+                        onDateClick = onDateClick,
+                        weeklyDays = uiState.weeklyDays,
+                        monthlyDays = uiState.monthlyDays,
+                        onNavigateWeek = onNavigateWeek,
+                        onNavigateMonth = onNavigateMonth,
+                        onHeaderClick = onHeaderClick
+                    )
+                }
 
-                // 3. 피드 영역
+                // 2. 검색 결과 안내 텍스트 (검색어가 있을 때만 등장)
+                if (uiState.isSearchMode && uiState.searchQuery.isNotEmpty()) {
+                    Text(
+                        text = "'${uiState.searchQuery}' 검색 결과 ${uiState.searchResults.size}건",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Amber800,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                    )
+                }
+
+                // 3. 피드 영역: 검색 모드일 때는 searchResults, 아니면 feedList
+                val displayList = if (uiState.isSearchMode && uiState.searchQuery.isNotEmpty()) {
+                    uiState.searchResults
+                } else {
+                    uiState.feedList
+                }
+
                 val globalBottomBarHeight = 100.dp
                 MomentFeed(
-                    moments = uiState.feedList,
+                    moments = displayList,
+                    isSearchMode = uiState.isSearchMode,
                     contentPadding = PaddingValues(
                         top = 16.dp,
                         bottom = globalBottomBarHeight + 16.dp
                     ),
                     onLikeClick = onToggleFavorite,
                     onFeedDeletedClick = onFeedDeletedClick
+                )
+            }
+
+            // 4. 년/월 선택 다이얼로그
+            if (uiState.isYearMonthPickerVisible) {
+                YearMonthPickerDialog(
+                    currentMonth = uiState.currentMonth,
+                    onYearMonthSelected = onYearMonthSelected,
+                    onDismiss = onDismissYearMonthPicker
                 )
             }
         }
@@ -209,8 +259,11 @@ fun MomentsTopAppBar(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onSearchModeChange(false) }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "닫기", tint = Stone800)
+                IconButton(onClick = {
+                    onSearchModeChange(false)
+                    onSearchQueryChange("") // 닫을 때 검색어 초기화
+                }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "닫기", tint = Stone800)
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 BasicTextField(
@@ -225,7 +278,7 @@ fun MomentsTopAppBar(
                     decorationBox = { innerTextField ->
                         Box(contentAlignment = Alignment.CenterStart) {
                             if (searchQuery.isEmpty()) {
-                                Text("일기 내용 검색...", color = Stone400, style = MaterialTheme.typography.bodyMedium)
+                                Text(stringResource(FeedR.string.feed_screen_search_hint), color = Stone400, style = MaterialTheme.typography.bodyMedium)
                             }
                             innerTextField()
                         }
@@ -249,7 +302,6 @@ fun MomentsTopAppBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 로고 (MomentsDesignSystem의 displayLarge 스타일 적용)
                 Text(
                     text = stringResource(FeedR.string.app_name_moments),
                     style = MaterialTheme.typography.displayLarge,
@@ -264,7 +316,6 @@ fun MomentsTopAppBar(
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    // 프로필 버튼
                     Box(
                         modifier = Modifier
                             .size(36.dp)
@@ -294,27 +345,59 @@ fun ExpandableCalendar(
     selectedDate: LocalDate? = null,
     onDateClick: (LocalDate) -> Unit = {},
     weeklyDays: List<LocalDate> = emptyList(),
-    monthlyDays: List<LocalDate?> = emptyList()
+    monthlyDays: List<LocalDate?> = emptyList(),
+    onNavigateWeek: (Int) -> Unit = {},
+    onNavigateMonth: (Int) -> Unit = {},
+    onHeaderClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White.copy(alpha = 0.8f))
-            .animateContentSize() // 확장/축소 시 부드러운 애니메이션
+            .animateContentSize()
             .padding(bottom = 8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // ◀ 이전 (주간: 이전 주, 월간: 이전 달)
+            IconButton(
+                onClick = { if (isExpanded) onNavigateMonth(-1) else onNavigateWeek(-1) }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = stringResource(FeedR.string.desc_prev_month),
+                    tint = Stone400
+                )
+            }
+
+            // 년/월 헤더 (클릭하면 다이얼로그 열기)
             Text(
                 text = currentMonth.format(DateTimeFormatter.ofPattern(stringResource(FeedR.string.calendar_header_format))),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp),
-                color = Stone800
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+                color = Stone800,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onHeaderClick() }
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center
             )
+
+            // ▶ 다음 (주간: 다음 주, 월간: 다음 달)
+            IconButton(
+                onClick = { if (isExpanded) onNavigateMonth(1) else onNavigateWeek(1) }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = stringResource(FeedR.string.desc_next_month),
+                    tint = Stone400
+                )
+            }
+
+            // 확장/축소 토글
             IconButton(onClick = onToggle) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -325,14 +408,12 @@ fun ExpandableCalendar(
         }
 
         if (!isExpanded) {
-            // 주간 뷰 (Horizontal)
             WeeklyCalendarView(
                 days = weeklyDays,
                 selectedDate = selectedDate,
                 onDateClick = onDateClick
             )
         } else {
-            // 월간 뷰 그리드
             MonthlyCalendarGridView(
                 days = monthlyDays,
                 selectedDate = selectedDate,
@@ -501,21 +582,25 @@ fun MonthlyCalendarGridView(
 @Composable
 private fun MomentFeed(
     moments: List<Diary>,
+    isSearchMode: Boolean, // 추가됨
     contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 16.dp),
     onFeedDeletedClick: (Long) -> Unit = {},
     onFeedSharedClick: (Long) -> Unit = {},
     onLikeClick: (Long, Boolean) -> Unit
 ) {
     if (moments.isEmpty()) {
-        EmptyFeedView(modifier = Modifier.padding(contentPadding))
+        // 검색 모드 여부에 따라 EmptyView 문구 분기 처리
+        EmptyFeedView(
+            isSearchMode = isSearchMode,
+            modifier = Modifier.padding(contentPadding)
+        )
     } else {
         val listState = rememberLazyListState()
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp)
-                .scrollbar(state = listState, color = Stone300),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
             contentPadding = contentPadding
         ) {
@@ -532,7 +617,7 @@ private fun MomentFeed(
 }
 
 @Composable
-fun EmptyFeedView(modifier: Modifier = Modifier) {
+fun EmptyFeedView(isSearchMode: Boolean = false, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -542,13 +627,13 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(160.dp) // Large size
+                .size(160.dp)
                 .clip(CircleShape)
                 .background(Stone100.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.Face,
+                imageVector = if (isSearchMode) Icons.Default.Search else Icons.Filled.Face, // 아이콘 분기
                 contentDescription = null,
                 tint = Stone300,
                 modifier = Modifier.size(64.dp)
@@ -557,8 +642,9 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // 검색 모드에 따라 Title 텍스트 분기
         Text(
-            text = stringResource(FeedR.string.empty_feed_title),
+            text = if (isSearchMode) stringResource(FeedR.string.feed_screen_not_search_content) else stringResource(FeedR.string.empty_feed_title),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
@@ -569,8 +655,9 @@ fun EmptyFeedView(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // 검색 모드에 따라 Subtitle 텍스트 분기
         Text(
-            text = stringResource(FeedR.string.empty_feed_subtitle),
+            text = if (isSearchMode) stringResource(FeedR.string.feed_screen_search_other_keyword) else stringResource(FeedR.string.empty_feed_subtitle),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = Stone400,
                 textAlign = TextAlign.Center
@@ -643,8 +730,6 @@ fun MomentFeedItem(
         }
     }
 }
-
-
 
 @Composable
 private fun MomentHeader(
@@ -822,6 +907,134 @@ fun MomentTagArea(
     }
 }
 
+// --- Year/Month Picker Dialog ---
+@Composable
+fun YearMonthPickerDialog(
+    currentMonth: YearMonth,
+    onYearMonthSelected: (YearMonth) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // 2단계: Step 0 = 년도 선택, Step 1 = 월 선택
+    var step by remember { mutableIntStateOf(0) }
+    var selectedYear by remember { mutableIntStateOf(currentMonth.year) }
+
+    val currentYear = YearMonth.now().year
+    val yearRange = (currentYear - 5)..(currentYear + 1) // 5년 전 ~ 1년 후
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(FeedR.string.dialog_cancel), color = Stone400)
+            }
+        },
+        title = {
+            Text(
+                text = if (step == 0)
+                    stringResource(FeedR.string.dialog_select_year)
+                else
+                    stringResource(FeedR.string.dialog_select_month_format, selectedYear),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                color = Stone900
+            )
+        },
+        text = {
+            Column {
+                if (step == 0) {
+                    // Step 0: 년도 선택 그리드 (3열)
+                    val years = yearRange.toList()
+                    repeat((years.size + 2) / 3) { rowIdx ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            repeat(3) { colIdx ->
+                                val idx = rowIdx * 3 + colIdx
+                                if (idx < years.size) {
+                                    val year = years[idx]
+                                    val isCurrentYear = year == currentMonth.year
+                                    Surface(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(vertical = 4.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                selectedYear = year
+                                                step = 1
+                                            },
+                                        color = if (isCurrentYear) Amber100 else Stone100,
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(FeedR.string.date_year_format, year),
+                                            modifier = Modifier.padding(vertical = 12.dp),
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = if (isCurrentYear) FontWeight.Bold else FontWeight.Normal
+                                            ),
+                                            color = if (isCurrentYear) Amber800 else Stone800
+                                        )
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Step 1: 월 선택 그리드 (3열)
+                    // 뒤로가기 버튼
+                    TextButton(onClick = { step = 0 }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(FeedR.string.dialog_back),
+                            modifier = Modifier.size(16.dp),
+                            tint = Stone400
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(FeedR.string.dialog_back), color = Stone400)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    repeat(4) { rowIdx ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            repeat(3) { colIdx ->
+                                val month = rowIdx * 3 + colIdx + 1
+                                val isCurrentMonth = selectedYear == currentMonth.year && month == currentMonth.monthValue
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(vertical = 4.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            onYearMonthSelected(YearMonth.of(selectedYear, month))
+                                        },
+                                    color = if (isCurrentMonth) Amber100 else Stone100,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(FeedR.string.date_month_format, month),
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal
+                                        ),
+                                        color = if (isCurrentMonth) Amber800 else Stone800
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun FeedScreenLoadedPreview() {
@@ -857,10 +1070,15 @@ private fun FeedScreenLoadedPreview() {
             ),
             onDateClick = {},
             onToggleCalendar = {},
-            onToggleFavorite = {_ , _ ->},
+            onToggleFavorite = { _, _ -> },
             onFeedDeletedClick = {},
             onToggleSearchMode = {},
-            onSearchQueryChange = {}
+            onSearchQueryChange = {},
+            onNavigateWeek = {},
+            onNavigateMonth = {},
+            onHeaderClick = {},
+            onYearMonthSelected = {},
+            onDismissYearMonthPicker = {}
         )
     }
 }
