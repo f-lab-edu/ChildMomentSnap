@@ -31,7 +31,7 @@ interface DiaryDao {
     suspend fun getDiaryListByDate(startDate: String, endDate: String): List<DiaryEntity>
 
     @Query("SELECT * FROM diary_table WHERE is_favorite = 1")
-    fun getFavoriteDiaryList(): Flow<List<DiaryEntity>>
+    fun getFavoriteDiaryList(): List<DiaryEntity>
 
     @Query("SELECT * FROM diary_table WHERE content LIKE '%' || :query || '%'")
     fun searchDiary(query: String): Flow<List<DiaryEntity>>

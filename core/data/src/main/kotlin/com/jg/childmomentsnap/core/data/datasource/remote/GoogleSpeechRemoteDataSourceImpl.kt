@@ -1,4 +1,4 @@
-package com.jg.childmomentsnap.core.data.datasource
+package com.jg.childmomentsnap.core.data.datasource.remote
 
 import com.jg.childmomentsnap.core.common.provider.ApiKeyProvider
 import com.jg.childmomentsnap.core.network.api.GoogleSpeechApiService

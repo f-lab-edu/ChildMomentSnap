@@ -13,11 +13,11 @@ object DateUtils {
         return currentDateTime.format(formatter)
     }
 
-    fun getStartOfDay(date: java.time.LocalDate): String {
+    fun getStartOfDay(date: LocalDate): String {
         return date.atStartOfDay().format(DateTimeFormatter.ofPattern(DIARY_DATE_TIME_FORMAT))
     }
 
-    fun getEndOfDay(date: java.time.LocalDate): String {
+    fun getEndOfDay(date: LocalDate): String {
         return date.atTime(23, 59, 59).format(DateTimeFormatter.ofPattern(DIARY_DATE_TIME_FORMAT))
     }
 
