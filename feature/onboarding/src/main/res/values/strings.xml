@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feat_onboarding_role_mom">엄마</string>
+    <string name="feat_onboarding_role_dad">아빠</string>
+    <string name="feat_onboarding_role_grandma">할머니</string>
+    <string name="feat_onboarding_role_grandpa">할아버지</string>
+    <string name="feat_onboarding_role_other">기타</string>
+</resources>
