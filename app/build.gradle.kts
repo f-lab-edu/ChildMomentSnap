@@ -138,6 +138,7 @@ dependencies {
     implementation(projects.feature.feed)
     implementation(projects.feature.diary)
     implementation(projects.feature.moment)
+    implementation(projects.feature.onboarding)
 
 
     implementation(libs.androidx.activity.compose)
