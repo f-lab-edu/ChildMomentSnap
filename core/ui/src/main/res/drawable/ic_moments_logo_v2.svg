@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+    <!-- 앱 아이콘 둥근 배경 (화이트) -->
+    <rect width="1024" height="1024" rx="280" fill="#FFFFFF"/>
+
+    <!-- 따뜻한 햇살 / 포용을 의미하는 부드러운 원 -->
+    <circle cx="620" cy="420" r="260" fill="#F0E3D3" opacity="0.8"/>
+
+    <!-- 성장과 평온함을 상징하는 우아한 식물 줄기 -->
+    <path d="M 300 820 C 150 550, 300 250, 600 200" stroke="#A39180" stroke-width="16" stroke-linecap="round" fill="none"/>
+
+    <!-- 우아한 잎사귀들 -->
+    <path d="M 300 820 Q 200 790 240 680 Q 300 720 300 820" fill="#A39180"/>
+    <path d="M 220 600 Q 140 500 200 400 Q 270 480 220 600" fill="#A39180"/>
+    <path d="M 290 380 Q 250 250 360 210 Q 380 300 290 380" fill="#A39180"/>
+    <path d="M 480 230 Q 480 120 580 120 Q 580 200 480 230" fill="#A39180"/>
+
+    <!-- 고급스러운 세리프(명조) 'M' -->
+    <text x="512" y="740" font-family="Georgia, serif" font-size="420" font-style="italic" font-weight="bold" fill="#7A634D" text-anchor="middle">
+        M
+    </text>
+
+    <!-- 마법 같은 순간(Moments)을 의미하는 작은 빛/별 -->
+    <path d="M 780 650 Q 790 700 840 710 Q 790 720 780 770 Q 770 720 720 710 Q 770 700 780 650 Z" fill="#D4AF8C"/>
+</svg>

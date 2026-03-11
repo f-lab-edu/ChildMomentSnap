@@ -139,6 +139,7 @@ dependencies {
     implementation(projects.feature.diary)
     implementation(projects.feature.moment)
 
+    implementation(projects.feature.splash)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
