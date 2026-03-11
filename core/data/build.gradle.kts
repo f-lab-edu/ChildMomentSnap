@@ -12,9 +12,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     api(projects.core.common)
-    api(projects.core.domain)
     api(projects.core.model)
-    api(projects.core.database)
-    api(projects.core.datastore)
-    api(projects.core.network)
+
+    implementation(projects.core.domain)
+    implementation(projects.core.database)
+    implementation(projects.core.datastore)
+    implementation(projects.core.network)
 }

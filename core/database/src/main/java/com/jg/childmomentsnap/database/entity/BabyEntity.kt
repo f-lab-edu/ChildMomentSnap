@@ -28,5 +28,5 @@ data class BabyEntity(
     @ColumnInfo("is_pregnant")
     val isPregnant: Boolean,
     @ColumnInfo("profile_image_url")
-    val profileImgUrl: String
+    val profileImgUrl: String? = null
 )

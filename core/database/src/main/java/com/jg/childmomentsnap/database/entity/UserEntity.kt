@@ -11,7 +11,9 @@ data class UserEntity(
     @ColumnInfo(name = "role_type")
     val roleType: String,
     @ColumnInfo(name = "custom_role_name")
-    val customRoleName: String,
+    val customRoleName: String? = null,
+    @ColumnInfo(name = "profile_image_url")
+    val profileImageUrl: String? = null,
     @ColumnInfo(name = "created_at")
     val createdAt: String
 )
