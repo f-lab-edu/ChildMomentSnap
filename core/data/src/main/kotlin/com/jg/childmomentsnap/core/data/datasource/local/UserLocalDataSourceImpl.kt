@@ -8,15 +8,15 @@ class UserLocalDataSourceImpl @Inject constructor(
     private val userDao: UserDao
 ) : UserLocalDataSource {
     override suspend fun insertUser(user: UserEntity) {
-        return userDao.insertUser(user)
+        userDao.insertUser(user)
     }
 
     override suspend fun updateUser(user: UserEntity) {
-        return userDao.updateUser(user)
+        userDao.updateUser(user)
     }
 
     override suspend fun deleteUser(user: UserEntity) {
-        return userDao.deleteUser(user)
+        userDao.deleteUser(user)
     }
 
     override suspend fun getUser(): UserEntity {

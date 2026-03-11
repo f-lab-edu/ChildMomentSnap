@@ -9,15 +9,15 @@ class BabyLocalDataSourceImpl @Inject constructor(
 ): BabyLocalDataSource {
 
     override suspend fun insertBaby(baby: BabyEntity) {
-        return babyDao.insertBaby(baby)
+        babyDao.insertBaby(baby)
     }
 
     override suspend fun updateBaby(baby: BabyEntity) {
-        return babyDao.updateBaby(baby)
+        babyDao.updateBaby(baby)
     }
 
     override suspend fun deleteBaby(baby: BabyEntity) {
-        return babyDao.deleteBaby(baby)
+        babyDao.deleteBaby(baby)
     }
 
     override suspend fun getBabyList(userId: Long): List<BabyEntity> {
