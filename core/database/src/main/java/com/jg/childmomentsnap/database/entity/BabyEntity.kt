@@ -14,6 +14,9 @@ import androidx.room.PrimaryKey
             childColumns = ["user_id"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        androidx.room.Index(value = ["user_id"])
     ]
 )
 data class BabyEntity(

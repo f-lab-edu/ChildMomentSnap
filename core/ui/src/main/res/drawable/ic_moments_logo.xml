@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- 앱 아이콘 둥근 배경 (화이트) -->
+    <!-- rect width="1024" height="1024" rx="280" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 280,0 L 744,0 A 280,280 0 0 1 1024,280 L 1024,744 A 280,280 0 0 1 744,1024 L 280,1024 A 280,280 0 0 1 0,744 L 0,280 A 280,280 0 0 1 280,0 Z" />
+
+    <!-- 따뜻한 햇살 / 포용을 의미하는 부드러운 원 -->
+    <!-- circle cx="620" cy="420" r="260" -->
+    <path
+        android:fillColor="#F0E3D3"
+        android:fillAlpha="0.8"
+        android:pathData="M 360,420 A 260,260 0 1,1 880,420 A 260,260 0 1,1 360,420 Z" />
+
+    <!-- 성장과 평온함을 상징하는 우아한 식물 줄기 -->
+    <path
+        android:strokeColor="#A39180"
+        android:strokeWidth="16"
+        android:strokeLineCap="round"
+        android:pathData="M 300,820 C 150,550 300,250 600,200" />
+
+    <!-- 우아한 잎사귀들 -->
+    <path android:fillColor="#A39180" android:pathData="M 300,820 Q 200,790 240,680 Q 300,720 300,820" />
+    <path android:fillColor="#A39180" android:pathData="M 220,600 Q 140,500 200,400 Q 270,480 220,600" />
+    <path android:fillColor="#A39180" android:pathData="M 290,380 Q 250,250 360,210 Q 380,300 290,380" />
+    <path android:fillColor="#A39180" android:pathData="M 480,230 Q 480,120 580,120 Q 580,200 480,230" />
+
+    <!-- 고급스러운 세리프(명조) 'M' (text 대체 Path) -->
+    <path
+        android:fillColor="#7A634D"
+        android:pathData="M 382,740 L 382,480 L 512,620 L 642,480 L 642,740 L 582,740 L 582,550 L 512,630 L 442,550 L 442,740 Z" />
+
+    <!-- 마법 같은 순간(Moments)을 의미하는 작은 빛/별 -->
+    <path android:fillColor="#D4AF8C" android:pathData="M 780,650 Q 790,700 840,710 Q 790,720 780,770 Q 770,720 720,710 Q 770,700 780,650 Z" />
+
+</vector>

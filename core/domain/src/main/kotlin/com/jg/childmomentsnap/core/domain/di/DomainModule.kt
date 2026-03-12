@@ -6,6 +6,8 @@ import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GeneratePhotoDiaryUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCase
 import com.jg.childmomentsnap.core.domain.usecase.GetDiariesByDateUseCaseImpl
+import com.jg.childmomentsnap.core.domain.usecase.IsFirstLaunchUseCase
+import com.jg.childmomentsnap.core.domain.usecase.IsFirstLaunchUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCase
 import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
@@ -51,4 +53,9 @@ abstract class DomainModule {
     abstract fun bindSearchDiaryContentUseCase(
         searchDiaryContentUseCase: SearchDiaryContentUseCaseImpl
     ): SearchDiaryContentUseCase
+
+    @Binds
+    abstract fun bindIsFirstLaunchUseCase(
+        isFirstLaunchUseCase: IsFirstLaunchUseCaseImpl
+    ): IsFirstLaunchUseCase
 }
