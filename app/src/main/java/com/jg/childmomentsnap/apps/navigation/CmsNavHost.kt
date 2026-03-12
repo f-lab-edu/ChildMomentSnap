@@ -9,6 +9,10 @@ import androidx.navigation.compose.NavHost
 import com.jg.childmomentsnap.core.ui.state.CmsAppState
 import com.jg.childmomentsnap.feature.home.HomeGraphRoute
 import com.jg.childmomentsnap.feature.home.homeGraph
+import com.jg.childmomentsnap.feature.onboarding.navigation.OnBoardingGraph
+import com.jg.childmomentsnap.feature.onboarding.navigation.onboardingGraph
+import com.jg.childmomentsnap.feature.splash.navigation.SplashGraph
+import com.jg.childmomentsnap.feature.splash.navigation.splashGraph
 
 
 @SuppressLint("ContextCastToActivity")
@@ -23,9 +27,26 @@ fun CmsNavHost(
     SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = HomeGraphRoute,
+            startDestination = SplashGraph,
             modifier = modifier
         ) {
+            splashGraph(
+                appState = appState,
+                onNavigateToHome = {
+                    navController.navigate(HomeGraphRoute)
+                },
+                onNavigateToOnboarding = {
+                    navController.navigate(OnBoardingGraph)
+                }
+            )
+
+            onboardingGraph(
+                appState = appState,
+                onCompleted = {
+                    navController.navigate(HomeGraphRoute)
+                }
+            )
+
             homeGraph(
                 cmsAppState = appState,
             )

@@ -56,7 +56,8 @@ import com.jg.childmomentsnap.feature.onboarding.viewmodel.UiState
 
 @Composable
 internal fun OnboardingRoute(
-    viewModel: OnBoardingViewModel = hiltViewModel()
+    viewModel: OnBoardingViewModel = hiltViewModel(),
+    onCompleted: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 

@@ -15,13 +15,14 @@ const val ONBOARDING_GRAPH = "onboarding_graph"
 const val ONBOARDING_ROUTE = "onboarding_route"
 
 fun NavGraphBuilder.onboardingGraph(
-    appState: CmsAppState
+    appState: CmsAppState,
+    onCompleted: () -> Unit
 ) {
     val navController = appState.navController
 
     composable<OnBoardingGraph> {
         OnboardingRoute(
-
+            onCompleted = onCompleted
         )
     }
 }
