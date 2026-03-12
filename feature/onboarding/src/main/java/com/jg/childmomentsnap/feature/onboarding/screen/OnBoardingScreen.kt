@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jg.childmomentsnap.core.model.enums.RoleType
 import com.jg.childmomentsnap.core.ui.theme.DarkAccent
 import com.jg.childmomentsnap.core.ui.theme.Gray100
 import com.jg.childmomentsnap.core.ui.theme.Gray500
@@ -46,6 +47,7 @@ import com.jg.childmomentsnap.core.ui.theme.Gray900
 import com.jg.childmomentsnap.core.ui.theme.PrimaryAmber
 import com.jg.childmomentsnap.core.ui.theme.SelectedBg
 import com.jg.childmomentsnap.core.ui.theme.Stone800
+import com.jg.childmomentsnap.feature.onboarding.R
 import com.jg.childmomentsnap.feature.onboarding.model.RoleItem
 import com.jg.childmomentsnap.feature.onboarding.viewmodel.OnBoardingViewModel
 import com.jg.childmomentsnap.feature.onboarding.viewmodel.OnboardingConstants
@@ -143,7 +145,7 @@ private fun StepRoleSelection(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Text(
-            text = "반가워요!\n아이에게 어떤 분이신가요?",
+            text = stringResource(R.string.feature_onboarding_role_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Gray900,
@@ -151,13 +153,12 @@ private fun StepRoleSelection(
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "가족 역할에 맞는 맞춤형 AI 코칭을 제공해 드려요.",
+            text = stringResource(R.string.feature_onboarding_role_guide_msg),
             fontSize = 14.sp,
             color = Gray500
         )
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 2x2 그리드
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 roles.take(2).forEach { role ->
@@ -181,7 +182,7 @@ private fun StepRoleSelection(
             }
 
             // 기타 직접 입력
-            val isOtherSelected = selectedRole == "other"
+            val isOtherSelected = selectedRole == RoleType.OTHER.role
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +193,7 @@ private fun StepRoleSelection(
                         if (isOtherSelected) PrimaryAmber else Gray100,
                         RoundedCornerShape(16.dp)
                     )
-                    .clickable { onRoleSelect("other") }
+                    .clickable { onRoleSelect(RoleType.OTHER.role) }
                     .padding(20.dp)
             ) {
                 Row(
@@ -204,7 +205,7 @@ private fun StepRoleSelection(
                         Text(text = "👤", fontSize = 24.sp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "기타 (직접 입력)",
+                            text = stringResource(R.string.feature_onboarding_role_other_input),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = if (isOtherSelected) DarkAccent else Color.DarkGray

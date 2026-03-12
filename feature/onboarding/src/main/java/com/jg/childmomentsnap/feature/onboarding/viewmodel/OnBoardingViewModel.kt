@@ -21,11 +21,11 @@ data class UiState(
 
 object OnboardingConstants {
     val roles = listOf(
-        RoleItem(id = "mom", emoji = "\uD83D\uDC69", titleResId = R.string.feat_onboarding_role_mom),
-        RoleItem(id = "dad", emoji = "\uD83D\uDC68", titleResId = R.string.feat_onboarding_role_dad),
-        RoleItem(id = "grandma", emoji = "\uD83D\uDC75", titleResId = R.string.feat_onboarding_role_grandma),
-        RoleItem(id = "grandpa", emoji = "\uD83D\uDC74", titleResId = R.string.feat_onboarding_role_grandpa),
-        RoleItem(id = "other", emoji = "", titleResId =  R.string.feat_onboarding_role_other)
+        RoleItem(id = "mom", emoji = "\uD83D\uDC69", titleResId = R.string.feature_onboarding_role_mom),
+        RoleItem(id = "dad", emoji = "\uD83D\uDC68", titleResId = R.string.feature_onboarding_role_dad),
+        RoleItem(id = "grandma", emoji = "\uD83D\uDC75", titleResId = R.string.feature_onboarding_role_grandma),
+        RoleItem(id = "grandpa", emoji = "\uD83D\uDC74", titleResId = R.string.feature_onboarding_role_grandpa),
+        RoleItem(id = "other", emoji = "", titleResId =  R.string.feature_onboarding_role_other)
     )
 
     val STEP_ONE_SET_ROLE = 1
