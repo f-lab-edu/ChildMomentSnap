@@ -140,6 +140,7 @@ dependencies {
     implementation(projects.feature.moment)
     implementation(projects.feature.onboarding)
 
+    implementation(projects.feature.splash)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

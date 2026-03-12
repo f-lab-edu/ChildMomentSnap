@@ -1,5 +1,7 @@
 package com.jg.childmomentsnap.core.data.di
 
+import com.jg.childmomentsnap.core.data.datasource.local.BabyLocalDataSource
+import com.jg.childmomentsnap.core.data.datasource.local.BabyLocalDataSourceImpl
 import com.jg.childmomentsnap.core.domain.repository.PhotoRepository
 import com.jg.childmomentsnap.core.data.datasource.remote.GoogleSpeechRemoteDataSource
 import com.jg.childmomentsnap.core.data.datasource.remote.GoogleSpeechRemoteDataSourceImpl
@@ -7,12 +9,18 @@ import com.jg.childmomentsnap.core.data.datasource.remote.GoogleVisionRemoteData
 import com.jg.childmomentsnap.core.data.datasource.remote.GoogleVisionRemoteDataSourceImpl
 import com.jg.childmomentsnap.core.data.datasource.local.DiaryLocalDataSource
 import com.jg.childmomentsnap.core.data.datasource.local.DiaryLocalDataSourceImpl
+import com.jg.childmomentsnap.core.data.datasource.local.UserLocalDataSource
+import com.jg.childmomentsnap.core.data.datasource.local.UserLocalDataSourceImpl
 import com.jg.childmomentsnap.core.data.datasource.remote.GeminiApiRemoteDataSource
 import com.jg.childmomentsnap.core.data.datasource.remote.GeminiApiRemoteDataSourceImpl
+import com.jg.childmomentsnap.core.data.repository.BabyRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.DiaryRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.PhotoRepositoryImpl
+import com.jg.childmomentsnap.core.data.repository.UserRepositoryImpl
 import com.jg.childmomentsnap.core.data.repository.VoiceRepositoryImpl
+import com.jg.childmomentsnap.core.domain.repository.BabyRepository
 import com.jg.childmomentsnap.core.domain.repository.DiaryRepository
+import com.jg.childmomentsnap.core.domain.repository.UserRepository
 import com.jg.childmomentsnap.core.domain.repository.VoiceRepository
 import dagger.Binds
 import dagger.Module
@@ -57,4 +65,24 @@ abstract class DataModule {
     abstract fun bindGeminiApiServiceRemoteDataSource(
         geminiApiRemoteDataSource: GeminiApiRemoteDataSourceImpl
     ): GeminiApiRemoteDataSource
+
+    @Binds
+    abstract fun bindUserLocalDataSource(
+        userLocalDataSourceImpl: UserLocalDataSourceImpl
+    ): UserLocalDataSource
+
+    @Binds
+    abstract fun bindBabyLocalDataSource(
+        babyLocalDataSourceImpl: BabyLocalDataSourceImpl
+    ): BabyLocalDataSource
+
+    @Binds
+    abstract fun bindUserRepository(
+        userRepositoryImpl: UserRepositoryImpl
+    ): UserRepository
+
+    @Binds
+    abstract fun bindBabyRepository(
+        babyRepositoryImpl: BabyRepositoryImpl
+    ): BabyRepository
 }

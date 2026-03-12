@@ -103,6 +103,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.jg.childmomentsnap.core.ui.theme.Amber500
 import com.jg.childmomentsnap.core.ui.theme.Rose400
 import com.jg.childmomentsnap.feature.feed.R as FeedR
@@ -115,13 +118,16 @@ internal fun FeedRoute(
     onNavigateToCamera: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(viewModel.sideEffect) {
-        viewModel.sideEffect.collect { effect ->
-            when (effect) {
-                is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
-                is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
-                is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
+    LaunchedEffect(viewModel.sideEffect, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.sideEffect.collect { effect ->
+                when (effect) {
+                    is FeedSideEffect.NavigateToDetail -> onNavigateToDetail(effect.diaryId)
+                    is FeedSideEffect.NavigateToCamera -> onNavigateToCamera()
+                    is FeedSideEffect.NavigateToWrite -> onNavigateToWrite(effect.date)
+                }
             }
         }
     }
