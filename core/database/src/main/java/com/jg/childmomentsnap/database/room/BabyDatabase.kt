@@ -7,8 +7,10 @@ import androidx.room.RoomDatabase
 import com.jg.childmomentsnap.database.dao.BabyDao
 import com.jg.childmomentsnap.database.entity.BabyEntity
 
+import com.jg.childmomentsnap.database.entity.UserEntity
+
 @Database(
-    entities = [BabyEntity::class],
+    entities = [BabyEntity::class, UserEntity::class],
     version = 1,
     exportSchema = true
 )

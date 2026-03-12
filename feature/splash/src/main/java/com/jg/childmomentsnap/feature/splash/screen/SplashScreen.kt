@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.jg.childmomentsnap.feature.splash.R
 import com.jg.childmomentsnap.feature.splash.viewmodel.SplashSideEffect
 import com.jg.childmomentsnap.core.ui.R as CoreR
 import com.jg.childmomentsnap.feature.splash.viewmodel.SplashViewModel
@@ -126,7 +128,7 @@ private fun SplashScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Moments",
+                text = stringResource(R.string.feature_splash_app_name_title),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
@@ -137,7 +139,7 @@ private fun SplashScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "우리아이 첫 순간의 기록",
+                text = stringResource(R.string.feature_splash_title_msg),
                 fontSize = 14.sp,
                 color = Color(0xFF8B7355)
             )
