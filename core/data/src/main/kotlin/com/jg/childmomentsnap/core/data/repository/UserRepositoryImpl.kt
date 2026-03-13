@@ -12,12 +12,12 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(
     private val userLocalDataSource: UserLocalDataSource
 ): UserRepository {
-    override suspend fun getUser(): DataResult<User> {
+    override suspend fun getUser(): DataResult<User?> {
         return safeRunCatching {
             userLocalDataSource.getUser()
         }.fold(
             onSuccess = { userEntity ->
-                DataResult.Success(userEntity.toDomain()) },
+                DataResult.Success(userEntity?.toDomain()) },
             onFailure = { error ->
                 DataResult.Fail(
                     code = -1,

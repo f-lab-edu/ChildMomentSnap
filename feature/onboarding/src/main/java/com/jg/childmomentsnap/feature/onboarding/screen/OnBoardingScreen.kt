@@ -113,10 +113,10 @@ private fun StepProgressTopBar(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        if(step != OnboardingConstants.STEP_ONE_SET_ROLE) {
-            IconButton(
-                onClick = onBackPressed
-            ) {
+        IconButton(
+            onClick = onBackPressed
+        ) {
+            if(step != OnboardingConstants.STEP_ONE_SET_ROLE) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "뒤로가기",
@@ -134,6 +134,14 @@ private fun StepProgressTopBar(
             color = PrimaryAmber,
             trackColor = Gray100
         )
+        Text(
+            text = stringResource(R.string.feature_onboarding_role_topbar_step_count, step),
+            color = PrimaryAmber,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 
@@ -144,7 +152,13 @@ private fun StepRoleSelection(
     selectedRole: String?,
     onRoleSelect: (String) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
         Text(
             text = stringResource(R.string.feature_onboarding_role_title),
             fontSize = 24.sp,
@@ -152,13 +166,13 @@ private fun StepRoleSelection(
             color = Gray900,
             lineHeight = 34.sp
         )
-        Spacer(modifier = Modifier.height(12.dp))
+
         Text(
             text = stringResource(R.string.feature_onboarding_role_guide_msg),
             fontSize = 14.sp,
             color = Gray500
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -173,12 +187,14 @@ private fun StepRoleSelection(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 roles.drop(2).forEach { role ->
-                    RoleCard(
-                        modifier = Modifier.weight(1f),
-                        role = role,
-                        isSelected = selectedRole == role.id,
-                        onClick = { onRoleSelect(role.id) }
-                    )
+                    if (role.emoji.isNotEmpty()) {
+                        RoleCard(
+                            modifier = Modifier.weight(1f),
+                            role = role,
+                            isSelected = selectedRole == role.id,
+                            onClick = { onRoleSelect(role.id) }
+                        )
+                    }
                 }
             }
 

@@ -8,4 +8,5 @@
     <string name="feature_onboarding_role_title">반가워요!\n아이에게 어떤 분이신가요?</string>
     <string name="feature_onboarding_role_guide_msg">가족 역할에 맞는 맞춤형 AI 코칭을 제공해 드려요.</string>
     <string name="feature_onboarding_role_other_input">기타 (직접 입력)</string>
+    <string name="feature_onboarding_role_topbar_step_count">STEP $d</string>
 </resources>

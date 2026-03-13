@@ -3,6 +3,7 @@ package com.jg.childmomentsnap.feature.onboarding.viewmodel
 import androidx.lifecycle.ViewModel
 import com.jg.childmomentsnap.feature.onboarding.R
 import com.jg.childmomentsnap.feature.onboarding.model.RoleItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -34,6 +35,7 @@ object OnboardingConstants {
     val STEP_TOTAL_COUNT = 3
 }
 
+@HiltViewModel
 class OnBoardingViewModel @Inject constructor(
 
 ): ViewModel() {

@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.splash.screen
 
+import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -48,13 +50,17 @@ internal fun SplashRoute(
     onNavigateToHome: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.uiEffect, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.uiEffect.collect { effect ->
                 when (effect) {
-                    is SplashSideEffect.NavigateToOnboarding -> onNavigateToOnboarding
-                    is SplashSideEffect.NavigateToHome -> onNavigateToHome
+                    is SplashSideEffect.NavigateToOnboarding -> onNavigateToOnboarding()
+                    is SplashSideEffect.NavigateToHome -> onNavigateToHome()
+                    is SplashSideEffect.ErrorMessage -> {
+                        Toast.makeText(context, effect.error, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
