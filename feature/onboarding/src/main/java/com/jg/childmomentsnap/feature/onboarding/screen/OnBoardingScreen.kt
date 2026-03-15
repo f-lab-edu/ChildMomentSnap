@@ -27,18 +27,23 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.jg.childmomentsnap.core.model.enums.RoleType
 import com.jg.childmomentsnap.core.ui.theme.DarkAccent
 import com.jg.childmomentsnap.core.ui.theme.Gray100
@@ -48,6 +53,7 @@ import com.jg.childmomentsnap.core.ui.theme.PrimaryAmber
 import com.jg.childmomentsnap.core.ui.theme.SelectedBg
 import com.jg.childmomentsnap.core.ui.theme.Stone800
 import com.jg.childmomentsnap.feature.onboarding.R
+import com.jg.childmomentsnap.feature.onboarding.component.RoleCard
 import com.jg.childmomentsnap.feature.onboarding.model.RoleItem
 import com.jg.childmomentsnap.feature.onboarding.viewmodel.OnBoardingViewModel
 import com.jg.childmomentsnap.feature.onboarding.viewmodel.OnboardingConstants
@@ -61,8 +67,17 @@ internal fun OnboardingRoute(
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.loadInitRoles()
+        }
+    }
+
     OnBoardingScreen(
         uiState = uiState.value,
+        step = uiState.value.step,
         onBackPressed = {}
     )
 }
@@ -70,6 +85,7 @@ internal fun OnboardingRoute(
 @Composable
 private fun OnBoardingScreen(
     uiState: UiState,
+    step: Int,
     onBackPressed: () -> Unit,
 ) {
     val progress by animateFloatAsState(
@@ -92,13 +108,15 @@ private fun OnBoardingScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-
-            StepRoleSelection(
-                roles = uiState.roleItems,
-                selectedRole = null,
-                onRoleSelect = {}
-            )
-
+            when (step) {
+                OnboardingConstants.STEP_ONE_SET_ROLE -> {
+                    StepRoleSelection(
+                        roles = uiState.roleUiState.roleItems,
+                        selectedRole = null,
+                        onRoleSelect = {}
+                    )
+                }
+            }
         }
     }
 }
@@ -137,10 +155,10 @@ private fun StepProgressTopBar(
         Text(
             text = stringResource(R.string.feature_onboarding_role_topbar_step_count, step),
             color = PrimaryAmber,
-            fontSize = 11.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp, start = 24.dp)
         )
     }
 }
@@ -242,39 +260,5 @@ private fun StepRoleSelection(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun RoleCard(
-    modifier: Modifier = Modifier,
-    role: RoleItem,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val scale by animateFloatAsState(if (isSelected) 1.02f else 1f, label = "scaleAnimation")
-
-    Column(
-        modifier = modifier
-            .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) SelectedBg.copy(alpha = 0.5f) else Color.White)
-            .border(
-                2.dp,
-                if (isSelected) PrimaryAmber else Gray100,
-                RoundedCornerShape(16.dp)
-            )
-            .clickable { onClick() }
-            .padding(vertical = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = role.emoji, fontSize = 40.sp)
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(role.titleResId),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isSelected) DarkAccent else Color.DarkGray
-        )
     }
 }

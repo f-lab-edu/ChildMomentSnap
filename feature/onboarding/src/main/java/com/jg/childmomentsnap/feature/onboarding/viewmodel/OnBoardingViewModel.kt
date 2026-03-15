@@ -12,11 +12,20 @@ import javax.inject.Inject
 
 data class UiState(
     val step: Int,
-    val roleItems: List<RoleItem>,
-    val selectedRole: String,
+    val roleUiState: RoleUiState
 ) {
     companion object {
-        val EMPTY = UiState(step = 0, roleItems = emptyList(), selectedRole = "")
+        val EMPTY = UiState(step = 0, roleUiState = RoleUiState.EMPTY)
+    }
+}
+
+data class RoleUiState(
+    val selectedRole: String,
+    val roleItems: List<RoleItem>,
+    val otherRole: String? = null
+) {
+    companion object {
+        val EMPTY = RoleUiState(selectedRole = "", roleItems = emptyList())
     }
 }
 
@@ -43,15 +52,14 @@ class OnBoardingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.EMPTY)
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadInitRoles()
-    }
 
     fun loadInitRoles() {
         _uiState.update { current ->
             current.copy(
                 step = OnboardingConstants.STEP_ONE_SET_ROLE,
-                roleItems = OnboardingConstants.roles
+                roleUiState = current.roleUiState.copy(
+                    roleItems = OnboardingConstants.roles
+                )
             )
         }
     }
