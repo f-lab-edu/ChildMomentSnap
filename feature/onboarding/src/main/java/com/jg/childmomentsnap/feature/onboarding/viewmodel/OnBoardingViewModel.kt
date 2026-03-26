@@ -1,6 +1,8 @@
 package com.jg.childmomentsnap.feature.onboarding.viewmodel
 
+import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
+import com.jg.childmomentsnap.core.model.enums.RoleType
 import com.jg.childmomentsnap.feature.onboarding.R
 import com.jg.childmomentsnap.feature.onboarding.model.RoleItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,15 +10,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 
 
 data class UiState(
     val step: Int,
-    val roleUiState: RoleUiState
+    val roleUiState: RoleUiState,
+    val babyName: String,
+    val birthDay: String,
+    val isPregnant: Boolean,
+    val isNextEnable: Boolean
 ) {
     companion object {
-        val EMPTY = UiState(step = 0, roleUiState = RoleUiState.EMPTY)
+        val EMPTY = UiState(step = 0, roleUiState = RoleUiState.EMPTY, babyName = "", isNextEnable = false, birthDay = "", isPregnant = false)
     }
+}
+
+sealed class OnboardingSideEffect {
+    object NavigateToHome : OnboardingSideEffect()
 }
 
 data class RoleUiState(
@@ -31,11 +45,11 @@ data class RoleUiState(
 
 object OnboardingConstants {
     val roles = listOf(
-        RoleItem(id = "mom", emoji = "\uD83D\uDC69", titleResId = R.string.feature_onboarding_role_mom),
-        RoleItem(id = "dad", emoji = "\uD83D\uDC68", titleResId = R.string.feature_onboarding_role_dad),
-        RoleItem(id = "grandma", emoji = "\uD83D\uDC75", titleResId = R.string.feature_onboarding_role_grandma),
-        RoleItem(id = "grandpa", emoji = "\uD83D\uDC74", titleResId = R.string.feature_onboarding_role_grandpa),
-        RoleItem(id = "other", emoji = "", titleResId =  R.string.feature_onboarding_role_other)
+        RoleItem(roleName = "mom", emoji = "\uD83D\uDC69", titleResId = R.string.feature_onboarding_role_mom),
+        RoleItem(roleName = "dad", emoji = "\uD83D\uDC68", titleResId = R.string.feature_onboarding_role_dad),
+        RoleItem(roleName = "grandma", emoji = "\uD83D\uDC75", titleResId = R.string.feature_onboarding_role_grandma),
+        RoleItem(roleName = "grandpa", emoji = "\uD83D\uDC74", titleResId = R.string.feature_onboarding_role_grandpa),
+        RoleItem(roleName = "other", emoji = "", titleResId =  R.string.feature_onboarding_role_other)
     )
 
     val STEP_ONE_SET_ROLE = 1
@@ -52,6 +66,9 @@ class OnBoardingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.EMPTY)
     val uiState = _uiState.asStateFlow()
 
+    private val _uiEffect = MutableSharedFlow<OnboardingSideEffect>()
+    val uiEffect = _uiEffect.asSharedFlow()
+
 
     fun loadInitRoles() {
         _uiState.update { current ->
@@ -61,6 +78,72 @@ class OnBoardingViewModel @Inject constructor(
                     roleItems = OnboardingConstants.roles
                 )
             )
+        }
+    }
+
+    fun onRoleSelect(role: String) {
+        _uiState.update { current ->
+            current.copy(
+                roleUiState = current.roleUiState.copy(
+                    selectedRole = role
+                ),
+                isNextEnable = true,
+            )
+        }
+    }
+
+    fun onCustomRoleChange(role: String) {
+        _uiState.update { current ->
+            current.copy(
+                roleUiState = current.roleUiState.copy(
+                    selectedRole = RoleType.OTHER.role,
+                    otherRole = role
+                ),
+                isNextEnable = role.isNotEmpty(),
+            )
+        }
+    }
+
+    fun onNameChange(babyName: String) {
+        _uiState.update { current ->
+            current.copy(
+                babyName = babyName,
+                isNextEnable = babyName.isNotEmpty()
+            )
+        }
+    }
+
+    fun onNext(step: Int) {
+        _uiState.update { current ->
+            current.copy(
+                step = step,
+                isNextEnable = false
+            )
+        }
+    }
+
+    fun onBirthDateChange(date: String) {
+        _uiState.update { current ->
+            current.copy(
+                birthDay = date,
+                isNextEnable = date.isNotEmpty()
+            )
+        }
+    }
+
+    fun onPregnantChange(isPregnant: Boolean) {
+        _uiState.update { current ->
+            current.copy(
+                isPregnant = isPregnant,
+                birthDay = if (isPregnant) "" else current.birthDay,
+                isNextEnable = isPregnant || current.birthDay.isNotEmpty()
+            )
+        }
+    }
+
+    fun onCompleteOnboarding() {
+        viewModelScope.launch {
+            _uiEffect.emit(OnboardingSideEffect.NavigateToHome)
         }
     }
 }

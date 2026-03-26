@@ -8,5 +8,10 @@
     <string name="feature_onboarding_role_title">반가워요!\n아이에게 어떤 분이신가요?</string>
     <string name="feature_onboarding_role_guide_msg">가족 역할에 맞는 맞춤형 AI 코칭을 제공해 드려요.</string>
     <string name="feature_onboarding_role_other_input">기타 (직접 입력)</string>
-    <string name="feature_onboarding_role_topbar_step_count">STEP $d</string>
+    <string name="feature_onboarding_role_placeholder">예: 이모, 삼촌</string>
+    <string name="feature_onboarding_role_topbar_step_count">STEP %d</string>
+    <string name="feature_onboarding_baby_name_title">아이의 예쁜 이름을\n알려주세요.</string>
+    <string name="feature_onboarding_baby_name_sub_title">태명도 좋아요! 언제든지 수정할 수 있어요.</string>
+    <string name="feature_onboarding_baby_name_placeholder">예: 지우, 로아, 튼튼이</string>
+    <string name="feature_onboarding_role_next">다음</string>
 </resources>

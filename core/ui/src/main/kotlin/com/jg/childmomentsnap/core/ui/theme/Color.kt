@@ -24,6 +24,7 @@ val DarkAccent = Color(0xFF8B7355)
 val SelectedBg = Color(0xFFFDF3D0)
 val DarkButton = Color(0xFF2C2A29)
 val Gray100 = Color(0xFFF3F4F6)
+val Gray300 = Color(0xFFD1D5DB)
 val Gray500 = Color(0xFF6B7280)
 val Gray900 = Color(0xFF111827)
 
