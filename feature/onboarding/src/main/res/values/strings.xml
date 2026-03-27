@@ -5,6 +5,7 @@
     <string name="feature_onboarding_role_grandma">할머니</string>
     <string name="feature_onboarding_role_grandpa">할아버지</string>
     <string name="feature_onboarding_role_other">기타</string>
+    <string name="feature_onboarding_role_start">시작하기</string>
     <string name="feature_onboarding_role_title">반가워요!\n아이에게 어떤 분이신가요?</string>
     <string name="feature_onboarding_role_guide_msg">가족 역할에 맞는 맞춤형 AI 코칭을 제공해 드려요.</string>
     <string name="feature_onboarding_role_other_input">기타 (직접 입력)</string>
@@ -13,5 +14,9 @@
     <string name="feature_onboarding_baby_name_title">아이의 예쁜 이름을\n알려주세요.</string>
     <string name="feature_onboarding_baby_name_sub_title">태명도 좋아요! 언제든지 수정할 수 있어요.</string>
     <string name="feature_onboarding_baby_name_placeholder">예: 지우, 로아, 튼튼이</string>
+    <string name="feature_onboarding_birthday_title">%s와(과) 처음 만난 날은\n언제인가요?</string>
+    <string name="feature_onboarding_birthday_sub_title">아이의 성장 시기에 맞춘 AI 조언을 위해 필요해요.</string>
+    <string name="feature_onboarding_birthday_placeholder">YYYY-MM-DD</string>
+    <string name="feature_onboarding_birthday_pregnant">아직 태어나지 않았어요 (출산 전)</string>
     <string name="feature_onboarding_role_next">다음</string>
 </resources>

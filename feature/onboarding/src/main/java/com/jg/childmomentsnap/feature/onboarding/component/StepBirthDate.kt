@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jg.childmomentsnap.feature.onboarding.R
 import com.jg.childmomentsnap.core.ui.theme.DarkAccent
 import com.jg.childmomentsnap.core.ui.theme.Gray100
 import com.jg.childmomentsnap.core.ui.theme.Gray300
@@ -45,7 +47,7 @@ internal fun StepBirthDate(
             .padding(horizontal = 24.dp)
     ) {
         Text(
-            text = "${displayName}와(과) 처음 만난 날은\n언제인가요?",
+            text = stringResource(R.string.feature_onboarding_birthday_title, displayName),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Gray900,
@@ -53,7 +55,7 @@ internal fun StepBirthDate(
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "아이의 성장 시기에 맞춘 AI 조언을 위해 필요해요.",
+            text = stringResource(R.string.feature_onboarding_birthday_sub_title),
             fontSize = 14.sp,
             color = Gray500
         )
@@ -64,7 +66,7 @@ internal fun StepBirthDate(
             value = birthDate,
             onValueChange = onDateChange,
             placeholder = {
-                Text("YYYY-MM-DD", color = Gray300)
+                Text(stringResource(R.string.feature_onboarding_birthday_placeholder), color = Gray300)
             },
             leadingIcon = {
                 Icon(
@@ -133,7 +135,7 @@ internal fun StepBirthDate(
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "아직 태어나지 않았어요 (출산 전)",
+                text = stringResource(R.string.feature_onboarding_birthday_pregnant),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (isPregnant) DarkAccent else Gray500

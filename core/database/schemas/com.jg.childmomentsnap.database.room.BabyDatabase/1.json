@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8d471808901e9fc48eebd231980da60d",
+    "identityHash": "bcbcc025f82884e7bd8e2c1a7ad74b45",
     "entities": [
       {
         "tableName": "baby_table",
@@ -77,7 +77,7 @@
       },
       {
         "tableName": "user_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `role_type` TEXT NOT NULL, `custom_role_name` TEXT, `profile_image_url` TEXT, `created_at` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `role_type` TEXT NOT NULL, `custom_role_name` TEXT, `profile_image_url` TEXT, `baby_name` TEXT NOT NULL, `birth_day` TEXT NOT NULL, `is_pregnant` INTEGER NOT NULL, `created_at` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -102,6 +102,24 @@
             "affinity": "TEXT"
           },
           {
+            "fieldPath": "babyName",
+            "columnName": "baby_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "birthDay",
+            "columnName": "birth_day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPregnant",
+            "columnName": "is_pregnant",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "createdAt",
             "columnName": "created_at",
             "affinity": "TEXT",
@@ -118,7 +136,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8d471808901e9fc48eebd231980da60d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bcbcc025f82884e7bd8e2c1a7ad74b45')"
     ]
   }
 }

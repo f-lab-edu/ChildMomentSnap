@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
+import com.jg.childmomentsnap.core.common.result.DomainResult
+import com.jg.childmomentsnap.core.domain.usecase.SetUserUseCase
+import com.jg.childmomentsnap.core.model.User
 
 
 data class UiState(
@@ -31,6 +34,7 @@ data class UiState(
 
 sealed class OnboardingSideEffect {
     object NavigateToHome : OnboardingSideEffect()
+    class ErrorMessage(val message: String) : OnboardingSideEffect()
 }
 
 data class RoleUiState(
@@ -60,7 +64,7 @@ object OnboardingConstants {
 
 @HiltViewModel
 class OnBoardingViewModel @Inject constructor(
-
+    private val setUserUseCase: SetUserUseCase
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.EMPTY)
@@ -143,7 +147,25 @@ class OnBoardingViewModel @Inject constructor(
 
     fun onCompleteOnboarding() {
         viewModelScope.launch {
-            _uiEffect.emit(OnboardingSideEffect.NavigateToHome)
+            val result = setUserUseCase.invoke(
+                user = User(
+                    roleType = RoleType.fromRole(uiState.value.roleUiState.selectedRole),
+                    customRoleName = uiState.value.roleUiState.otherRole,
+                    babyName = uiState.value.babyName,
+                    birthDay = uiState.value.birthDay,
+                    isPregnant = uiState.value.isPregnant
+                )
+            )
+            when (result) {
+                is DomainResult.Success -> {
+                    if (result.data) {
+                        _uiEffect.emit(OnboardingSideEffect.NavigateToHome)
+                    }
+                }
+                is DomainResult.Fail -> {
+                    _uiEffect.emit(OnboardingSideEffect.ErrorMessage(result.error))
+                }
+            }
         }
     }
 }

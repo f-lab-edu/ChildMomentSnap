@@ -1,5 +1,6 @@
 package com.jg.childmomentsnap.feature.onboarding.screen
 
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,12 +53,16 @@ internal fun OnboardingRoute(
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.uiEffect, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.uiEffect.collect { effect ->
                 when (effect) {
                     is OnboardingSideEffect.NavigateToHome -> onCompleted()
+                    is OnboardingSideEffect.ErrorMessage -> {
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -131,7 +137,7 @@ private fun OnBoardingScreen(
                 enabled = uiState.isNextEnable,
             ) {
                 Text (
-                    text = if (step == OnboardingConstants.STEP_THREE_SET_BIRTHDAY) "시작하기" else stringResource(R.string.feature_onboarding_role_next)
+                    text = if (step == OnboardingConstants.STEP_THREE_SET_BIRTHDAY) stringResource(R.string.feature_onboarding_role_start) else stringResource(R.string.feature_onboarding_role_next)
                 )
             }
         }

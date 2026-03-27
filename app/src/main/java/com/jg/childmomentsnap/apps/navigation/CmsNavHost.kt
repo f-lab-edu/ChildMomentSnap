@@ -43,7 +43,12 @@ fun CmsNavHost(
             onboardingGraph(
                 appState = appState,
                 onCompleted = {
-                    navController.navigate(HomeGraphRoute)
+                    navController.navigate(HomeGraphRoute) {
+                        popUpTo(OnBoardingGraph) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
 
