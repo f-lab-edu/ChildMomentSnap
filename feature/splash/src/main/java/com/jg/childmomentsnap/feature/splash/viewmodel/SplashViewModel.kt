@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jg.childmomentsnap.core.common.result.DomainResult
 import com.jg.childmomentsnap.core.domain.usecase.IsFirstLaunchUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -29,8 +30,10 @@ data class UiState(
 sealed class SplashSideEffect {
     object NavigateToOnboarding : SplashSideEffect()
     object NavigateToHome : SplashSideEffect()
+    data class ErrorMessage(val error: String): SplashSideEffect()
 }
 
+@HiltViewModel
 class SplashViewModel @Inject constructor(
     private val isFirstLaunchUseCase: IsFirstLaunchUseCase
 ) : ViewModel() {
@@ -53,7 +56,7 @@ class SplashViewModel @Inject constructor(
                     }
                 }
                 is DomainResult.Fail -> {
-                    // TODO 예외 처리
+                    _uiEffect.emit(SplashSideEffect.ErrorMessage(result.error))
                 }
             }
         }

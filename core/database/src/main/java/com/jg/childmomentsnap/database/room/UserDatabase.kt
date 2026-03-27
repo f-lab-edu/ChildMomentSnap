@@ -10,7 +10,7 @@ import kotlin.concurrent.Volatile
 
 @Database(
     entities = [UserEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class UserDatabase: RoomDatabase() {

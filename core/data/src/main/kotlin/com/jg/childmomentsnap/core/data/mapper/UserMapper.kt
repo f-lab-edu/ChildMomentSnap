@@ -11,6 +11,9 @@ internal fun UserEntity.toDomain(): User {
         roleType = RoleType.fromRole(roleType),
         customRoleName = customRoleName,
         profileImageUrl = profileImageUrl,
+        babyName = babyName,
+        birthDay = birthDay,
+        isPregnant = isPregnant
     )
 }
 
@@ -20,6 +23,9 @@ internal fun User.toEntity(): UserEntity {
         roleType = roleType.role,
         customRoleName = customRoleName,
         profileImageUrl = profileImageUrl,
+        babyName = babyName,
+        birthDay = birthDay,
+        isPregnant = isPregnant,
         createdAt = DateUtils.createDiaryDateAndTime()
     )
 }

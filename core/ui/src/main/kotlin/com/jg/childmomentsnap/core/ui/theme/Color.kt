@@ -17,6 +17,17 @@ val Amber100 = Color(0xFFFEF3C7)
 val Amber500 = Color(0xFFF59E0B)
 val Amber800 = Color(0xFF92400E)
 
+//  Onboarding
+val BgColor = Color(0xFFFCFBF9)
+val PrimaryAmber = Color(0xFFE0A96D)
+val DarkAccent = Color(0xFF8B7355)
+val SelectedBg = Color(0xFFFDF3D0)
+val DarkButton = Color(0xFF2C2A29)
+val Gray100 = Color(0xFFF3F4F6)
+val Gray300 = Color(0xFFD1D5DB)
+val Gray500 = Color(0xFF6B7280)
+val Gray900 = Color(0xFF111827)
+
 // Indigo Scale
 val Indigo50 = Color(0xFFEEF2FF)
 val Indigo400 = Color(0xFF818CF8)

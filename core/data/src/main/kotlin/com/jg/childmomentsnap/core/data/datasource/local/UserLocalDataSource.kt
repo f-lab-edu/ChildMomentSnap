@@ -6,5 +6,5 @@ interface UserLocalDataSource {
     suspend fun insertUser(user: UserEntity)
     suspend fun updateUser(user: UserEntity)
     suspend fun deleteUser(user: UserEntity)
-    suspend fun getUser(): UserEntity
+    suspend fun getUser(): UserEntity?
 }

@@ -10,6 +10,8 @@ import com.jg.childmomentsnap.core.domain.usecase.IsFirstLaunchUseCase
 import com.jg.childmomentsnap.core.domain.usecase.IsFirstLaunchUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCase
 import com.jg.childmomentsnap.core.domain.usecase.SearchDiaryContentUseCaseImpl
+import com.jg.childmomentsnap.core.domain.usecase.SetUserUseCase
+import com.jg.childmomentsnap.core.domain.usecase.SetUserUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCase
 import com.jg.childmomentsnap.core.domain.usecase.ToggleDiaryFavoriteUseCaseImpl
 import com.jg.childmomentsnap.core.domain.usecase.WriteDiaryUseCase
@@ -58,4 +60,9 @@ abstract class DomainModule {
     abstract fun bindIsFirstLaunchUseCase(
         isFirstLaunchUseCase: IsFirstLaunchUseCaseImpl
     ): IsFirstLaunchUseCase
+
+    @Binds
+    abstract fun bindSetUserInfoUseCase(
+        setUserUseCase: SetUserUseCaseImpl
+    ): SetUserUseCase
 }

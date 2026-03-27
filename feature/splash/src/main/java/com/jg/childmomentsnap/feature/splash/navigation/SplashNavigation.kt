@@ -12,6 +12,7 @@ data object SplashGraph
 @Serializable
 data object SplashRoute
 
+//  appState 는 추후 사용될 것으로 예상됨
 fun NavGraphBuilder.splashGraph(
     appState: CmsAppState,
     onNavigateToOnboarding: () -> Unit,

@@ -13,12 +13,10 @@ class IsFirstLaunchUseCaseImpl @Inject constructor(
     private val userRepository: UserRepository
 ) : IsFirstLaunchUseCase {
     override suspend fun invoke(): DomainResult<Boolean, String> {
-        val result = userRepository.getUser()
-
-        return when(result) {
+        return when(val result = userRepository.getUser()) {
             is DataResult.Success -> {
-                //  0이면 처음 설치 사용자 이므로 true
-                DomainResult.Success(result.data.id == 0L)
+                // 데이터가 없으면(null) 온보딩을 거치지 않은 처음 사용자이므로 true
+                DomainResult.Success(result.data == null)
             }
             is DataResult.Fail -> {
                 DomainResult.Fail(result.message ?: "")
