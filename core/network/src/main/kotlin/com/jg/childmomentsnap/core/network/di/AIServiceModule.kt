@@ -21,7 +21,7 @@ abstract class AIServiceBindingModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object AIServiceProviderModule {
-    private const val modelName = "gemini-2.0-flash"
+    private const val modelName = "gemini-1.5-flash"
     @Provides
     @Singleton
     fun provideGenerativeModel(apiKeyProvider: ApiKeyProvider): GenerativeModel {

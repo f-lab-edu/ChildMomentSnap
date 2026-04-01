@@ -23,12 +23,13 @@ data class UiState(
     val step: Int,
     val roleUiState: RoleUiState,
     val babyName: String,
+    val profileImageUrl: String? = null,
     val birthDay: String,
     val isPregnant: Boolean,
     val isNextEnable: Boolean
 ) {
     companion object {
-        val EMPTY = UiState(step = 0, roleUiState = RoleUiState.EMPTY, babyName = "", isNextEnable = false, birthDay = "", isPregnant = false)
+        val EMPTY = UiState(step = 0, roleUiState = RoleUiState.EMPTY, babyName = "", profileImageUrl = null, isNextEnable = false, birthDay = "", isPregnant = false)
     }
 }
 
@@ -114,6 +115,12 @@ class OnBoardingViewModel @Inject constructor(
                 babyName = babyName,
                 isNextEnable = babyName.isNotEmpty()
             )
+        }
+    }
+
+    fun onProfileImageChange(uri: String?) {
+        _uiState.update { current ->
+            current.copy(profileImageUrl = uri)
         }
     }
 
