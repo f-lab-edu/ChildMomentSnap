@@ -84,6 +84,7 @@ internal fun OnboardingRoute(
         onPregnantChange = viewModel::onPregnantChange,
         onNext = viewModel::onNext,
         onComplete = viewModel::onCompleteOnboarding,
+        onProfileImageChange = viewModel::onProfileImageChange,
         onBackPressed = {}
     )
 }
@@ -97,6 +98,7 @@ private fun OnBoardingScreen(
     onNameChange: (String) -> Unit,
     onDateChange: (String) -> Unit,
     onPregnantChange: (Boolean) -> Unit,
+    onProfileImageChange: (String?) -> Unit,
     onNext: (Int) -> Unit,
     onComplete: () -> Unit,
     onBackPressed: () -> Unit,
@@ -161,7 +163,9 @@ private fun OnBoardingScreen(
                 OnboardingConstants.STEP_TWO_SET_NAME -> {
                     StepBabyName(
                         babyName = uiState.babyName,
+                        profileImageUrl = uiState.profileImageUrl,
                         onNameChange = onNameChange,
+                        onProfileImageChange = onProfileImageChange,
                         onNextStep = {
                             onNext(OnboardingConstants.STEP_THREE_SET_BIRTHDAY)
                         }

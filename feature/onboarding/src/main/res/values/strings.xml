@@ -13,6 +13,7 @@
     <string name="feature_onboarding_role_topbar_step_count">STEP %d</string>
     <string name="feature_onboarding_baby_name_title">아이의 예쁜 이름을\n알려주세요.</string>
     <string name="feature_onboarding_baby_name_sub_title">태명도 좋아요! 언제든지 수정할 수 있어요.</string>
+    <stirng name="feature_onboarding_baby_name_guide_msg">프로필 사진은 나중에 언제든 바꿀 수 있어요.</stirng>
     <string name="feature_onboarding_baby_name_placeholder">예: 지우, 로아, 튼튼이</string>
     <string name="feature_onboarding_birthday_title">%s와(과) 처음 만난 날은\n언제인가요?</string>
     <string name="feature_onboarding_birthday_sub_title">아이의 성장 시기에 맞춘 AI 조언을 위해 필요해요.</string>
